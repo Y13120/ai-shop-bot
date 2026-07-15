@@ -340,23 +340,21 @@ async function handleOrderModal(interaction) {
     save('orders.json', orders);
 
     // Welcome embed in ticket
-    const descLines = [
-      `**العميل:** <@${user.id}>`,
-      `**الخدمة:** ${service.emoji} ${service.name}`,
-      `**السعر:** \`${fmt(service.price)}\` كريديت`,
-      '',
-      `**السبب:**`,
-      `> ${reason}`,
-    ];
-    if (details) descLines.push('', `**تفاصيل:**`, `> ${details}`);
-    descLines.push('', `⏳ **في انتظار الستاف...**`, '', `• \`/close\` — إغلاق التذكرة`);
-
     const welcomeEmbed = new EmbedBuilder()
-      .setTitle(safeStr(`${service.emoji} طلب #${oid}`, 256))
-      .setDescription(descLines.join('\n').substring(0, 4000))
+      .setTitle(`${service.emoji} طلب #${oid} — ${service.name}`)
       .setColor('#FFB900')
       .setTimestamp()
-      .setFooter({ text: `طلب #${oid}` });
+      .addFields(
+        { name: '👤 العميل', value: `<@${user.id}>`, inline: true },
+        { name: '💰 السعر', value: `\`${fmt(service.price)}\` كريديت`, inline: true },
+        { name: '📊 الحالة', value: '⏳ معلق', inline: true },
+        { name: '📝 السبب', value: safeStr(reason, 200) || 'بدون', inline: false },
+      )
+      .setFooter({ text: `طلب #${oid} • ⏳ في انتظار الستاف` });
+
+    if (details) {
+      welcomeEmbed.addFields({ name: '📋 تفاصيل', value: safeStr(details, 200), inline: false });
+    }
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
