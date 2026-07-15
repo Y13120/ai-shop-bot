@@ -508,6 +508,93 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true });
     }
 
+    // ═══════════════ TICKETS ═══════════════
+
+    // List all ticket channels (order channels)
+    if (req.method === 'GET' && p === '/api/tickets') {
+      const orders = getOrders();
+      const tickets = [];
+      for (const order of orders) {
+        const ch = guild.channels.cache.get(order.channelId);
+        if (!ch) continue;
+        let messages = [];
+        try {
+          const fetched = await ch.messages.fetch({ limit: 20 });
+          messages = fetched.reverse().map(m => ({
+            id: m.id, author: m.author.username, authorId: m.author.id,
+            avatar: m.author.displayAvatarURL({ dynamic: true, size: 64 }),
+            content: m.content, timestamp: m.createdAt.toISOString(),
+            isBot: m.author.bot,
+          }));
+        } catch {}
+        tickets.push({
+          orderId: order.id, serviceId: order.serviceId, serviceName: order.serviceName,
+          userId: order.userId, username: order.username, channelId: order.channelId,
+          price: order.price, status: order.status, createdAt: order.createdAt,
+          channelName: ch.name, messages,
+        });
+      }
+      return jsonRes(res, 200, tickets);
+    }
+
+    // Get single ticket with messages
+    if (req.method === 'GET' && p.startsWith('/api/tickets/')) {
+      const oid = parseInt(p.split('/')[3]);
+      const orders = getOrders();
+      const order = orders.find(o => o.id === oid);
+      if (!order) return jsonRes(res, 404, { error: 'Order not found' });
+      const ch = guild.channels.cache.get(order.channelId);
+      if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      let messages = [];
+      try {
+        const fetched = await ch.messages.fetch({ limit: 50 });
+        messages = fetched.reverse().map(m => ({
+          id: m.id, author: m.author.username, authorId: m.author.id,
+          avatar: m.author.displayAvatarURL({ dynamic: true, size: 64 }),
+          content: m.content, timestamp: m.createdAt.toISOString(),
+          isBot: m.author.bot, embeds: m.embeds.map(e => ({ title: e.title, description: e.description })),
+        }));
+      } catch {}
+      return jsonRes(res, 200, {
+        orderId: order.id, serviceId: order.serviceId, serviceName: order.serviceName,
+        userId: order.userId, username: order.username, channelId: order.channelId,
+        price: order.price, status: order.status, createdAt: order.createdAt,
+        channelName: ch.name, messages,
+      });
+    }
+
+    // Send message to ticket
+    if (req.method === 'POST' && p === '/api/tickets/send') {
+      const d = await parseBody(req);
+      const ch = guild.channels.cache.get(d.channelId);
+      if (!ch || !ch.isTextBased()) return jsonRes(res, 404, { error: 'Channel not found' });
+      const msg = await ch.send({ content: d.content || '' });
+      return jsonRes(res, 200, { ok: true, messageId: msg.id });
+    }
+
+    // Update ticket status
+    if (req.method === 'PATCH' && p.startsWith('/api/tickets/')) {
+      const oid = parseInt(p.split('/')[3]);
+      const orders = getOrders();
+      const idx = orders.findIndex(o => o.id === oid);
+      if (idx === -1) return jsonRes(res, 404, { error: 'Order not found' });
+      const d = await parseBody(req);
+      if (d.status) orders[idx].status = d.status;
+      save('orders.json', orders);
+
+      if (d.status === 'closed') {
+        const ch = guild.channels.cache.get(orders[idx].channelId);
+        if (ch) {
+          try {
+            const embed = new EmbedBuilder().setTitle('🔒 تم إغلاق التذكرة').setDescription('تم الإغلاق من لوحة التحكم').setColor('#E74C3C').setTimestamp();
+            await ch.send({ embeds: [embed] });
+          } catch {}
+          setTimeout(() => { ch.delete().catch(() => {}); }, 3000);
+        }
+      }
+      return jsonRes(res, 200, { ok: true });
+    }
+
     jsonRes(res, 404, { error: 'Not found' });
   } catch (e) {
     console.error('API Error:', e);
