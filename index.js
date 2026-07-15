@@ -18,8 +18,6 @@ if (process.env.GUILD_ID) CFG.guildId = process.env.GUILD_ID;
 function getServices() { return load('services.json', []); }
 function getOrders() { return load('orders.json', []); }
 function getReviews() { return load('reviews.json', []); }
-function getBalance() { return load('balance.json', {}); }
-function saveBalance(b) { save('balance.json', b); }
 
 function fmt(n) {
   if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
@@ -45,7 +43,9 @@ const cmds = [
   new SlashCommandBuilder().setName('order').setDescription('طلب خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true)),
 
-  new SlashCommandBuilder().setName('balance').setDescription('عرض رصيدك من الكريديت'),
+  new SlashCommandBuilder().setName('credits').setDescription('عرض أو إرسال كريديت (عبر ProBot)')
+    .addUserOption(o => o.setName('user').setDescription('المستخدم (اختياري)'))
+    .addNumberOption(o => o.setName('amount').setDescription('المبلغ (اختياري)')),
 
   new SlashCommandBuilder().setName('add-service').setDescription('إضافة خدمة جديدة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('name').setDescription('اسم الخدمة').setRequired(true))
@@ -57,10 +57,6 @@ const cmds = [
 
   new SlashCommandBuilder().setName('remove-service').setDescription('حذف خدمة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('رقم الخدمة').setRequired(true)),
-
-  new SlashCommandBuilder().setName('add-balance').setDescription('إضافة كريديت لعضو').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
-    .addNumberOption(o => o.setName('amount').setDescription('المبلغ').setRequired(true)),
 
   new SlashCommandBuilder().setName('review').setDescription('تقييم خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
@@ -269,23 +265,27 @@ async function handleRemoveService(interaction) {
   await interaction.reply({ content: `✅ تم حذف: ${svc.emoji} ${svc.name}`, ephemeral: true });
 }
 
-async function handleBalance(interaction) {
-  const bal = getBalance();
-  const userBal = bal[interaction.user.id] || 0;
-  const embed = new EmbedBuilder()
-    .setTitle('💰 رصيدك')
-    .setDescription(`**${interaction.user.username}**\n\nالرصيد: \`${fmt(userBal)}\` كريديت`)
-    .setColor('#2ECC71').setTimestamp();
-  await interaction.reply({ embeds: [embed], ephemeral: true });
-}
-
-async function handleAddBalance(interaction) {
-  const user = interaction.options.getUser('user');
+async function handleCredits(interaction) {
+  const user = interaction.options.getUser('user') || interaction.user;
   const amount = interaction.options.getNumber('amount');
-  const bal = getBalance();
-  bal[user.id] = (bal[user.id] || 0) + amount;
-  saveBalance(bal);
-  await interaction.reply({ content: `✅ تمت إضافة \`${fmt(amount)}\` كريديت لـ ${user}\nالرصيد الحالي: \`${fmt(bal[user.id])}\``, ephemeral: true });
+
+  if (amount && interaction.user.id === user.id) {
+    return interaction.reply({ content: '❌ لا تقدر تبعت كريديت لنفسك', ephemeral: true });
+  }
+
+  if (amount) {
+    const embed = new EmbedBuilder()
+      .setTitle('💰 تحويل كريديت')
+      .setDescription(`استخدم أمر ProBot:\n\n\`/credits ${user} ${amount} دفع للخدمة\`\n\nأو اكتب:\n\`/credits ${user} ${amount}\``)
+      .setColor('#3498DB').setTimestamp();
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  } else {
+    const embed = new EmbedBuilder()
+      .setTitle('💰 الكريديت')
+      .setDescription(`**${user.username}** — استخدم أمر **ProBot** لعرض رصيدك:\n\n\`/credits\`\n\nأو ل转账:\n\`/credits @المستخدم المبلغ\``)
+      .setColor('#2ECC71').setTimestamp();
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 }
 
 async function handleReview(interaction) {
@@ -309,15 +309,21 @@ async function handleReview(interaction) {
 }
 
 async function handleLeaderboard(interaction) {
-  const bal = getBalance();
-  const entries = Object.entries(bal).sort(([,a], [,b]) => b - a).slice(0, 10);
-  if (!entries.length) return interaction.reply({ content: '📭 لا يوجد بيانات بعد', ephemeral: true });
+  const orders = getOrders();
+  const userOrders = {};
+  for (const o of orders) {
+    if (o.status === 'completed') {
+      userOrders[o.username] = (userOrders[o.username] || 0) + 1;
+    }
+  }
+  const entries = Object.entries(userOrders).sort(([,a], [,b]) => b - a).slice(0, 10);
+  if (!entries.length) return interaction.reply({ content: '📭 لا توجد طلبات مكتملة بعد', ephemeral: true });
 
   const medals = ['🥇', '🥈', '🥉'];
-  const desc = entries.map(([uid, b], i) => `${medals[i] || `**${i+1}.**`} <@${uid}> — \`${fmt(b)}\` كريديت`).join('\n');
+  const desc = entries.map(([name, count], i) => `${medals[i] || `**${i+1}.**`} ${name} — **${count}** طلب مكتمل`).join('\n');
 
   const embed = new EmbedBuilder()
-    .setTitle('🏆 أعلى المستخدمين بالكريديت')
+    .setTitle('🏆 أكثر المستخدمين طلباتاً')
     .setDescription(desc)
     .setColor('#FFD700').setTimestamp();
   await interaction.reply({ embeds: [embed] });
@@ -327,8 +333,9 @@ async function handleHelp(interaction) {
   const embed = new EmbedBuilder()
     .setTitle('🤖 أوامر البوت')
     .addFields(
-      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/order` طلب خدمة\n`/balance` رصيدك\n`/review` تقييم\n`/leaderboard` الترتيب\n`/help` المساعدة' },
-      { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة\n`/add-balance` إضافة كريديت' },
+      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/order` طلب خدمة\n`/credits` الكريديت (ProBot)\n`/review` تقييم\n`/leaderboard` الترتيب\n`/help` المساعدة' },
+      { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة' },
+      { name: '💰 الدفع', value: 'الدفع يتم عبر **ProBot**:\n`/credits` لعرض الرصيد\n`/credits @user amount` للتحويل' },
     )
     .setColor('#FF0000').setTimestamp();
   await interaction.reply({ embeds: [embed], ephemeral: true });
@@ -341,7 +348,7 @@ client.on('interactionCreate', async (interaction) => {
       const map = {
         setup: handleSetup, services: handleServices, order: handleOrder,
         'add-service': handleAddService, 'remove-service': handleRemoveService,
-        balance: handleBalance, 'add-balance': handleAddBalance,
+        credits: handleCredits,
         review: handleReview, leaderboard: handleLeaderboard, help: handleHelp,
       };
       if (map[interaction.commandName]) await map[interaction.commandName](interaction);
@@ -357,10 +364,7 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply({ content: `✅ قبل الطلب ${interaction.user}` });
       } else if (type === 'complete') {
         order.status = 'completed'; save('orders.json', orders);
-        const bal = getBalance();
-        bal[order.userId] = (bal[order.userId] || 0) + order.price;
-        saveBalance(bal);
-        await interaction.reply({ content: '🏁 تم إتمام الطلب! تم إضافة الكريديت للعميل' });
+        await interaction.reply({ content: '🏁 تم إتمام الطلب! استخدم `/credits` لتحويل الكريديت عبر ProBot' });
       } else if (type === 'close') {
         order.status = 'closed'; save('orders.json', orders);
         await interaction.reply({ content: '🗑️ إغلاق التذكرة...' });
