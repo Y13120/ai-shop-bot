@@ -101,7 +101,9 @@ async function handleSetup(interaction) {
       { n: '🛒・الخدمات', p: full }, { n: '📝・كيف-تطلب', p: noSend },
       { n: '⭐・التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, { id: roles.customer?.id, allow: [PermissionFlagsBits.SendMessages] }] },
     ]},
-    { n: '╔════════ 🎫 التذاكر ════════', chs: [] },
+    { n: '╔════════ 🎫 التذاكر ════════', chs: [
+      { n: '🎫・افتح-تذكرة', p: noSend },
+    ]},
     { n: '╔════════ 📢 الإعلانات ════════', chs: [
       { n: '📣・الإعلانات', p: noSend }, { n: '📋・القواعد', p: noSend },
     ]},
@@ -134,6 +136,37 @@ async function handleSetup(interaction) {
 
   await sleep(1500);
   await g.channels.fetch();
+
+  // Ticket creation channel
+  const ticketCh = g.channels.cache.find(c => c.name.includes('افتح-تذكرة') && c.isTextBased());
+  if (ticketCh) {
+    const services = getServices().filter(s => s.active);
+    const svcList = services.map(s => `${s.emoji} **${s.name}** — \`${fmt(s.price)}\` كريديت`).join('\n');
+
+    const e = new EmbedBuilder()
+      .setTitle('🎫 افتح تذكرة جديدة')
+      .setDescription(
+        '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**احتاج خدمة من متجرنا؟**\n' +
+        'اضغط على الزر أدناه وعبّى النموذج\n' +
+        'وسيتم فتح روم خاص بك فوراً!\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        (svcList || '📭 لا توجد خدمات حالياً') +
+        '\n\n━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor('#FFB900')
+      .setTimestamp()
+      .setFooter({ text: '🎫 اضغط الزر لفتح تذكرة' });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('create_ticket')
+        .setLabel('🎫 افتح تذكرة')
+        .setStyle(ButtonStyle.Success),
+    );
+
+    await ticketCh.send({ embeds: [e], components: [row] });
+  }
 
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
@@ -540,6 +573,51 @@ client.on('interactionCreate', async (interaction) => {
     // Service order button
     else if (interaction.isButton() && interaction.customId.startsWith('svc_order_')) {
       await handleServiceButton(interaction);
+    }
+    // Create ticket button (from ticket creation channel)
+    else if (interaction.isButton() && interaction.customId === 'create_ticket') {
+      const services = getServices().filter(s => s.active);
+      if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات حالياً', ephemeral: true });
+
+      const svcList = services.map(s => `${s.id}. ${s.emoji} ${s.name} — ${fmt(s.price)}`).join('\n');
+
+      const modal = new ModalBuilder()
+        .setCustomId('create_ticket_modal')
+        .setTitle('🎫 فتح تذكرة جديدة');
+
+      const serviceInput = new TextInputBuilder()
+        .setCustomId('service_id')
+        .setLabel('رقم الخدمة (من القائمة)')
+        .setPlaceholder(`اكتب رقم الخدمة مثل: 1\n\n${svcList}`)
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true)
+        .setMaxLength(10);
+
+      const reasonInput = new TextInputBuilder()
+        .setCustomId('reason')
+        .setLabel('لماذا تحتاج هذه الخدمة؟')
+        .setPlaceholder('اشرح وصفاً مختصراً لطلبك...')
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(CFG.orderSettings?.requireReason !== false)
+        .setMaxLength(1000);
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(serviceInput),
+        new ActionRowBuilder().addComponents(reasonInput),
+      );
+
+      await interaction.showModal(modal);
+    }
+    // Create ticket modal submit
+    else if (interaction.isModalSubmit() && interaction.customId === 'create_ticket_modal') {
+      const id = parseInt(interaction.fields.getTextInputValue('service_id'));
+      const services = getServices();
+      const service = services.find(s => s.id === id && s.active);
+      if (!service) return interaction.reply({ content: '❌ رقم خدمة غير صحيح. جرب `/services` لعرض الخدمات', ephemeral: true });
+
+      // Reuse the order modal flow
+      interaction.customId = `order_modal_${id}`;
+      await handleOrderModal(interaction);
     }
     // Order modal submit
     else if (interaction.isModalSubmit() && interaction.customId.startsWith('order_modal_')) {
