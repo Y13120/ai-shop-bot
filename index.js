@@ -1,249 +1,243 @@
-const { Client, GatewayIntentBits, Collection, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, REST, Routes, SlashCommandBuilder, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
-const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+// ═══════════════ DATA ═══════════════
+const DATA = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true });
 
-function loadJSON(file, def = {}) { try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), 'utf-8')); } catch { return def; } }
-function saveJSON(file, data) { fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2), 'utf-8'); }
+function load(f, d) { try { return JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8')); } catch { return d; } }
+function save(f, d) { fs.writeFileSync(path.join(DATA, f), JSON.stringify(d, null, 2), 'utf8'); }
 
-const config = loadJSON('config.json', { token: '', clientId: '', guildId: '', adminRoles: [], ticketCategory: null, logChannel: null, currency: '$' });
+const CFG = load('config.json', {});
+if (process.env.BOT_TOKEN) CFG.token = process.env.BOT_TOKEN;
+if (process.env.CLIENT_ID) CFG.clientId = process.env.CLIENT_ID;
+if (process.env.GUILD_ID) CFG.guildId = process.env.GUILD_ID;
 
-// Support Railway env vars
-if (process.env.BOT_TOKEN) config.token = process.env.BOT_TOKEN;
-if (process.env.CLIENT_ID) config.clientId = process.env.CLIENT_ID;
-if (process.env.GUILD_ID) config.guildId = process.env.GUILD_ID;
-const services = loadJSON('services.json', []);
-const orders = loadJSON('orders.json', []);
-const reviews = loadJSON('reviews.json', []);
+function getServices() { return load('services.json', []); }
+function getOrders() { return load('orders.json', []); }
+function getReviews() { return load('reviews.json', []); }
+function getBalance() { return load('balance.json', {}); }
+function saveBalance(b) { save('balance.json', b); }
 
-function saveServices() { saveJSON('services.json', services); }
-function saveOrders() { saveJSON('orders.json', orders); }
-function saveReviews() { saveJSON('reviews.json', reviews); }
-function saveConfig() { saveJSON('config.json', config); }
-
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent] });
-
-const commands = [
-  new SlashCommandBuilder().setName('setup').setDescription('إعداد السيرفر').setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  new SlashCommandBuilder().setName('add-service').setDescription('إضافة خدمة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addStringOption(o => o.setName('name').setDescription('الاسم').setRequired(true))
-    .addStringOption(o => o.setName('description').setDescription('الوصف').setRequired(true))
-    .addNumberOption(o => o.setName('price').setDescription('السعر').setRequired(true))
-    .addStringOption(o => o.setName('category').setDescription('التصنيف').setRequired(true)
-      .addChoices({ name: 'ChatGPT', value: 'chatgpt' }, { name: 'Image', value: 'image' }, { name: 'Voice', value: 'voice' }, { name: 'Code', value: 'code' }, { name: 'Writing', value: 'writing' }, { name: 'Data', value: 'data' }, { name: 'Other', value: 'other' }))
-    .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
-  new SlashCommandBuilder().setName('services').setDescription('عرض الخدمات'),
-  new SlashCommandBuilder().setName('order').setDescription('طلب خدمة').addStringOption(o => o.setName('service').setDescription('رقم').setRequired(true)),
-  new SlashCommandBuilder().setName('help').setDescription('المساعدة'),
-];
+function fmt(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(n % 1e6 === 0 ? 0 : 1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+  return n.toLocaleString();
+}
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// ═══════════════ Setup ═══════════════
+// ═══════════════ CLIENT ═══════════════
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
+  partials: [Partials.Channel, Partials.Message, Partials.GuildMember],
+});
+
+// ═══════════════ SLASH COMMANDS ═══════════════
+const cmds = [
+  new SlashCommandBuilder().setName('setup').setDescription('إعداد السيرفر بالكامل').setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+  new SlashCommandBuilder().setName('services').setDescription('عرض كل الخدمات المتاحة'),
+
+  new SlashCommandBuilder().setName('order').setDescription('طلب خدمة')
+    .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true)),
+
+  new SlashCommandBuilder().setName('balance').setDescription('عرض رصيدك من الكريديت'),
+
+  new SlashCommandBuilder().setName('add-service').setDescription('إضافة خدمة جديدة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addStringOption(o => o.setName('name').setDescription('اسم الخدمة').setRequired(true))
+    .addStringOption(o => o.setName('description').setDescription('الوصف').setRequired(true))
+    .addNumberOption(o => o.setName('price').setDescription('السعر بالكريديت').setRequired(true))
+    .addStringOption(o => o.setName('category').setDescription('التصنيف').setRequired(true)
+      .addChoices({ name: 'ChatGPT', value: 'chatgpt' }, { name: 'Image', value: 'image' }, { name: 'Voice', value: 'voice' }, { name: 'Code', value: 'code' }, { name: 'Writing', value: 'writing' }, { name: 'Data', value: 'data' }, { name: 'Other', value: 'other' }))
+    .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
+
+  new SlashCommandBuilder().setName('remove-service').setDescription('حذف خدمة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addStringOption(o => o.setName('id').setDescription('رقم الخدمة').setRequired(true)),
+
+  new SlashCommandBuilder().setName('add-balance').setDescription('إضافة كريديت لعضو').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
+    .addNumberOption(o => o.setName('amount').setDescription('المبلغ').setRequired(true)),
+
+  new SlashCommandBuilder().setName('review').setDescription('تقييم خدمة')
+    .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
+    .addNumberOption(o => o.setName('rating').setDescription('التقييم 1-5').setRequired(true))
+    .addStringOption(o => o.setName('comment').setDescription('تعليق')),
+
+  new SlashCommandBuilder().setName('leaderboard').setDescription('ترتيب أعلى المستخدمين بالكريديت'),
+
+  new SlashCommandBuilder().setName('help').setDescription('عرض كل الأوامر'),
+];
+
+// ═══════════════ COMMANDS ═══════════════
 
 async function handleSetup(interaction) {
   await interaction.deferReply({ ephemeral: true });
-  const guild = interaction.guild;
+  const g = interaction.guild;
   const log = [];
-  const everyone = guild.roles.everyone;
 
-  // Delete all channels
-  let chs = await guild.channels.fetch();
-  for (const [, ch] of chs) {
-    try { await ch.delete(); } catch(e) { log.push(`❌ ${ch.name}: ${e.message}`); }
-    await sleep(1000);
+  let chs = await g.channels.fetch();
+  for (const [, ch] of chs) { try { await ch.delete(); } catch(e) { log.push(`❌ ${ch.name}`); } await sleep(800); }
+
+  let rls = await g.roles.fetch();
+  for (const [, r] of rls) {
+    if (r.name === '@everyone' || r.managed) continue;
+    try { await r.delete(); } catch(e) { log.push(`❌ رول ${r.name}`); } await sleep(600);
   }
+  await sleep(1500);
 
-  // Delete all roles
-  let rls = await guild.roles.fetch();
-  for (const [, role] of rls) {
-    if (role.name === '@everyone' || role.managed) continue;
-    try { await role.delete(); } catch(e) { log.push(`❌ رول ${role.name}: ${e.message}`); }
-    await sleep(1000);
-  }
-
-  await sleep(2000);
-
-  // ══════════ Roles ══════════
   const roles = {};
   for (const rd of [
-    { key: 'admin', name: '⚡⚡⚡ ┃ Admin', color: '#E74C3C', perms: [PermissionFlagsBits.Administrator] },
-    { key: 'staff', name: '⭐⭐⭐ ┃ Staff', color: '#F1C40F', perms: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
-    { key: 'customer', name: '🛒 ┃ Customer', color: '#1ABC9C', perms: [] },
-    { key: 'vip', name: '💎 ┃ VIP', color: '#9B59B6', perms: [] },
-    { key: 'bot', name: '🤖 ┃ Bot', color: '#3498DB', perms: [] },
+    { k: 'admin', n: '⚡⚡⚡ ┃ Admin', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
+    { k: 'staff', n: '⭐⭐⭐ ┃ Staff', c: '#F1C40F', p: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
+    { k: 'customer', n: '🛒 ┃ Customer', c: '#1ABC9C', p: [] },
+    { k: 'vip', n: '💎 ┃ VIP', c: '#9B59B6', p: [] },
   ]) {
-    try {
-      const r = await guild.roles.create({ name: rd.name, color: rd.color, permissions: rd.perms, mentionable: rd.key === 'bot' });
-      roles[rd.key] = r;
-      log.push(`✅ رول: ${rd.name}`);
-    } catch(e) { log.push(`❌ رول ${rd.name}: ${e.message}`); }
-    await sleep(800);
+    try { roles[rd.k] = await g.roles.create({ name: rd.n, color: rd.c, permissions: rd.p }); log.push(`✅ ${rd.n}`); } catch(e) { log.push(`❌ ${rd.n}`); }
+    await sleep(600);
   }
 
-  // Set @everyone permissions (no sending in read-only channels by default)
-  try {
-    await everyone.setPermissions([
-      PermissionFlagsBits.ViewChannel,
-      PermissionFlagsBits.SendMessages,
-      PermissionFlagsBits.ReadMessageHistory,
-    ]);
-  } catch(e) {}
-
-  // ══════════ Categories & Channels ══════════
-  const noSend = [{ id: guild.id, deny: [PermissionFlagsBits.SendMessages] }];
-  const fullAccess = [{ id: guild.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }];
+  const noSend = [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }];
+  const full = [{ id: g.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }];
 
   const structure = [
-    {
-      name: '╔════════ 🏪 المتجر ════════',
-      channels: [
-        { name: '🛒・قائمة-الخدمات', perms: fullAccess },
-        { name: '📝・كيف-تطلب', perms: noSend },
-        { name: '⭐・التقييمات', perms: [{ id: guild.id, deny: [PermissionFlagsBits.SendMessages] }, { id: roles.customer?.id, allow: [PermissionFlagsBits.SendMessages] }] },
-      ]
-    },
-    {
-      name: '╔════════ 🎫 التذاكر ════════',
-      channels: []
-    },
-    {
-      name: '╔════════ 📢 الإعلانات ════════',
-      channels: [
-        { name: '📣・الإعلانات', perms: noSend },
-        { name: '📋・القواعد', perms: noSend },
-        { name: '🎉・العرض-والخصومات', perms: noSend },
-      ]
-    },
-    {
-      name: '╔════════ 💬 الت/chat ════════',
-      channels: [
-        { name: '💬・الدردشة-العامة', perms: fullAccess },
-        { name: '🤖・اوامر-البوت', perms: fullAccess },
-        { name: '📷・مشاركة-العمل', perms: fullAccess },
-      ]
-    },
-    {
-      name: '╔════════ 📌 معلومات ════════',
-      channels: [
-        { name: '📊・حالة-السيرفر', perms: noSend },
-        { name: '🔗・روابط-مهمة', perms: noSend },
-      ]
-    },
+    { n: '╔════════ 🏪 المتجر ════════', chs: [
+      { n: '🛒・الخدمات', p: full }, { n: '📝・كيف-تطلب', p: noSend },
+      { n: '⭐・التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, { id: roles.customer?.id, allow: [PermissionFlagsBits.SendMessages] }] },
+    ]},
+    { n: '╔════════ 🎫 التذاكر ════════', chs: [] },
+    { n: '╔════════ 📢 الإعلانات ════════', chs: [
+      { n: '📣・الإعلانات', p: noSend }, { n: '📋・القواعد', p: noSend },
+    ]},
+    { n: '╔════════ 💬 الدردشة ════════', chs: [
+      { n: '💬・العامة', p: full }, { n: '🤖・اوامر-البوت', p: full },
+    ]},
+    { n: '╔════════ 📌 معلومات ════════', chs: [
+      { n: '📊・حالة-السيرفر', p: noSend },
+    ]},
   ];
 
   for (const cat of structure) {
     try {
-      const c = await guild.channels.create({ name: cat.name, type: ChannelType.GuildCategory });
-      log.push(`✅ كاتيقوري: ${cat.name}`);
-      for (const ch of cat.channels) {
+      const c = await g.channels.create({ name: cat.n, type: ChannelType.GuildCategory });
+      log.push(`✅ ${cat.n}`);
+      for (const ch of cat.chs) {
         try {
-          const overwrites = ch.perms.map(p => {
-            const ow = { id: p.id };
-            if (p.deny) ow.deny = p.deny;
-            if (p.allow) ow.allow = p.allow;
-            return ow;
-          });
-          await guild.channels.create({ name: ch.name, type: ChannelType.GuildText, parent: c.id, permissionOverwrites: overwrites });
-          log.push(`✅ قناة: ${ch.name}`);
-        } catch(e) { log.push(`❌ قناة ${ch.name}: ${e.message}`); }
-        await sleep(800);
+          await g.channels.create({ name: ch.n, type: ChannelType.GuildText, parent: c.id, permissionOverwrites: ch.p });
+          log.push(`✅ ${ch.n}`);
+        } catch(e) { log.push(`❌ ${ch.n}`); }
+        await sleep(600);
       }
-    } catch(e) { log.push(`❌ كاتيقوري: ${e.message}`); }
-    await sleep(800);
+    } catch(e) { log.push(`❌ كاتيقوري`); }
+    await sleep(600);
   }
 
-  // Save ticket category
-  await guild.channels.fetch();
-  const ticketCat = guild.channels.cache.find(c => c.name.includes('التذاكر') && c.type === ChannelType.GuildCategory);
-  if (ticketCat) { config.ticketCategory = ticketCat.id; saveConfig(); }
+  await g.channels.fetch();
+  const tc = g.channels.cache.find(c => c.name.includes('التذاكر') && c.type === ChannelType.GuildCategory);
+  if (tc) { CFG.ticketCategory = tc.id; save('config.json', CFG); }
 
-  // ══════════ Embeds ══════════
-  await sleep(2000);
-  await guild.channels.fetch();
+  await sleep(1500);
+  await g.channels.fetch();
 
-  // Welcome
-  const svcCh = guild.channels.cache.find(c => c.name.includes('قائمة-الخدمات'));
+  const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
-    try {
-      const e = new EmbedBuilder()
-        .setTitle('🤖 مرحباً بك في متجر الذكاء الاصطناعي')
-        .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**الخدمات المتاحة:**\n\n🤖 **ChatGPT Plus** — محادثات ذكية لا محدودة\n🎨 **توليد الصور** — Midjourney, DALL-E 3\n💻 **برمجة** — مساعدة في أي لغة\n📝 **كتابة** — مقالات ونصوص احترافية\n📊 **تحليل بيانات** — تقارير ورسوم بيانية\n🎬 **فيديو** — تحرير وتصميم\n🔊 **صوت** — تحويل وتعديل\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**💡 كيف تبدأ؟**\n\n> `1️⃣` اكتب `/services` لعرض كل الخدمات\n> `2️⃣` اختار الخدمة اللي عايزها\n> `3️⃣` اكتب `/order [رقم]` لفتح تذكرة\n> `4️⃣` ادفع واستنّى الستاف\n> `5️⃣` بعد التسليم، قيّم الخدمة!\n\n━━━━━━━━━━━━━━━━━━━━━')
-        .setColor('#FF0000')
-        .setThumbnail(guild.iconURL({ dynamic: true }))
-        .setTimestamp()
-        .setFooter({ text: '🛍️ AI Shop Bot — كل شيء بالذكاء الاصطناعي' });
-      await svcCh.send({ embeds: [e] });
-      log.push('✅ ترحيب');
-    } catch(e) { log.push('❌ ترحيب: ' + e.message); }
+    const e = new EmbedBuilder()
+      .setTitle('🤖 مرحباً بك في متجر الذكاء الاصطناعي')
+      .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**الخدمات المتاحة:**\n\n🤖 **ChatGPT Plus** — محادثات ذكية\n🎨 **توليد الصور** — Midjourney, DALL-E 3\n💻 **برمجة** — مساعدة في أي لغة\n📝 **كتابة** — مقالات ونصوص\n📊 **تحليل بيانات** — تقارير\n🔊 **صوت** — تحويل وتعديل\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**💡 كيف تبدأ؟**\n\n> `1️⃣` اكتب `/services` لعرض الخدمات\n> `2️⃣` اكتب `/order [رقم]` لفتح تذكرة\n> `3️⃣` ادفع واستنّى الستاف\n> `4️⃣` بعد التسليم، قيّم بـ `/review`\n\n━━━━━━━━━━━━━━━━━━━━━')
+      .setColor('#FF0000').setTimestamp().setFooter({ text: '🛍️ AI Shop Bot' });
+    await svcCh.send({ embeds: [e] });
   }
 
-  // Rules
-  const rulesCh = guild.channels.cache.find(c => c.name.includes('القواعد'));
+  const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
   if (rulesCh) {
-    try {
-      const e = new EmbedBuilder()
-        .setTitle('📋 قواعد السيرفر')
-        .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**📜 قوانين يجب الالتزام بها:**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**1.** 🤝 **احترام الجميع** — لا تنمر ولا سبام\n**2.** 🚫 **محتوى ممنوع** — لا محتوى مخالف أو دعائي\n**3.** 🎫 **التذاكر** — استخدم تذكرة لكل طلب منفصل\n**4.** 💰 **الدفع مقدماً** — لا نبدأ العمل قبل الدفع\n**5.** 🔒 **خصوصية** — لا تشارك حساباتك مع أحد\n**6.** 👑 **تعليمات الادمن** — اتبع إرشادات الإدارة\n**7.** ⚠️ **ال sanctions** — إنذار → ميوت → بان\n\n━━━━━━━━━━━━━━━━━━━━━\n\n> 💡 **للاستفسار:** افتح تذكرة بالaos `/order`\n> 📩 **للإبلاغ:** تواصل مع الـ Staff')
-        .setColor('#FFB900')
-        .setTimestamp()
-        .setFooter({ text: '⚖️ قواعد السيرفر — اقراها جيداً' });
-      await rulesCh.send({ embeds: [e] });
-      log.push('✅ قوانين');
-    } catch(e) { log.push('❌ قوانين: ' + e.message); }
+    const e = new EmbedBuilder()
+      .setTitle('📋 قواعد السيرفر')
+      .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**1.** 🤝 احترام الجميع\n**2.** 🚫 لا محتوى مخالف\n**3.** 🎫 تذكرة لكل طلب\n**4.** 💰 الدفع مقدماً\n**5.** 🔒 لا تشارك حساباتك\n**6.** 👑 اتبع الادمن\n\n━━━━━━━━━━━━━━━━━━━━━')
+      .setColor('#FFB900').setTimestamp();
+    await rulesCh.send({ embeds: [e] });
   }
 
-  // How to order
-  const howCh = guild.channels.cache.find(c => c.name.includes('كيف-تطلب'));
+  const howCh = g.channels.cache.find(c => c.name.includes('كيف-تطلب') && c.isTextBased());
   if (howCh) {
-    try {
-      const e = new EmbedBuilder()
-        .setTitle('📝 دليل طلب الخدمة')
-        .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**🎯 خطوات الطلب خطوة بخطوة:**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n> `Step 1` 🛒 **اكتشف الخدمات**\n> اكتب `/services` هتظهرلك كل الخدمات بالأسعار\n\n> `Step 2` 🎯 **اختار اللي يناسبك**\n> اختار الخدمة من القائمة واتذكر رقمها\n\n> `Step 3` 🎫 **افتح تذكرة**\n> اكتب `/order [رقم الخدمة]`\n> هتتفتحلك قناة خاصة في كاتيقوري التذاكر\n\n> `Step 4` 💬 **تواصل مع الستاف**\n> ا explaining طلبك جوا التذكرة\n> الستاف هيكمّلوك التفاصيل\n\n> `Step 5` 💰 **ادفع**\n> بعد الاتفاق على التفاصيل، ادفع\n> الستاف يبدأ فوراً في العمل\n\n> `Step 6` ✅ **استلم وقيّم**\n> بعد التسليم، اكتب `/review [رقم] [1-5]`\n> تقييمك يساعدنا نتحسن!\n\n━━━━━━━━━━━━━━━━━━━━━')
-        .setColor('#2ECC71')
-        .setTimestamp()
-        .setFooter({ text: '📖 دليل الطلب الشامل' });
-      await howCh.send({ embeds: [e] });
-      log.push('✅ كيف تطلب');
-    } catch(e) { log.push('❌ كيف تطلب: ' + e.message); }
+    const e = new EmbedBuilder()
+      .setTitle('📝 دليل طلب الخدمة')
+      .setDescription('**Step 1** 🛒 اكتب `/services` لعرض الخدمات\n**Step 2** 🎯 اختار الخدمة\n**Step 3** 🎫 اكتب `/order [رقم]` لفتح تذكرة\n**Step 4** 💬 تواصل مع الستاف\n**Step 5** 💰 ادفع\n**Step 6** ✅ استلم وقيّم بـ `/review`')
+      .setColor('#2ECC71').setTimestamp();
+    await howCh.send({ embeds: [e] });
   }
 
-  // Announcements channel
-  const annCh = guild.channels.cache.find(c => c.name.includes('الإعلانات'));
-  if (annCh) {
-    try {
-      const e = new EmbedBuilder()
-        .setTitle('📣 مرحباً بالجميع!')
-        .setDescription('**هنا هتلاقي أحدث الإعلانات والعروض والخصومات!** 🔔\n\n-follow this channel عشان يوصلك كل جديد')
-        .setColor('#E74C3C')
-        .setTimestamp()
-        .setFooter({ text: '📢 الإعلانات' });
-      await annCh.send({ embeds: [e] });
-      log.push('✅ إعلانات');
-    } catch(e) {}
-  }
-
-  // Offers channel
-  const offersCh = guild.channels.cache.find(c => c.name.includes('العرض'));
-  if (offersCh) {
-    try {
-      const e = new EmbedBuilder()
-        .setTitle('🎉 العروض والخصومات')
-        .setDescription('**تابع هذه القناة عشان تعرف أحدث العروض والخصومات!** 🏷️\n\nخصومات تصل إلى **50%** على بعض الخدمات!')
-        .setColor('#FF6B6B')
-        .setTimestamp()
-        .setFooter({ text: '🏷️ العروض والخصومات' });
-      await offersCh.send({ embeds: [e] });
-      log.push('✅ عروض');
-    } catch(e) {}
-  }
-
-  await interaction.editReply(`✅ تم الإعداد الكامل!\n\n${log.join('\n')}`);
+  await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
 }
 
-// ═══════════════ Services ═══════════════
+async function handleServices(interaction) {
+  const services = getServices().filter(s => s.active);
+  if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات حالياً', ephemeral: true });
+
+  const cats = {};
+  for (const s of services) {
+    if (!cats[s.category]) cats[s.category] = [];
+    cats[s.category].push(s);
+  }
+
+  const catNames = { chatgpt: '🤖 ChatGPT', image: '🎨 صور', voice: '🔊 صوت', code: '💻 برمجة', writing: '📝 كتابة', data: '📊 بيانات', other: '📦 أخرى' };
+
+  const embed = new EmbedBuilder()
+    .setTitle('🛒 الخدمات المتاحة')
+    .setColor('#FF0000')
+    .setTimestamp()
+    .setFooter({ text: `📊 ${services.length} خدمة متاحة` });
+
+  for (const [cat, items] of Object.entries(cats)) {
+    embed.addFields({
+      name: catNames[cat] || cat,
+      value: items.map(s => `${s.emoji} **${s.name}** — \`${fmt(s.price)}\` كريديت`).join('\n'),
+    });
+  }
+
+  await interaction.reply({ embeds: [embed] });
+}
+
+async function handleOrder(interaction) {
+  const id = parseInt(interaction.options.getString('service'));
+  const services = getServices();
+  const service = services.find(s => s.id === id && s.active);
+  if (!service) return interaction.reply({ content: '❌ خدمة غير موجودة. استخدم `/services` لعرض الخدمات', ephemeral: true });
+
+  const g = interaction.guild, user = interaction.user;
+  const tc = CFG.ticketCategory ? g.channels.cache.get(CFG.ticketCategory) : null;
+
+  const ch = await g.channels.create({
+    name: `ticket-${user.username}-${service.id}`,
+    type: ChannelType.GuildText,
+    parent: tc?.id || null,
+    permissionOverwrites: [
+      { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+      { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
+    ],
+  });
+
+  const orders = getOrders();
+  const oid = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
+  orders.push({ id: oid, serviceId: service.id, serviceName: service.name, userId: user.id, username: user.username, channelId: ch.id, price: service.price, status: 'pending', createdAt: Date.now() });
+  save('orders.json', orders);
+
+  const embed = new EmbedBuilder()
+    .setTitle(`🎫 طلب #${oid}`)
+    .setDescription(`**الخدمة:** ${service.emoji} ${service.name}\n**العميل:** ${user}\n**السعر:** \`${fmt(service.price)}\` كريديت\n**الحالة:** ⏳ معلق`)
+    .setColor('#FFB900').setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId(`order_complete_${oid}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId(`order_close_${oid}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Secondary),
+  );
+
+  await ch.send({ embeds: [embed], components: [row] });
+  await interaction.reply({ content: `✅ تم فتح التذكرة: ${ch}`, ephemeral: true });
+}
 
 async function handleAddService(interaction) {
   const name = interaction.options.getString('name');
@@ -251,82 +245,131 @@ async function handleAddService(interaction) {
   const price = interaction.options.getNumber('price');
   const category = interaction.options.getString('category');
   const emoji = interaction.options.getString('emoji') || '🤖';
+
+  const services = getServices();
   const id = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
   services.push({ id, name, description: desc, price, category, emoji, active: true, createdAt: Date.now() });
-  saveServices();
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`${emoji} ${name}`).setDescription(desc).addFields({ name: '💰 السعر', value: `${config.currency}${price}`, inline: true }, { name: '📂 التصنيف', value: category, inline: true }).setColor('#2d6a4f').setTimestamp()], ephemeral: true });
+  save('services.json', services);
+
+  const embed = new EmbedBuilder()
+    .setTitle(`${emoji} ${name}`)
+    .setDescription(desc)
+    .addFields({ name: '💰 السعر', value: `\`${fmt(price)}\` كريديت`, inline: true }, { name: '📂 التصنيف', value: category, inline: true })
+    .setColor('#2ECC71').setTimestamp();
+  await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-async function handleServices(interaction) {
-  const cats = {};
-  for (const s of services.filter(s => s.active)) {
-    if (!cats[s.category]) cats[s.category] = [];
-    cats[s.category].push(s);
-  }
-  if (!Object.keys(cats).length) return interaction.reply({ content: '📭 لا توجد خدمات', ephemeral: true });
-  const embed = new EmbedBuilder().setTitle('🛒 الخدمات').setColor('#FF0000').setTimestamp();
-  for (const [cat, items] of Object.entries(cats)) {
-    embed.addFields({ name: cat, value: items.map(s => `${s.emoji} **${s.name}** — ${config.currency}${s.price}`).join('\n') });
-  }
+async function handleRemoveService(interaction) {
+  const id = parseInt(interaction.options.getString('id'));
+  let services = getServices();
+  const svc = services.find(s => s.id === id);
+  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
+  services = services.filter(s => s.id !== id);
+  save('services.json', services);
+  await interaction.reply({ content: `✅ تم حذف: ${svc.emoji} ${svc.name}`, ephemeral: true });
+}
+
+async function handleBalance(interaction) {
+  const bal = getBalance();
+  const userBal = bal[interaction.user.id] || 0;
+  const embed = new EmbedBuilder()
+    .setTitle('💰 رصيدك')
+    .setDescription(`**${interaction.user.username}**\n\nالرصيد: \`${fmt(userBal)}\` كريديت`)
+    .setColor('#2ECC71').setTimestamp();
+  await interaction.reply({ embeds: [embed], ephemeral: true });
+}
+
+async function handleAddBalance(interaction) {
+  const user = interaction.options.getUser('user');
+  const amount = interaction.options.getNumber('amount');
+  const bal = getBalance();
+  bal[user.id] = (bal[user.id] || 0) + amount;
+  saveBalance(bal);
+  await interaction.reply({ content: `✅ تمت إضافة \`${fmt(amount)}\` كريديت لـ ${user}\nالرصيد الحالي: \`${fmt(bal[user.id])}\``, ephemeral: true });
+}
+
+async function handleReview(interaction) {
+  const id = parseInt(interaction.options.getString('service'));
+  const rating = interaction.options.getNumber('rating');
+  const comment = interaction.options.getString('comment') || '';
+  const services = getServices();
+  const svc = services.find(s => s.id === id);
+  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
+  if (rating < 1 || rating > 5) return interaction.reply({ content: '❌ التقييم من 1 لـ 5', ephemeral: true });
+
+  const reviews = getReviews();
+  reviews.push({ id: reviews.length > 0 ? Math.max(...reviews.map(r => r.id)) + 1 : 1, serviceId: id, serviceName: svc.name, userId: interaction.user.id, username: interaction.user.username, rating, comment, createdAt: Date.now() });
+  save('reviews.json', reviews);
+
+  const embed = new EmbedBuilder()
+    .setTitle('⭐ تم التقييم')
+    .setDescription(`**الخدمة:** ${svc.emoji} ${svc.name}\n**التقييم:** ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}\n**التعليق:** ${comment || 'بدون'}`)
+    .setColor('#F1C40F').setTimestamp();
   await interaction.reply({ embeds: [embed] });
 }
 
-async function handleOrder(interaction) {
-  const id = parseInt(interaction.options.getString('service'));
-  const service = services.find(s => s.id === id && s.active);
-  if (!service) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
-  const guild = interaction.guild, user = interaction.user;
-  const ticketCat = config.ticketCategory ? guild.channels.cache.get(config.ticketCategory) : null;
-  const channel = await guild.channels.create({
-    name: `ticket-${user.username}-${service.id}`,
-    type: ChannelType.GuildText,
-    parent: ticketCat?.id || null,
-    permissionOverwrites: [
-      { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
-      { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
-    ],
-  });
-  const orderId = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
-  orders.push({ id: orderId, serviceId: service.id, serviceName: service.name, userId: user.id, username: user.username, channelId: channel.id, price: service.price, status: 'pending', createdAt: Date.now() });
-  saveOrders();
-  const embed = new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**الخدمة:** ${service.emoji} ${service.name}\n**العميل:** ${user}\n**السعر:** ${config.currency}${service.price}\n**الحالة:** ⏳`).setColor('#FFB900').setTimestamp();
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Secondary),
-  );
-  await channel.send({ embeds: [embed], components: [row] });
-  await interaction.reply({ content: `✅ تم فتح التذكرة: ${channel}`, ephemeral: true });
+async function handleLeaderboard(interaction) {
+  const bal = getBalance();
+  const entries = Object.entries(bal).sort(([,a], [,b]) => b - a).slice(0, 10);
+  if (!entries.length) return interaction.reply({ content: '📭 لا يوجد بيانات بعد', ephemeral: true });
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const desc = entries.map(([uid, b], i) => `${medals[i] || `**${i+1}.**`} <@${uid}> — \`${fmt(b)}\` كريديت`).join('\n');
+
+  const embed = new EmbedBuilder()
+    .setTitle('🏆 أعلى المستخدمين بالكريديت')
+    .setDescription(desc)
+    .setColor('#FFD700').setTimestamp();
+  await interaction.reply({ embeds: [embed] });
 }
 
 async function handleHelp(interaction) {
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 الأوامر').addFields({ name: 'عامة', value: '`/services` `/order` `/help`' }, { name: 'إدارة', value: '`/setup` `/add-service`' }).setColor('#FF0000')], ephemeral: true });
+  const embed = new EmbedBuilder()
+    .setTitle('🤖 أوامر البوت')
+    .addFields(
+      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/order` طلب خدمة\n`/balance` رصيدك\n`/review` تقييم\n`/leaderboard` الترتيب\n`/help` المساعدة' },
+      { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة\n`/add-balance` إضافة كريديت' },
+    )
+    .setColor('#FF0000').setTimestamp();
+  await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-// ═══════════════ Handler ═══════════════
-
+// ═══════════════ HANDLER ═══════════════
 client.on('interactionCreate', async (interaction) => {
   try {
     if (interaction.isChatInputCommand()) {
-      const { commandName } = interaction;
-      console.log(`Command: ${commandName}`);
-      if (commandName === 'setup') await handleSetup(interaction);
-      else if (commandName === 'add-service') await handleAddService(interaction);
-      else if (commandName === 'services') await handleServices(interaction);
-      else if (commandName === 'order') await handleOrder(interaction);
-      else if (commandName === 'help') await handleHelp(interaction);
+      const map = {
+        setup: handleSetup, services: handleServices, order: handleOrder,
+        'add-service': handleAddService, 'remove-service': handleRemoveService,
+        balance: handleBalance, 'add-balance': handleAddBalance,
+        review: handleReview, leaderboard: handleLeaderboard, help: handleHelp,
+      };
+      if (map[interaction.commandName]) await map[interaction.commandName](interaction);
     } else if (interaction.isButton() && interaction.customId.startsWith('order_')) {
       const [, type, idStr] = interaction.customId.split('_');
-      const orderId = parseInt(idStr);
-      const order = orders.find(o => o.id === orderId);
+      const oid = parseInt(idStr);
+      const orders = getOrders();
+      const order = orders.find(o => o.id === oid);
       if (!order) return interaction.reply({ content: '❌', ephemeral: true });
-      if (type === 'accept') { order.status = 'progress'; saveOrders(); await interaction.reply({ content: `✅ قبل ${interaction.user}` }); }
-      else if (type === 'complete') { order.status = 'completed'; saveOrders(); await interaction.reply({ content: '🏁 تم!' }); }
-      else if (type === 'close') { order.status = 'closed'; saveOrders(); await interaction.reply({ content: '🗑️ إغلاق...' }); setTimeout(() => { const c = interaction.guild.channels.cache.get(order.channelId); if (c) c.delete().catch(() => {}); }, 2000); }
+
+      if (type === 'accept') {
+        order.status = 'progress'; save('orders.json', orders);
+        await interaction.reply({ content: `✅ قبل الطلب ${interaction.user}` });
+      } else if (type === 'complete') {
+        order.status = 'completed'; save('orders.json', orders);
+        const bal = getBalance();
+        bal[order.userId] = (bal[order.userId] || 0) + order.price;
+        saveBalance(bal);
+        await interaction.reply({ content: '🏁 تم إتمام الطلب! تم إضافة الكريديت للعميل' });
+      } else if (type === 'close') {
+        order.status = 'closed'; save('orders.json', orders);
+        await interaction.reply({ content: '🗑️ إغلاق التذكرة...' });
+        setTimeout(() => { const c = interaction.guild.channels.cache.get(order.channelId); if (c) c.delete().catch(() => {}); }, 2000);
+      }
     }
   } catch (err) {
     console.error('Error:', err);
-    if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: '❌ خطأ', ephemeral: true }).catch(() => {});
+    if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: '❌ حصل خطأ', ephemeral: true }).catch(() => {});
   }
 });
 
@@ -335,31 +378,156 @@ client.on('ready', () => {
   client.user.setActivity('AI Services Shop', { type: 3 });
 });
 
-// Auto-assign Customer role to new members
 client.on('guildMemberAdd', async (member) => {
   try {
     const role = member.guild.roles.cache.find(r => r.name.includes('Customer'));
-    if (role) {
-      await member.roles.add(role);
-      console.log(`✅ Assigned Customer role to ${member.user.tag}`);
+    if (role) await member.roles.add(role);
+  } catch {}
+});
+
+// ═══════════════ HTTP API (Panel) ═══════════════
+const API_PORT = process.env.BOT_API_PORT || 3001;
+
+function parseBody(req) { return new Promise((ok, no) => { let b = ''; req.on('data', c => b += c); req.on('end', () => { try { ok(JSON.parse(b || '{}')); } catch { ok({}); } }); req.on('error', no); }); }
+function jsonRes(res, code, data) { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(data)); }
+
+const apiServer = http.createServer(async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') { res.writeHead(200); return res.end(); }
+
+  const url = new URL(req.url, 'http://localhost');
+  const p = url.pathname;
+  const guild = client.guilds.cache.first();
+  if (!guild && !p.startsWith('/api/bot')) return jsonRes(res, 500, { error: 'Bot not in guild' });
+
+  try {
+    // GUILD
+    if (req.method === 'GET' && p === '/api/guild') {
+      return jsonRes(res, 200, { id: guild.id, name: guild.name, icon: guild.iconURL({ dynamic: true, size: 256 }), memberCount: guild.memberCount, ownerId: guild.ownerId, createdAt: guild.createdAt.toISOString(), boostCount: guild.premiumSubscriptionCount || 0 });
     }
-  } catch(e) {
-    console.error('Role assign error:', e.message);
+    if (req.method === 'PATCH' && p === '/api/guild') {
+      const data = await parseBody(req);
+      if (data.name) await guild.setName(data.name);
+      if (data.icon) { const b64 = data.icon.replace(/^data:image\/\w+;base64,/, ''); await guild.setIcon(Buffer.from(b64, 'base64')); }
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // BOT
+    if (req.method === 'GET' && p === '/api/bot') {
+      return jsonRes(res, 200, { id: client.user.id, username: client.user.username, avatar: client.user.displayAvatarURL({ dynamic: true, size: 256 }) });
+    }
+    if (req.method === 'PATCH' && p === '/api/bot') {
+      const data = await parseBody(req);
+      if (data.username) await client.user.setUsername(data.username);
+      if (data.avatar) { const b64 = data.avatar.replace(/^data:image\/\w+;base64,/, ''); await client.user.setAvatar(Buffer.from(b64, 'base64')); }
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // CHANNELS
+    if (req.method === 'GET' && p === '/api/channels') {
+      return jsonRes(res, 200, guild.channels.cache.sort((a, b) => a.position - b.position).map(c => ({ id: c.id, name: c.name, type: c.type, parent: c.parentId, position: c.position, topic: c.topic || '' })));
+    }
+    if (req.method === 'POST' && p === '/api/channels') {
+      const d = await parseBody(req);
+      const ch = await guild.channels.create({ name: d.name, type: d.type || 0, parent: d.parent || null, topic: d.topic || '' });
+      return jsonRes(res, 200, { ok: true, id: ch.id });
+    }
+    if (req.method === 'DELETE' && p.startsWith('/api/channels/')) {
+      const ch = guild.channels.cache.get(p.split('/')[3]);
+      if (!ch) return jsonRes(res, 404, { error: 'Not found' });
+      await ch.delete(); return jsonRes(res, 200, { ok: true });
+    }
+
+    // CATEGORIES
+    if (req.method === 'GET' && p === '/api/categories') {
+      return jsonRes(res, 200, guild.channels.cache.filter(c => c.type === 4).sort((a, b) => a.position - b.position).map(c => ({ id: c.id, name: c.name, position: c.position })));
+    }
+
+    // ROLES
+    if (req.method === 'GET' && p === '/api/roles') {
+      return jsonRes(res, 200, guild.roles.cache.sort((a, b) => b.position - a.position).map(r => ({ id: r.id, name: r.name, color: r.hexColor, mentionable: r.mentionable, hoist: r.hoist, members: r.members.size, managed: r.managed })));
+    }
+    if (req.method === 'POST' && p === '/api/roles') {
+      const d = await parseBody(req);
+      const r = await guild.roles.create({ name: d.name, color: d.color || '#000000', mentionable: d.mentionable || false, hoist: d.hoist || false });
+      return jsonRes(res, 200, { ok: true, id: r.id });
+    }
+    if (req.method === 'DELETE' && p.startsWith('/api/roles/')) {
+      const r = guild.roles.cache.get(p.split('/')[3]);
+      if (!r || r.name === '@everyone' || r.managed) return jsonRes(res, 400, { error: 'Cannot delete' });
+      await r.delete(); return jsonRes(res, 200, { ok: true });
+    }
+
+    // MEMBERS
+    if (req.method === 'GET' && p === '/api/members') {
+      await guild.members.fetch();
+      return jsonRes(res, 200, guild.members.cache.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0)).map(m => ({
+        id: m.id, username: m.user.username, displayName: m.displayName,
+        avatar: m.user.displayAvatarURL({ dynamic: true, size: 64 }),
+        roles: m.roles.cache.filter(r => r.id !== guild.id).map(r => r.id),
+        joinedAt: m.joinedAt?.toISOString(),
+      })));
+    }
+    if (req.method === 'PATCH' && p.startsWith('/api/members/')) {
+      const m = guild.members.cache.get(p.split('/')[3]);
+      if (!m) return jsonRes(res, 404, { error: 'Not found' });
+      const d = await parseBody(req);
+      if (d.roles) await m.roles.set(d.roles);
+      if (d.nickname) await m.setNickname(d.nickname);
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'DELETE' && p.startsWith('/api/members/')) {
+      const m = guild.members.cache.get(p.split('/')[3]);
+      if (!m) return jsonRes(res, 404, { error: 'Not found' });
+      const d = await parseBody(req);
+      d.ban ? await m.ban({ reason: d.reason }) : await m.kick(d.reason);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ANNOUNCE
+    if (req.method === 'POST' && p === '/api/announce') {
+      const d = await parseBody(req);
+      const ch = guild.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased() && !c.isThread());
+      if (!ch) return jsonRes(res, 404, { error: 'قناة الإعلانات غير موجودة' });
+      await ch.send({ embeds: [new EmbedBuilder().setTitle(`${d.emoji || '📣'} ${d.title}`).setDescription(d.content).setColor(d.color || '#FF0000').setTimestamp().setFooter({ text: '📢 إعلان من لوحة التحكم' })] });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // SEND MESSAGE
+    if (req.method === 'POST' && p === '/api/send') {
+      const d = await parseBody(req);
+      const ch = guild.channels.cache.get(d.channelId);
+      if (!ch || !ch.isTextBased()) return jsonRes(res, 404, { error: 'Channel not found' });
+      await ch.send({ content: d.content || '' });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    jsonRes(res, 404, { error: 'Not found' });
+  } catch (e) {
+    console.error('API Error:', e);
+    jsonRes(res, 500, { error: e.message });
   }
 });
 
+apiServer.listen(API_PORT, '127.0.0.1', () => console.log(`📡 Bot API: http://127.0.0.1:${API_PORT}`));
+
+// ═══════════════ START ═══════════════
 async function start() {
-  if (!config.token || !config.clientId || !config.guildId) {
-    console.log('Missing config!');
-    return;
-  }
-  const rest = new REST({ version: '10' }).setToken(config.token);
+  if (!CFG.token || !CFG.clientId || !CFG.guildId) { console.log('❌ Missing config!'); return; }
+
+  const rest = new REST({ version: '10' }).setToken(CFG.token);
   try {
-    console.log('Registering...');
-    await rest.put(Routes.applicationGuildCommands(config.clientId, config.guildId), { body: commands.map(c => c.toJSON()) });
-    console.log('✅ Registered!');
+    console.log('🗑️ Clearing old commands...');
+    await rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), { body: [] });
+    await sleep(1000);
+    console.log('📝 Registering new commands...');
+    await rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), { body: cmds.map(c => c.toJSON()) });
+    console.log('✅ Commands registered!');
   } catch (err) { console.error('Reg error:', err); }
-  await client.login(config.token);
+
+  await client.login(CFG.token);
 }
 
 start();

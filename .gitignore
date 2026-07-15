@@ -1,7 +1,8 @@
 node_modules/
 data/config.json
-data/services.json
 data/orders.json
 data/reviews.json
-test-login.js
-check.js
+data/balance.json
+test-*.js
+check*.js
+debug.js
