@@ -111,7 +111,7 @@ async function handleSetup(interaction) {
       { n: '💬・العامة', p: full }, { n: '🤖・اوامر-البوت', p: full },
     ]},
     { n: '╔════════ 📌 معلومات ════════', chs: [
-      { n: '📊・حالة-السيرفر', p: noSend },
+      { n: '📊・حالة-السيرفر', p: noSend }, { n: '👋・الترحيب', p: noSend },
     ]},
   ];
 
@@ -687,6 +687,36 @@ client.on('guildMemberAdd', async (member) => {
   try {
     const role = member.guild.roles.cache.find(r => r.name.includes('Customer'));
     if (role) await member.roles.add(role);
+  } catch {}
+
+  try {
+    const g = member.guild;
+    const ch = g.channels.cache.find(c => c.name.includes('الترحيب') && c.isTextBased());
+    if (!ch) return;
+
+    const embed = new EmbedBuilder()
+      .setTitle(`مرحباً ${member.user.username}! 🎉`)
+      .setDescription(
+        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `**اهلاً وسهلاً بك في ${g.name}!** 🚀\n\n` +
+        `أنت العضو رقم **${g.memberCount}**\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `**📦 ابدأ بالخطوات:**\n\n` +
+        `> 🛒 كتابة \`/services\` لعرض الخدمات\n` +
+        `> 🎫 الدخول على \`🎫・افتح-تذكرة\` لطلب خدمة\n` +
+        `> 💰 استخدام \`/credits\` لعرض رصيدك\n` +
+        `> ⭐ تقييم الخدمة بـ \`/review\`\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `**💡 نصيحة:** تقدر تطلب أي خدمة من الذكاء الاصطناعي\n` +
+        `من شات، صور، برمجة، صوت، كتابة وأكثير!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━`
+      )
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
+      .setColor('#2ECC71')
+      .setTimestamp()
+      .setFooter({ text: `${g.name} • ${g.memberCount} عضو` });
+
+    await ch.send({ content: `${member}`, embeds: [embed] });
   } catch {}
 });
 
