@@ -338,6 +338,42 @@ async function handleOrderModal(interaction) {
   await interaction.editReply(`✅ تم فتح تذكرتك: ${ch}\n\n**رقم الطلب:** #${oid}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت`);
 }
 
+// ═══════════════ ORDER (slash command) ═══════════════
+async function handleOrder(interaction) {
+  const id = parseInt(interaction.options.getString('service'));
+  const services = getServices();
+  const service = services.find(s => s.id === id && s.active);
+  if (!service) return interaction.reply({ content: '❌ خدمة غير موجودة. استخدم `/services` لعرض الخدمات', ephemeral: true });
+
+  // Show modal directly
+  const modal = new ModalBuilder()
+    .setCustomId(`order_modal_${id}`)
+    .setTitle(`طلب: ${service.emoji} ${service.name}`);
+
+  const reasonInput = new TextInputBuilder()
+    .setCustomId('reason')
+    .setLabel('لماذا تحتاج هذه الخدمة؟')
+    .setPlaceholder('اشرح وصفاً مختصراً لطلبك...')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(CFG.orderSettings?.requireReason !== false)
+    .setMaxLength(1000);
+
+  const detailsInput = new TextInputBuilder()
+    .setCustomId('details')
+    .setLabel('تفاصيل إضافية (اختياري)')
+    .setPlaceholder('أي تفاصيل إضافية...')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(false)
+    .setMaxLength(1000);
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(reasonInput),
+    new ActionRowBuilder().addComponents(detailsInput),
+  );
+
+  await interaction.showModal(modal);
+}
+
 // ═══════════════ CLOSE COMMAND ═══════════════
 async function handleClose(interaction) {
   const orders = getOrders();
