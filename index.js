@@ -180,7 +180,7 @@ async function handleServices(interaction) {
 
   const embed = new EmbedBuilder()
     .setTitle('🛒 الخدمات المتاحة')
-    .setDescription('**اضغط على الزر أدناه لطلب الخدمة مباشرة**')
+    .setDescription('**اضغط على زر الخدمة لطلبها مباشرة**')
     .setColor('#FF0000')
     .setTimestamp()
     .setFooter({ text: `📊 ${services.length} خدمة متاحة` });
@@ -192,16 +192,17 @@ async function handleServices(interaction) {
     });
   }
 
-  // Create buttons for each service (max 5 per row, up to 25 services = 5 rows)
+  // Create buttons (max 25 buttons = 5 rows of 5)
   const rows = [];
-  const allServices = services.slice(0, 25); // Discord max 25 buttons
+  const allServices = services.slice(0, 25);
   for (let i = 0; i < allServices.length; i += 5) {
     const row = new ActionRowBuilder();
     for (const s of allServices.slice(i, i + 5)) {
+      const label = `${s.emoji} ${s.name}`.substring(0, 80);
       row.addComponents(
         new ButtonBuilder()
           .setCustomId(`svc_order_${s.id}`)
-          .setLabel(`${s.emoji} ${s.name}`)
+          .setLabel(label)
           .setStyle(ButtonStyle.Primary)
       );
     }
@@ -548,13 +549,18 @@ client.on('interactionCreate', async (interaction) => {
         else if (type === 'notify') CFG.orderSettings.notifyOnOrder = !CFG.orderSettings.notifyOnOrder;
         else if (type === 'reason') CFG.orderSettings.requireReason = CFG.orderSettings.requireReason === false ? true : false;
         save('config.json', CFG);
-        // Re-run the settings command
         await handleOrderSettings(interaction);
       }
     }
   } catch (err) {
     console.error('Error:', err);
-    if (!interaction.replied && !interaction.deferred) await interaction.reply({ content: '❌ حصل خطأ', ephemeral: true }).catch(() => {});
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: `❌ خطأ: ${err.message}`, ephemeral: true }).catch(() => {});
+      } else {
+        await interaction.reply({ content: `❌ خطأ: ${err.message}`, ephemeral: true }).catch(() => {});
+      }
+    } catch {}
   }
 });
 
