@@ -30,6 +30,11 @@ function fmt(n) {
   return n.toLocaleString();
 }
 
+function safeStr(s, max = 1000) {
+  if (!s) return '';
+  return String(s).replace(/[\u0000-\u001F\u007F-\u009F]/g, '').substring(0, max);
+}
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ═══════════════ CLIENT ═══════════════
@@ -282,97 +287,94 @@ async function handleServiceButton(interaction) {
 }
 
 async function handleOrderModal(interaction) {
-  const id = parseInt(interaction.customId.split('_')[2]);
-  const services = getServices();
-  const service = services.find(s => s.id === id && s.active);
-  if (!service) return interaction.reply({ content: '❌ الخدمة لم تعد متاحة', ephemeral: true });
+  try {
+    const id = parseInt(interaction.customId.split('_')[2]);
+    const services = getServices();
+    const service = services.find(s => s.id === id && s.active);
+    if (!service) return interaction.reply({ content: '❌ الخدمة لم تعد متاحة', ephemeral: true });
 
-  await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
 
-  const g = interaction.guild;
-  const user = interaction.user;
-  const reason = (interaction.fields.getTextInputValue('reason') || 'بدون وصف').substring(0, 500);
-  const details = (interaction.fields.getTextInputValue('details') || '').substring(0, 500);
-
-  // Create order number
-  const orders = getOrders();
-  const oid = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
-
-  // Create ticket channel
-  const tc = CFG.ticketCategory ? g.channels.cache.get(CFG.ticketCategory) : null;
-  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-
-  const permOverwrites = [
-    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
-    { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
-  ];
-  if (staffRole) permOverwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
-
-  const chName = `ticket-${oid}-${user.username}`.substring(0, 100);
-  const ch = await g.channels.create({
-    name: chName,
-    type: ChannelType.GuildText,
-    parent: tc?.id || null,
-    permissionOverwrites: permOverwrites,
-    topic: `طلب #${oid} | ${service.name.substring(0, 50)} | ${user.username}`,
-  });
-
-  // Save order
-  orders.push({
-    id: oid, serviceId: service.id, serviceName: service.name, serviceEmoji: service.emoji,
-    userId: user.id, username: user.username, channelId: ch.id,
-    price: service.price, status: 'pending', reason, details,
-    createdAt: Date.now(),
-  });
-  save('orders.json', orders);
-
-  // Welcome embed in ticket
-  const desc = [
-    `**العميل:** ${user}`,
-    `**الخدمة:** ${service.emoji} ${service.name}`,
-    `**السعر:** \`${fmt(service.price)}\` كريديت`,
-    '',
-    `**السبب:**`,
-    `> ${reason}`,
-    details ? `**تفاصيل:**\n> ${details}` : '',
-    '',
-    `⏳ **في انتظار الستاف...**`,
-    '',
-    `• \`/close\` — إغلاق التذكرة`,
-    `• \`/credits\` — الدفع عبر ProBot`,
-  ].filter(Boolean).join('\n').substring(0, 4000);
-
-  const welcomeEmbed = new EmbedBuilder()
-    .setTitle(`${service.emoji} طلب #${oid} — ${service.name}`)
-    .setDescription(desc)
-    .setColor('#FFB900')
-    .setTimestamp()
-    .setFooter({ text: `طلب #${oid} | ${user.username}` });
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول الطلب').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId(`order_progress_${oid}`).setLabel('🔄 قيد التنفيذ').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId(`order_complete_${oid}`).setLabel('🏁 تم التسليم').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId(`order_close_${oid}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Secondary),
-  );
-
-  await ch.send({ content: `${user} ${staffRole ? staffRole : ''}`, embeds: [welcomeEmbed], components: [row] });
-
-  // Notify staff channel
-  if (CFG.orderSettings?.notifyOnOrder) {
-    const notifyCh = CFG.orderSettings.notifyChannel
-      ? g.channels.cache.get(CFG.orderSettings.notifyChannel)
-      : g.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
-    if (notifyCh) {
-      const notifEmbed = new EmbedBuilder()
-        .setTitle(`🆕 طلب جديد #${oid}`)
-        .setDescription(`**العميل:** ${user}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت\n**القناة:** ${ch}`)
-        .setColor('#2ECC71').setTimestamp();
-      await notifyCh.send({ embeds: [notifEmbed] });
+    const g = interaction.guild;
+    const user = interaction.user;
+    let reason = 'بدون وصف';
+    let details = '';
+    try {
+      reason = safeStr(interaction.fields.getTextInputValue('reason'), 500) || 'بدون وصف';
+      details = safeStr(interaction.fields.getTextInputValue('details'), 500) || '';
+    } catch (e) {
+      console.error('Modal fields error:', e.message);
     }
-  }
 
-  await interaction.editReply(`✅ تم فتح تذكرتك: ${ch}\n\n**رقم الطلب:** #${oid}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت`);
+    // Create order number
+    const orders = getOrders();
+    const oid = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
+
+    // Create ticket channel
+    const tc = CFG.ticketCategory ? g.channels.cache.get(CFG.ticketCategory) : null;
+    const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+
+    const permOverwrites = [
+      { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+      { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+    ];
+    if (staffRole) permOverwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+    const chName = safeStr(`ticket-${oid}-${user.username}`, 80).replace(/[^a-zA-Z0-9\u0600-\u06FF-_ ]/g, '');
+    const ch = await g.channels.create({
+      name: chName,
+      type: ChannelType.GuildText,
+      parent: tc?.id || null,
+      permissionOverwrites: permOverwrites,
+      topic: safeStr(`طلب #${oid} | ${service.name}`, 100),
+    });
+
+    // Save order
+    const order = {
+      id: oid, serviceId: service.id, serviceName: safeStr(service.name, 100), serviceEmoji: service.emoji || '🛒',
+      userId: user.id, username: safeStr(user.username, 50), channelId: ch.id,
+      price: service.price, status: 'pending', reason, details,
+      createdAt: Date.now(),
+    };
+    orders.push(order);
+    save('orders.json', orders);
+
+    // Welcome embed in ticket
+    const descLines = [
+      `**العميل:** <@${user.id}>`,
+      `**الخدمة:** ${service.emoji} ${service.name}`,
+      `**السعر:** \`${fmt(service.price)}\` كريديت`,
+      '',
+      `**السبب:**`,
+      `> ${reason}`,
+    ];
+    if (details) descLines.push('', `**تفاصيل:**`, `> ${details}`);
+    descLines.push('', `⏳ **في انتظار الستاف...**`, '', `• \`/close\` — إغلاق التذكرة`);
+
+    const welcomeEmbed = new EmbedBuilder()
+      .setTitle(safeStr(`${service.emoji} طلب #${oid}`, 256))
+      .setDescription(descLines.join('\n').substring(0, 4000))
+      .setColor('#FFB900')
+      .setTimestamp()
+      .setFooter({ text: `طلب #${oid}` });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`order_progress_${oid}`).setLabel('🔄 تنفيذ').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId(`order_complete_${oid}`).setLabel('🏁 تسليم').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`order_close_${oid}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Secondary),
+    );
+
+    await ch.send({ content: `<@${user.id}>`, embeds: [welcomeEmbed], components: [row] });
+
+    await interaction.editReply(`✅ تم فتح تذكرتك: ${ch}\n\n**رقم الطلب:** #${oid}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت`);
+  } catch (err) {
+    console.error('Order modal error:', err);
+    try {
+      if (interaction.deferred) await interaction.editReply({ content: `❌ حصل خطأ: ${err.message}` }).catch(() => {});
+      else await interaction.reply({ content: `❌ حصل خطأ: ${err.message}`, ephemeral: true }).catch(() => {});
+    } catch {}
+  }
 }
 
 // ═══════════════ ORDER (slash command) ═══════════════
@@ -614,14 +616,20 @@ client.on('interactionCreate', async (interaction) => {
     }
     // Create ticket modal submit
     else if (interaction.isModalSubmit() && interaction.customId === 'create_ticket_modal') {
-      const id = parseInt(interaction.fields.getTextInputValue('service_id'));
-      const services = getServices();
-      const service = services.find(s => s.id === id && s.active);
-      if (!service) return interaction.reply({ content: '❌ رقم خدمة غير صحيح. جرب `/services` لعرض الخدمات', ephemeral: true });
+      try {
+        const id = parseInt(safeStr(interaction.fields.getTextInputValue('service_id'), 10));
+        const services = getServices();
+        const service = services.find(s => s.id === id && s.active);
+        if (!service) return interaction.reply({ content: '❌ رقم خدمة غير صحيح. جرب `/services` لعرض الخدمات', ephemeral: true });
 
-      // Reuse the order modal flow
-      interaction.customId = `order_modal_${id}`;
-      await handleOrderModal(interaction);
+        // Build a fake order_modal customId and reuse the handler
+        const fakeInteraction = interaction;
+        fakeInteraction.customId = `order_modal_${id}`;
+        await handleOrderModal(fakeInteraction);
+      } catch (err) {
+        console.error('Create ticket error:', err);
+        try { await interaction.reply({ content: `❌ خطأ: ${err.message}`, ephemeral: true }); } catch {}
+      }
     }
     // Order modal submit
     else if (interaction.isModalSubmit() && interaction.customId.startsWith('order_modal_')) {
