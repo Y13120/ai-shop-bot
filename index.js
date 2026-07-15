@@ -291,8 +291,8 @@ async function handleOrderModal(interaction) {
 
   const g = interaction.guild;
   const user = interaction.user;
-  const reason = interaction.fields.getTextInputValue('reason') || 'بدون وصف';
-  const details = interaction.fields.getTextInputValue('details') || '';
+  const reason = (interaction.fields.getTextInputValue('reason') || 'بدون وصف').substring(0, 500);
+  const details = (interaction.fields.getTextInputValue('details') || '').substring(0, 500);
 
   // Create order number
   const orders = getOrders();
@@ -308,12 +308,13 @@ async function handleOrderModal(interaction) {
   ];
   if (staffRole) permOverwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
 
+  const chName = `ticket-${oid}-${user.username}`.substring(0, 100);
   const ch = await g.channels.create({
-    name: `🎫-${oid}-${user.username}`,
+    name: chName,
     type: ChannelType.GuildText,
     parent: tc?.id || null,
     permissionOverwrites: permOverwrites,
-    topic: `طلب #${oid} | ${service.name} | ${user.username}`,
+    topic: `طلب #${oid} | ${service.name.substring(0, 50)} | ${user.username}`,
   });
 
   // Save order
@@ -326,21 +327,24 @@ async function handleOrderModal(interaction) {
   save('orders.json', orders);
 
   // Welcome embed in ticket
+  const desc = [
+    `**العميل:** ${user}`,
+    `**الخدمة:** ${service.emoji} ${service.name}`,
+    `**السعر:** \`${fmt(service.price)}\` كريديت`,
+    '',
+    `**السبب:**`,
+    `> ${reason}`,
+    details ? `**تفاصيل:**\n> ${details}` : '',
+    '',
+    `⏳ **في انتظار الستاف...**`,
+    '',
+    `• \`/close\` — إغلاق التذكرة`,
+    `• \`/credits\` — الدفع عبر ProBot`,
+  ].filter(Boolean).join('\n').substring(0, 4000);
+
   const welcomeEmbed = new EmbedBuilder()
     .setTitle(`${service.emoji} طلب #${oid} — ${service.name}`)
-    .setDescription(
-      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `**العميل:** ${user}\n` +
-      `**الخدمة:** ${service.emoji} ${service.name}\n` +
-      `**السعر:** \`${fmt(service.price)}\` كريديت\n\n` +
-      `**السبب:**\n> ${reason}\n` +
-      (details ? `**تفاصيل إضافية:**\n> ${details}\n\n` : '') +
-      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `⏳ **في انتظار الستاف...**\n\n` +
-      `**الأوامر:**\n` +
-      `• \`/close\` — إغلاق التذكرة\n` +
-      `• \`/credits\` — الدفع عبر ProBot`
-    )
+    .setDescription(desc)
     .setColor('#FFB900')
     .setTimestamp()
     .setFooter({ text: `طلب #${oid} | ${user.username}` });
