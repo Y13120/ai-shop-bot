@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, REST, Routes, SlashCommandBuilder, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType, PermissionFlagsBits, REST, Routes, SlashCommandBuilder, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -14,6 +14,10 @@ const CFG = load('config.json', {});
 if (process.env.BOT_TOKEN) CFG.token = process.env.BOT_TOKEN;
 if (process.env.CLIENT_ID) CFG.clientId = process.env.CLIENT_ID;
 if (process.env.GUILD_ID) CFG.guildId = process.env.GUILD_ID;
+
+// Order settings defaults
+if (!CFG.orderSettings) CFG.orderSettings = { autoClose: false, autoCloseMinutes: 30, notifyOnOrder: true, notifyChannel: '', requireReason: true };
+save('config.json', CFG);
 
 function getServices() { return load('services.json', []); }
 function getOrders() { return load('orders.json', []); }
@@ -37,16 +41,13 @@ const client = new Client({
 // ═══════════════ SLASH COMMANDS ═══════════════
 const cmds = [
   new SlashCommandBuilder().setName('setup').setDescription('إعداد السيرفر بالكامل').setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
   new SlashCommandBuilder().setName('services').setDescription('عرض كل الخدمات المتاحة'),
-
   new SlashCommandBuilder().setName('order').setDescription('طلب خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true)),
-
+  new SlashCommandBuilder().setName('close').setDescription('إغلاق التذكرة الحالية'),
   new SlashCommandBuilder().setName('credits').setDescription('عرض أو إرسال كريديت (عبر ProBot)')
     .addUserOption(o => o.setName('user').setDescription('المستخدم (اختياري)'))
     .addNumberOption(o => o.setName('amount').setDescription('المبلغ (اختياري)')),
-
   new SlashCommandBuilder().setName('add-service').setDescription('إضافة خدمة جديدة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('name').setDescription('اسم الخدمة').setRequired(true))
     .addStringOption(o => o.setName('description').setDescription('الوصف').setRequired(true))
@@ -54,22 +55,18 @@ const cmds = [
     .addStringOption(o => o.setName('category').setDescription('التصنيف').setRequired(true)
       .addChoices({ name: 'ChatGPT', value: 'chatgpt' }, { name: 'Image', value: 'image' }, { name: 'Voice', value: 'voice' }, { name: 'Code', value: 'code' }, { name: 'Writing', value: 'writing' }, { name: 'Data', value: 'data' }, { name: 'Other', value: 'other' }))
     .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
-
   new SlashCommandBuilder().setName('remove-service').setDescription('حذف خدمة').setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('رقم الخدمة').setRequired(true)),
-
   new SlashCommandBuilder().setName('review').setDescription('تقييم خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
     .addNumberOption(o => o.setName('rating').setDescription('التقييم 1-5').setRequired(true))
     .addStringOption(o => o.setName('comment').setDescription('تعليق')),
-
   new SlashCommandBuilder().setName('leaderboard').setDescription('ترتيب أعلى المستخدمين بالكريديت'),
-
+  new SlashCommandBuilder().setName('order-settings').setDescription('إعدادات الطلبات').setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   new SlashCommandBuilder().setName('help').setDescription('عرض كل الأوامر'),
 ];
 
-// ═══════════════ COMMANDS ═══════════════
-
+// ═══════════════ SETUP ═══════════════
 async function handleSetup(interaction) {
   await interaction.deferReply({ ephemeral: true });
   const g = interaction.guild;
@@ -142,7 +139,7 @@ async function handleSetup(interaction) {
   if (svcCh) {
     const e = new EmbedBuilder()
       .setTitle('🤖 مرحباً بك في متجر الذكاء الاصطناعي')
-      .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**الخدمات المتاحة:**\n\n🤖 **ChatGPT Plus** — محادثات ذكية\n🎨 **توليد الصور** — Midjourney, DALL-E 3\n💻 **برمجة** — مساعدة في أي لغة\n📝 **كتابة** — مقالات ونصوص\n📊 **تحليل بيانات** — تقارير\n🔊 **صوت** — تحويل وتعديل\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**💡 كيف تبدأ؟**\n\n> `1️⃣` اكتب `/services` لعرض الخدمات\n> `2️⃣` اكتب `/order [رقم]` لفتح تذكرة\n> `3️⃣` ادفع واستنّى الستاف\n> `4️⃣` بعد التسليم، قيّم بـ `/review`\n\n━━━━━━━━━━━━━━━━━━━━━')
+      .setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**الخدمات المتاحة:**\n\n🤖 **ChatGPT Plus** — محادثات ذكية\n🎨 **توليد الصور** — Midjourney, DALL-E 3\n💻 **برمجة** — مساعدة في أي لغة\n📝 **كتابة** — مقالات ونصوص\n📊 **تحليل بيانات** — تقارير\n🔊 **صوت** — تحويل وتعديل\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**💡 كيف تبدأ؟**\n\n> `1️⃣` اكتب `/services` لعرض الخدمات\n> `2️⃣` اضغط على زر الخدمة\n> `3️⃣` عبّى النموذج وابعت\n> `4️⃣` هيفتحلك روم خاص\n> `5️⃣` بعد التسليم، قيّم بـ `/review`\n\n━━━━━━━━━━━━━━━━━━━━━')
       .setColor('#FF0000').setTimestamp().setFooter({ text: '🛍️ AI Shop Bot' });
     await svcCh.send({ embeds: [e] });
   }
@@ -160,7 +157,7 @@ async function handleSetup(interaction) {
   if (howCh) {
     const e = new EmbedBuilder()
       .setTitle('📝 دليل طلب الخدمة')
-      .setDescription('**Step 1** 🛒 اكتب `/services` لعرض الخدمات\n**Step 2** 🎯 اختار الخدمة\n**Step 3** 🎫 اكتب `/order [رقم]` لفتح تذكرة\n**Step 4** 💬 تواصل مع الستاف\n**Step 5** 💰 ادفع\n**Step 6** ✅ استلم وقيّم بـ `/review`')
+      .setDescription('**Step 1** 🛒 اكتب `/services` لعرض الخدمات\n**Step 2** 🎯 اختار الخدمة واضغط زر\n**Step 3** 📝 عبّى النموذج\n**Step 4** 🎫 هيفتحلك روم خاص\n**Step 5** 💬 تواصل مع الستاف\n**Step 6** 💰 ادفع\n**Step 7** ✅ استلم وقيّم بـ `/review`')
       .setColor('#2ECC71').setTimestamp();
     await howCh.send({ embeds: [e] });
   }
@@ -168,6 +165,7 @@ async function handleSetup(interaction) {
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
 }
 
+// ═══════════════ SERVICES (with buttons) ═══════════════
 async function handleServices(interaction) {
   const services = getServices().filter(s => s.active);
   if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات حالياً', ephemeral: true });
@@ -178,10 +176,11 @@ async function handleServices(interaction) {
     cats[s.category].push(s);
   }
 
-  const catNames = { chatgpt: '🤖 ChatGPT', image: '🎨 صور', voice: '🔊 صوت', code: '💻 برمجة', writing: '📝 كتابة', data: '📊 بيانات', other: '📦 أخرى' };
+  const catNames = { chatgpt: '🤖 ChatGPT & AI', image: '🎨 صور', voice: '🔊 صوت', code: '💻 برمجة', writing: '📝 كتابة', data: '📊 بيانات', other: '📦 أخرى' };
 
   const embed = new EmbedBuilder()
     .setTitle('🛒 الخدمات المتاحة')
+    .setDescription('**اضغط على الزر أدناه لطلب الخدمة مباشرة**')
     .setColor('#FF0000')
     .setTimestamp()
     .setFooter({ text: `📊 ${services.length} خدمة متاحة` });
@@ -193,48 +192,194 @@ async function handleServices(interaction) {
     });
   }
 
-  await interaction.reply({ embeds: [embed] });
+  // Create buttons for each service (max 5 per row, up to 25 services = 5 rows)
+  const rows = [];
+  const allServices = services.slice(0, 25); // Discord max 25 buttons
+  for (let i = 0; i < allServices.length; i += 5) {
+    const row = new ActionRowBuilder();
+    for (const s of allServices.slice(i, i + 5)) {
+      row.addComponents(
+        new ButtonBuilder()
+          .setCustomId(`svc_order_${s.id}`)
+          .setLabel(`${s.emoji} ${s.name}`)
+          .setStyle(ButtonStyle.Primary)
+      );
+    }
+    rows.push(row);
+  }
+
+  await interaction.reply({ embeds: [embed], components: rows });
 }
 
-async function handleOrder(interaction) {
-  const id = parseInt(interaction.options.getString('service'));
+// ═══════════════ ORDER (button click → modal → create channel) ═══════════════
+async function handleServiceButton(interaction) {
+  const id = parseInt(interaction.customId.split('_')[2]);
   const services = getServices();
   const service = services.find(s => s.id === id && s.active);
-  if (!service) return interaction.reply({ content: '❌ خدمة غير موجودة. استخدم `/services` لعرض الخدمات', ephemeral: true });
+  if (!service) return interaction.reply({ content: '❌ الخدمة لم تعد متاحة', ephemeral: true });
 
-  const g = interaction.guild, user = interaction.user;
-  const tc = CFG.ticketCategory ? g.channels.cache.get(CFG.ticketCategory) : null;
+  // Show modal
+  const modal = new ModalBuilder()
+    .setCustomId(`order_modal_${id}`)
+    .setTitle(`طلب: ${service.emoji} ${service.name}`);
 
-  const ch = await g.channels.create({
-    name: `ticket-${user.username}-${service.id}`,
-    type: ChannelType.GuildText,
-    parent: tc?.id || null,
-    permissionOverwrites: [
-      { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
-      { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
-    ],
-  });
+  const reasonInput = new TextInputBuilder()
+    .setCustomId('reason')
+    .setLabel('لماذا تحتاج هذه الخدمة؟')
+    .setPlaceholder('اشرح وصفاً مختصراً لطلبك...')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(CFG.orderSettings?.requireReason !== false)
+    .setMaxLength(1000);
 
+  const detailsInput = new TextInputBuilder()
+    .setCustomId('details')
+    .setLabel('تفاصيل إضافية (اختياري)')
+    .setPlaceholder('أي تفاصيل إضافية مثل المطلوب بالتحديد...')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(false)
+    .setMaxLength(1000);
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(reasonInput),
+    new ActionRowBuilder().addComponents(detailsInput),
+  );
+
+  await interaction.showModal(modal);
+}
+
+async function handleOrderModal(interaction) {
+  const id = parseInt(interaction.customId.split('_')[2]);
+  const services = getServices();
+  const service = services.find(s => s.id === id && s.active);
+  if (!service) return interaction.reply({ content: '❌ الخدمة لم تعد متاحة', ephemeral: true });
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const g = interaction.guild;
+  const user = interaction.user;
+  const reason = interaction.fields.getTextInputValue('reason') || 'بدون وصف';
+  const details = interaction.fields.getTextInputValue('details') || '';
+
+  // Create order number
   const orders = getOrders();
   const oid = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
-  orders.push({ id: oid, serviceId: service.id, serviceName: service.name, userId: user.id, username: user.username, channelId: ch.id, price: service.price, status: 'pending', createdAt: Date.now() });
+
+  // Create ticket channel
+  const tc = CFG.ticketCategory ? g.channels.cache.get(CFG.ticketCategory) : null;
+  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+
+  const permOverwrites = [
+    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+    { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+  ];
+  if (staffRole) permOverwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+  const ch = await g.channels.create({
+    name: `🎫-${oid}-${user.username}`,
+    type: ChannelType.GuildText,
+    parent: tc?.id || null,
+    permissionOverwrites: permOverwrites,
+    topic: `طلب #${oid} | ${service.name} | ${user.username}`,
+  });
+
+  // Save order
+  orders.push({
+    id: oid, serviceId: service.id, serviceName: service.name, serviceEmoji: service.emoji,
+    userId: user.id, username: user.username, channelId: ch.id,
+    price: service.price, status: 'pending', reason, details,
+    createdAt: Date.now(),
+  });
   save('orders.json', orders);
 
-  const embed = new EmbedBuilder()
-    .setTitle(`🎫 طلب #${oid}`)
-    .setDescription(`**الخدمة:** ${service.emoji} ${service.name}\n**العميل:** ${user}\n**السعر:** \`${fmt(service.price)}\` كريديت\n**الحالة:** ⏳ معلق`)
-    .setColor('#FFB900').setTimestamp();
+  // Welcome embed in ticket
+  const welcomeEmbed = new EmbedBuilder()
+    .setTitle(`${service.emoji} طلب #${oid} — ${service.name}`)
+    .setDescription(
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `**العميل:** ${user}\n` +
+      `**الخدمة:** ${service.emoji} ${service.name}\n` +
+      `**السعر:** \`${fmt(service.price)}\` كريديت\n\n` +
+      `**السبب:**\n> ${reason}\n` +
+      (details ? `**تفاصيل إضافية:**\n> ${details}\n\n` : '') +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `⏳ **في انتظار الستاف...**\n\n` +
+      `**الأوامر:**\n` +
+      `• \`/close\` — إغلاق التذكرة\n` +
+      `• \`/credits\` — الدفع عبر ProBot`
+    )
+    .setColor('#FFB900')
+    .setTimestamp()
+    .setFooter({ text: `طلب #${oid} | ${user.username}` });
 
   const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId(`order_complete_${oid}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId(`order_accept_${oid}`).setLabel('✅ قبول الطلب').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId(`order_progress_${oid}`).setLabel('🔄 قيد التنفيذ').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId(`order_complete_${oid}`).setLabel('🏁 تم التسليم').setStyle(ButtonStyle.Success),
     new ButtonBuilder().setCustomId(`order_close_${oid}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Secondary),
   );
 
-  await ch.send({ embeds: [embed], components: [row] });
-  await interaction.reply({ content: `✅ تم فتح التذكرة: ${ch}`, ephemeral: true });
+  await ch.send({ content: `${user} ${staffRole ? staffRole : ''}`, embeds: [welcomeEmbed], components: [row] });
+
+  // Notify staff channel
+  if (CFG.orderSettings?.notifyOnOrder) {
+    const notifyCh = CFG.orderSettings.notifyChannel
+      ? g.channels.cache.get(CFG.orderSettings.notifyChannel)
+      : g.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
+    if (notifyCh) {
+      const notifEmbed = new EmbedBuilder()
+        .setTitle(`🆕 طلب جديد #${oid}`)
+        .setDescription(`**العميل:** ${user}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت\n**القناة:** ${ch}`)
+        .setColor('#2ECC71').setTimestamp();
+      await notifyCh.send({ embeds: [notifEmbed] });
+    }
+  }
+
+  await interaction.editReply(`✅ تم فتح تذكرتك: ${ch}\n\n**رقم الطلب:** #${oid}\n**الخدمة:** ${service.emoji} ${service.name}\n**السعر:** \`${fmt(service.price)}\` كريديت`);
 }
 
+// ═══════════════ CLOSE COMMAND ═══════════════
+async function handleClose(interaction) {
+  const orders = getOrders();
+  const order = orders.find(o => o.channelId === interaction.channelId);
+  if (!order) return interaction.reply({ content: '❌ هذه ليست تذكرة طلب', ephemeral: true });
+
+  order.status = 'closed';
+  save('orders.json', orders);
+
+  const embed = new EmbedBuilder()
+    .setTitle('🔒 تم إغلاق التذكرة')
+    .setDescription(`**رقم الطلب:** #${order.id}\n**الخدمة:** ${order.serviceEmoji || ''} ${order.serviceName}\n**العميل:** ${order.username}\n**أغلقها:** ${interaction.user}`)
+    .setColor('#E74C3C').setTimestamp();
+
+  await interaction.reply({ embeds: [embed] });
+  setTimeout(() => { interaction.channel.delete().catch(() => {}); }, 5000);
+}
+
+// ═══════════════ ORDER SETTINGS ═══════════════
+async function handleOrderSettings(interaction) {
+  const os = CFG.orderSettings || {};
+
+  const embed = new EmbedBuilder()
+    .setTitle('⚙️ إعدادات الطلبات')
+    .setDescription(
+      `**الإغلاق التلقائي:** ${os.autoClose ? '✅ مفعل' : '❌ معطل'}\n` +
+      `**الوقت (دقيقة):** ${os.autoCloseMinutes || 30}\n` +
+      `**إشعار عند طلب جديد:** ${os.notifyOnOrder ? '✅' : '❌'}\n` +
+      `**قناة الإشعار:** ${os.notifyChannel ? `<#${os.notifyChannel}>` : 'تلقائي (الإعلانات)'}\n` +
+      `**إجبار السبب:** ${os.requireReason !== false ? '✅' : '❌'}`
+    )
+    .setColor('#3498DB').setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('os_toggle_autoclose').setLabel(os.autoClose ? '🔴 إيقاف الإغلاق التلقائي' : '🟢 تفعيل الإغلاق التلقائي').setStyle(os.autoClose ? ButtonStyle.Danger : ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('os_toggle_notify').setLabel(os.notifyOnOrder ? '🔴 إيقاف الإشعارات' : '🟢 تفعيل الإشعارات').setStyle(os.notifyOnOrder ? ButtonStyle.Danger : ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('os_toggle_reason').setLabel(os.requireReason !== false ? '🔴 السبب اختياري' : '🟢 السبب إجباري').setStyle(os.requireReason !== false ? ButtonStyle.Danger : ButtonStyle.Success),
+  );
+
+  await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+}
+
+// ═══════════════ COMMAND HANDLERS ═══════════════
 async function handleAddService(interaction) {
   const name = interaction.options.getString('name');
   const desc = interaction.options.getString('description');
@@ -333,8 +478,9 @@ async function handleHelp(interaction) {
   const embed = new EmbedBuilder()
     .setTitle('🤖 أوامر البوت')
     .addFields(
-      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/order` طلب خدمة\n`/credits` الكريديت (ProBot)\n`/review` تقييم\n`/leaderboard` الترتيب\n`/help` المساعدة' },
-      { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة' },
+      { name: '📦 عامة', value: '`/services` عرض الخدمات + زر الطلب\n`/order [رقم]` طلب خدمة مباشرة\n`/close` إغلاق التذكرة\n`/credits` الكريديت (ProBot)\n`/review` تقييم\n`/leaderboard` الترتيب\n`/help` المساعدة' },
+      { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة\n`/order-settings` إعدادات الطلبات' },
+      { name: '🎫 التذاكر', value: 'عند طلب خدمة:\n1. تضغط على الزر\n2. تعبّى النموذج\n3. يتفتحلك روم خاص\n4. الستاف يكلمك\n5. بعد التسليم تضغط 🏁\n6. أو `/close` للإغلاق' },
       { name: '💰 الدفع', value: 'الدفع يتم عبر **ProBot**:\n`/credits` لعرض الرصيد\n`/credits @user amount` للتحويل' },
     )
     .setColor('#FF0000').setTimestamp();
@@ -344,31 +490,66 @@ async function handleHelp(interaction) {
 // ═══════════════ HANDLER ═══════════════
 client.on('interactionCreate', async (interaction) => {
   try {
+    // Slash commands
     if (interaction.isChatInputCommand()) {
       const map = {
         setup: handleSetup, services: handleServices, order: handleOrder,
+        close: handleClose, 'order-settings': handleOrderSettings,
         'add-service': handleAddService, 'remove-service': handleRemoveService,
-        credits: handleCredits,
-        review: handleReview, leaderboard: handleLeaderboard, help: handleHelp,
+        credits: handleCredits, review: handleReview, leaderboard: handleLeaderboard, help: handleHelp,
       };
       if (map[interaction.commandName]) await map[interaction.commandName](interaction);
-    } else if (interaction.isButton() && interaction.customId.startsWith('order_')) {
-      const [, type, idStr] = interaction.customId.split('_');
-      const oid = parseInt(idStr);
+    }
+    // Service order button
+    else if (interaction.isButton() && interaction.customId.startsWith('svc_order_')) {
+      await handleServiceButton(interaction);
+    }
+    // Order modal submit
+    else if (interaction.isModalSubmit() && interaction.customId.startsWith('order_modal_')) {
+      await handleOrderModal(interaction);
+    }
+    // Order action buttons (accept/progress/complete/close)
+    else if (interaction.isButton() && interaction.customId.startsWith('order_')) {
+      const parts = interaction.customId.split('_');
+      const type = parts[1];
+      const oid = parseInt(parts[2]);
       const orders = getOrders();
       const order = orders.find(o => o.id === oid);
       if (!order) return interaction.reply({ content: '❌', ephemeral: true });
 
       if (type === 'accept') {
         order.status = 'progress'; save('orders.json', orders);
-        await interaction.reply({ content: `✅ قبل الطلب ${interaction.user}` });
+        const embed = new EmbedBuilder().setTitle('✅ تم قبول الطلب').setDescription(`${interaction.user} قبول الطلب #${oid}`).setColor('#2ECC71').setTimestamp();
+        await interaction.reply({ embeds: [embed] });
+      } else if (type === 'progress') {
+        order.status = 'progress'; save('orders.json', orders);
+        const embed = new EmbedBuilder().setTitle('🔄 قيد التنفيذ').setDescription(`${interaction.user} بدأ التنفيذ`).setColor('#3498DB').setTimestamp();
+        await interaction.reply({ embeds: [embed] });
       } else if (type === 'complete') {
         order.status = 'completed'; save('orders.json', orders);
-        await interaction.reply({ content: '🏁 تم إتمام الطلب! استخدم `/credits` لتحويل الكريديت عبر ProBot' });
+        const embed = new EmbedBuilder()
+          .setTitle('🏁 تم التسليم!')
+          .setDescription(`**الطلب #${oid} تم إتمامه!**\n\n${order.serviceEmoji || ''} ${order.serviceName}\n\n**العميل:** <@${order.userId}>\n\nيمكنك الآن التقييم بـ \`/review ${order.serviceId} [1-5]\``)
+          .setColor('#2ECC71').setTimestamp();
+        await interaction.reply({ embeds: [embed] });
       } else if (type === 'close') {
         order.status = 'closed'; save('orders.json', orders);
-        await interaction.reply({ content: '🗑️ إغلاق التذكرة...' });
-        setTimeout(() => { const c = interaction.guild.channels.cache.get(order.channelId); if (c) c.delete().catch(() => {}); }, 2000);
+        const embed = new EmbedBuilder().setTitle('🔒 إغلاق التذكرة').setDescription(`تم الإغلاق بواسطة ${interaction.user}`).setColor('#E74C3C').setTimestamp();
+        await interaction.reply({ embeds: [embed] });
+        setTimeout(() => { interaction.channel.delete().catch(() => {}); }, 3000);
+      }
+    }
+    // Order settings buttons
+    else if (interaction.isButton() && interaction.customId.startsWith('os_')) {
+      const type = interaction.customId.split('_')[2];
+      const action = interaction.customId.split('_')[1];
+      if (action === 'toggle') {
+        if (type === 'autoclose') CFG.orderSettings.autoClose = !CFG.orderSettings.autoClose;
+        else if (type === 'notify') CFG.orderSettings.notifyOnOrder = !CFG.orderSettings.notifyOnOrder;
+        else if (type === 'reason') CFG.orderSettings.requireReason = CFG.orderSettings.requireReason === false ? true : false;
+        save('config.json', CFG);
+        // Re-run the settings command
+        await handleOrderSettings(interaction);
       }
     }
   } catch (err) {
@@ -508,9 +689,18 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true });
     }
 
-    // ═══════════════ TICKETS ═══════════════
+    // ORDER SETTINGS
+    if (req.method === 'GET' && p === '/api/order-settings') {
+      return jsonRes(res, 200, CFG.orderSettings || {});
+    }
+    if (req.method === 'PUT' && p === '/api/order-settings') {
+      const d = await parseBody(req);
+      CFG.orderSettings = { ...CFG.orderSettings, ...d };
+      save('config.json', CFG);
+      return jsonRes(res, 200, { ok: true });
+    }
 
-    // List all ticket channels (order channels)
+    // TICKETS
     if (req.method === 'GET' && p === '/api/tickets') {
       const orders = getOrders();
       const tickets = [];
@@ -529,15 +719,15 @@ const apiServer = http.createServer(async (req, res) => {
         } catch {}
         tickets.push({
           orderId: order.id, serviceId: order.serviceId, serviceName: order.serviceName,
-          userId: order.userId, username: order.username, channelId: order.channelId,
-          price: order.price, status: order.status, createdAt: order.createdAt,
-          channelName: ch.name, messages,
+          serviceEmoji: order.serviceEmoji || '🛒', userId: order.userId, username: order.username,
+          channelId: order.channelId, price: order.price, status: order.status,
+          reason: order.reason || '', details: order.details || '',
+          createdAt: order.createdAt, channelName: ch.name, messages,
         });
       }
       return jsonRes(res, 200, tickets);
     }
 
-    // Get single ticket with messages
     if (req.method === 'GET' && p.startsWith('/api/tickets/')) {
       const oid = parseInt(p.split('/')[3]);
       const orders = getOrders();
@@ -557,13 +747,13 @@ const apiServer = http.createServer(async (req, res) => {
       } catch {}
       return jsonRes(res, 200, {
         orderId: order.id, serviceId: order.serviceId, serviceName: order.serviceName,
-        userId: order.userId, username: order.username, channelId: order.channelId,
-        price: order.price, status: order.status, createdAt: order.createdAt,
-        channelName: ch.name, messages,
+        serviceEmoji: order.serviceEmoji || '🛒', userId: order.userId, username: order.username,
+        channelId: order.channelId, price: order.price, status: order.status,
+        reason: order.reason || '', details: order.details || '',
+        createdAt: order.createdAt, channelName: ch.name, messages,
       });
     }
 
-    // Send message to ticket
     if (req.method === 'POST' && p === '/api/tickets/send') {
       const d = await parseBody(req);
       const ch = guild.channels.cache.get(d.channelId);
@@ -572,7 +762,6 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true, messageId: msg.id });
     }
 
-    // Update ticket status
     if (req.method === 'PATCH' && p.startsWith('/api/tickets/')) {
       const oid = parseInt(p.split('/')[3]);
       const orders = getOrders();
