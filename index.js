@@ -27,6 +27,7 @@ save('config.json', CFG);
 
 const getServices = () => load('services.json', []);
 const getReviews  = () => load('reviews.json', []);
+const getOrders   = () => load('orders.json', []);
 
 // ══════════════════════════════════════════════════════════════
 //  HELPERS
@@ -89,6 +90,13 @@ const COMMANDS = [
     .addStringOption(o => o.setName('comment').setDescription('تعليق')),
   new SlashCommandBuilder()
     .setName('leaderboard').setDescription('ترتيب أعلى المستخدمين بالتقييمات'),
+  new SlashCommandBuilder()
+    .setName('order').setDescription('طلب خدمة')
+    .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('support').setDescription('فتح تذكرة دعم فني'),
+  new SlashCommandBuilder()
+    .setName('close').setDescription('إغلاق التذكرة الحالية'),
   new SlashCommandBuilder()
     .setName('help').setDescription('عرض كل الأوامر'),
   new SlashCommandBuilder()
@@ -191,6 +199,9 @@ async function cmdSetup(interaction) {
       { n: '📊・حالة-السيرفر', p: noSend },
       { n: '👋・الترحيب', p: noSend },
     ]},
+    { n: '╔════════ 🎫 التذاكر ════════', chs: [
+      { n: '🎫・فتح-تذكرة', p: full },
+    ]},
   ];
 
   for (const cat of structure) {
@@ -272,6 +283,25 @@ async function cmdSetup(interaction) {
       .setColor(0x2ECC71)
       .setTimestamp();
     await howCh.send({ embeds: [e] }).catch(() => {});
+  }
+
+  const ticketCh = g.channels.cache.find(c => c.name.includes('فتح-تذكرة') && c.isTextBased());
+  if (ticketCh) {
+    const e = new EmbedBuilder()
+      .setTitle('🎫 فتح تذكرة')
+      .setDescription(
+        '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**لطلب خدمة:** اكتب `/order رقم-الخدمة`\n' +
+        '**للدعم الفني:** اكتب `/support`\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**💡 ملاحظة:** كل تذكرة خاصة بك فقط\n' +
+        'لا تشارك رابط القناة مع أحد\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x9B59B6)
+      .setTimestamp()
+      .setFooter({ text: '🎫 Ticket System' });
+    await ticketCh.send({ embeds: [e] }).catch(() => {});
   }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
@@ -427,7 +457,7 @@ async function cmdHelp(interaction) {
   const embed = new EmbedBuilder()
     .setTitle('🤖 أوامر البوت')
     .addFields(
-      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/credits` الكريديت (ProBot)\n`/review` تقييم خدمة\n`/leaderboard` الترتيب\n`/help` المساعدة' },
+      { name: '📦 عامة', value: '`/services` عرض الخدمات\n`/order` طلب خدمة (يفتح تذكرة)\n`/support` دعم فني (يفتح تذكرة)\n`/close` إغلاق التذكرة\n`/credits` الكريديت (ProBot)\n`/review` تقييم خدمة\n`/leaderboard` الترتيب\n`/help` المساعدة' },
       { name: '👑 إدارية', value: '`/setup` إعداد السيرفر\n`/add-service` إضافة خدمة\n`/remove-service` حذف خدمة\n`/auto-role` إدارة الأدوات التلقائية' },
     )
     .setColor(0xFF0000)
@@ -470,6 +500,175 @@ async function cmdRemoveService(interaction) {
   services = services.filter(s => s.id !== id);
   save('services.json', services);
   await interaction.reply({ content: `✅ تم حذف: ${svc.emoji || '🤖'} ${svc.name}`, ephemeral: true });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HANDLER: ORDER (Create Ticket)
+// ══════════════════════════════════════════════════════════════
+async function cmdOrder(interaction) {
+  const id = parseInt(interaction.options.getString('service'));
+  const services = getServices();
+  const svc = services.find(s => s.id === id);
+  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة. استخدم `/services` لعرض الخدمات', ephemeral: true });
+
+  const g = interaction.guild;
+  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+  const overwrites = [
+    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+    { id: interaction.user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+  ];
+  if (staffRole) overwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+  let ticketCat = g.channels.cache.find(c => c.name.includes('التذاكر') && c.type === ChannelType.GuildCategory);
+  if (!ticketCat) {
+    try {
+      ticketCat = await g.channels.create({ name: '╔════════ 🎫 التذاكر ════════', type: ChannelType.GuildCategory });
+    } catch {}
+  }
+
+  const orders = getOrders();
+  const orderId = nextId(orders);
+  const channelName = `ticket-${orderId}-${interaction.user.username}`.substring(0, 100);
+
+  const channel = await g.channels.create({
+    name: channelName,
+    type: ChannelType.GuildText,
+    parent: ticketCat ? ticketCat.id : undefined,
+    permissionOverwrites: overwrites,
+  });
+
+  const order = {
+    id: orderId,
+    serviceId: svc.id,
+    serviceName: svc.name,
+    serviceEmoji: svc.emoji || '🛒',
+    servicePrice: svc.price || 0,
+    userId: interaction.user.id,
+    username: interaction.user.username,
+    channelId: channel.id,
+    status: 'pending',
+    createdAt: Date.now(),
+  };
+  orders.push(order);
+  save('orders.json', orders);
+
+  const embed = new EmbedBuilder()
+    .setTitle(`🎫 طلب جديد #${orderId}`)
+    .setDescription(
+      `**العميل:** ${interaction.user}\n` +
+      `**الخدمة:** ${svc.emoji || '🛒'} ${svc.name}\n` +
+      `**السعر:** \`${fmt(svc.price)}\` كريديت\n` +
+      `**الوصف:** ${svc.description || 'بدون وصف'}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `⏳ **في انتظار قبول الستاف...**`
+    )
+    .setColor(0xF1C40F)
+    .setTimestamp()
+    .setFooter({ text: `Order #${orderId}` });
+
+  const acceptBtn = new ButtonBuilder()
+    .setCustomId(`order_accept_${orderId}`)
+    .setLabel('✅ قبول')
+    .setStyle(ButtonStyle.Success);
+  const completeBtn = new ButtonBuilder()
+    .setCustomId(`order_complete_${orderId}`)
+    .setLabel('🏁 إتمام')
+    .setStyle(ButtonStyle.Primary)
+    .setDisabled(true);
+  const closeBtn = new ButtonBuilder()
+    .setCustomId(`order_close_${orderId}`)
+    .setLabel('🗑️ إغلاق')
+    .setStyle(ButtonStyle.Danger);
+
+  const row = new ActionRowBuilder().addComponents(acceptBtn, completeBtn, closeBtn);
+  await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [embed], components: [row] });
+
+  await interaction.reply({ content: `✅ تم إنشاء التذكرة: ${channel}`, ephemeral: true });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HANDLER: SUPPORT (Create Support Ticket)
+// ══════════════════════════════════════════════════════════════
+async function cmdSupport(interaction) {
+  const g = interaction.guild;
+  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+  const overwrites = [
+    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+    { id: interaction.user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+  ];
+  if (staffRole) overwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+  let ticketCat = g.channels.cache.find(c => c.name.includes('التذاكر') && c.type === ChannelType.GuildCategory);
+  if (!ticketCat) {
+    try {
+      ticketCat = await g.channels.create({ name: '╔════════ 🎫 التذاكر ════════', type: ChannelType.GuildCategory });
+    } catch {}
+  }
+
+  const orders = getOrders();
+  const orderId = nextId(orders);
+  const channelName = `support-${orderId}-${interaction.user.username}`.substring(0, 100);
+
+  const channel = await g.channels.create({
+    name: channelName,
+    type: ChannelType.GuildText,
+    parent: ticketCat ? ticketCat.id : undefined,
+    permissionOverwrites: overwrites,
+  });
+
+  const order = {
+    id: orderId,
+    type: 'support',
+    serviceName: 'دعم فني',
+    serviceEmoji: '🛠️',
+    userId: interaction.user.id,
+    username: interaction.user.username,
+    channelId: channel.id,
+    status: 'open',
+    createdAt: Date.now(),
+  };
+  orders.push(order);
+  save('orders.json', orders);
+
+  const embed = new EmbedBuilder()
+    .setTitle(`🛠️ تذكرة دعم فني #${orderId}`)
+    .setDescription(
+      `**المستخدم:** ${interaction.user}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `💬 **اكتب مشكلتك هنا** وسيساعدك الستاف\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━`
+    )
+    .setColor(0x3498DB)
+    .setTimestamp()
+    .setFooter({ text: `Support #${orderId}` });
+
+  const closeBtn = new ButtonBuilder()
+    .setCustomId(`ticket_close_${orderId}`)
+    .setLabel('🗑️ إغلاق')
+    .setStyle(ButtonStyle.Danger);
+
+  const row = new ActionRowBuilder().addComponents(closeBtn);
+  await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [embed], components: [row] });
+
+  await interaction.reply({ content: `✅ تم إنشاء تذكرة الدعم: ${channel}`, ephemeral: true });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HANDLER: CLOSE (Close current ticket)
+// ══════════════════════════════════════════════════════════════
+async function cmdClose(interaction) {
+  const orders = getOrders();
+  const order = orders.find(o => o.channelId === interaction.channel.id);
+  if (!order) return interaction.reply({ content: '❌ هذا ليس تذكرة', ephemeral: true });
+
+  order.status = 'closed';
+  order.closedAt = Date.now();
+  order.closedBy = interaction.user.id;
+  save('orders.json', orders);
+
+  await interaction.reply({ content: '🔒 جاري إغلاق التذكرة...' });
+  await sleep(2000);
+  try { await interaction.channel.delete(); } catch {}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -538,9 +737,111 @@ client.on('interactionCreate', async (interaction) => {
         'add-service': cmdAddService,
         'remove-service': cmdRemoveService,
         'auto-role': cmdAutoRole,
+        order: cmdOrder,
+        support: cmdSupport,
+        close: cmdClose,
       };
       const handler = map[interaction.commandName];
       if (handler) return await handler(interaction);
+    }
+
+    if (interaction.isButton()) {
+      const cid = interaction.customId || '';
+
+      if (cid.startsWith('order_accept_')) {
+        const orderId = parseInt(cid.replace('order_accept_', ''));
+        const orders = getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return interaction.reply({ content: '❌ الطلب غير موجود', ephemeral: true });
+        if (order.status !== 'pending') return interaction.reply({ content: '❌ الطلب تم التعامل معه بالفعل', ephemeral: true });
+
+        order.status = 'progress';
+        order.acceptedBy = interaction.user.id;
+        order.acceptedAt = Date.now();
+        save('orders.json', orders);
+
+        const embed = new EmbedBuilder()
+          .setTitle(`🎫 طلب #${orderId} — قيد التنفيذ`)
+          .setDescription(
+            `**العميل:** <@${order.userId}>\n` +
+            `**الخدمة:** ${order.serviceEmoji || '🛒'} ${order.serviceName}\n` +
+            `**السعر:** \`${fmt(order.servicePrice || 0)}\` كريديت\n` +
+            `**الستاف:** ${interaction.user}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `🔄 **جاري التنفيذ...**\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0x3498DB)
+          .setTimestamp()
+          .setFooter({ text: `Order #${orderId}` });
+
+        const completeBtn = new ButtonBuilder()
+          .setCustomId(`order_complete_${orderId}`)
+          .setLabel('🏁 إتمام')
+          .setStyle(ButtonStyle.Primary);
+        const closeBtn = new ButtonBuilder()
+          .setCustomId(`order_close_${orderId}`)
+          .setLabel('🗑️ إغلاق')
+          .setStyle(ButtonStyle.Danger);
+
+        const row = new ActionRowBuilder().addComponents(completeBtn, closeBtn);
+        await interaction.update({ embeds: [embed], components: [row] });
+        return;
+      }
+
+      if (cid.startsWith('order_complete_')) {
+        const orderId = parseInt(cid.replace('order_complete_', ''));
+        const orders = getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return interaction.reply({ content: '❌ الطلب غير موجود', ephemeral: true });
+        if (order.status !== 'progress') return interaction.reply({ content: '❌ لا يمكن إتمام هذا الطلب', ephemeral: true });
+
+        order.status = 'completed';
+        order.completedAt = Date.now();
+        order.completedBy = interaction.user.id;
+        save('orders.json', orders);
+
+        const embed = new EmbedBuilder()
+          .setTitle(`✅ طلب #${orderId} — مكتمل`)
+          .setDescription(
+            `**العميل:** <@${order.userId}>\n` +
+            `**الخدمة:** ${order.serviceEmoji || '🛒'} ${order.serviceName}\n` +
+            `**الستاف:** ${interaction.user}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `✅ **تم الإتمام بنجاح!**\n\n` +
+            `<@${order.userId}> استخدم \`/review\` لتقييم الخدمة\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0x2ECC71)
+          .setTimestamp()
+          .setFooter({ text: `Order #${orderId}` });
+
+        const closeBtn = new ButtonBuilder()
+          .setCustomId(`order_close_${orderId}`)
+          .setLabel('🗑️ إغلاق')
+          .setStyle(ButtonStyle.Danger);
+
+        const row = new ActionRowBuilder().addComponents(closeBtn);
+        await interaction.update({ embeds: [embed], components: [row] });
+        return;
+      }
+
+      if (cid.startsWith('order_close_') || cid.startsWith('ticket_close_')) {
+        const orderId = parseInt(cid.replace('order_close_', '').replace('ticket_close_', ''));
+        const orders = getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return interaction.reply({ content: '❌ التذكرة غير موجودة', ephemeral: true });
+
+        order.status = 'closed';
+        order.closedAt = Date.now();
+        order.closedBy = interaction.user.id;
+        save('orders.json', orders);
+
+        await interaction.reply({ content: '🔒 جاري إغلاق التذكرة...' });
+        await sleep(2000);
+        try { await interaction.channel.delete(); } catch {}
+        return;
+      }
     }
   } catch (err) {
     console.error('❌ Error:', err.message);
@@ -710,6 +1011,30 @@ const apiServer = http.createServer(async (req, res) => {
 
     // Reviews
     if (req.method === 'GET' && p === '/api/reviews') return jsonRes(res, 200, getReviews());
+
+    // Tickets
+    if (req.method === 'GET' && p === '/api/tickets') return jsonRes(res, 200, getOrders());
+    if (req.method === 'PUT' && p === '/api/tickets') {
+      const d = await parseBody(req);
+      save('orders.json', d);
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'GET' && p.match(/^\/api\/tickets\/\d+$/)) {
+      const id = parseInt(p.split('/').pop());
+      const order = getOrders().find(o => o.id === id);
+      if (!order) return jsonRes(res, 404, { error: 'Not found' });
+      return jsonRes(res, 200, order);
+    }
+    if (req.method === 'PUT' && p.match(/^\/api\/tickets\/\d+$/)) {
+      const id = parseInt(p.split('/').pop());
+      const orders = getOrders();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx === -1) return jsonRes(res, 404, { error: 'Not found' });
+      const d = await parseBody(req);
+      orders[idx] = { ...orders[idx], ...d, id: orders[idx].id };
+      save('orders.json', orders);
+      return jsonRes(res, 200, { ok: true });
+    }
 
     // Announce
     if (req.method === 'POST' && p === '/api/announce') {
