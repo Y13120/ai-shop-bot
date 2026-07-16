@@ -29,7 +29,7 @@ In Discord, use the command:
 ```
 This creates:
 - 4 roles: 👑 Admin, ⭐ Staff, 🛒 Customer, 💎 VIP
-- Categories: 📋 الخدمات, 🎫 التذاكر, 📢 الإعلانات, 💬 عام
+- Categories: 📋 الخدمات, 📢 الإعلانات, 💬 عام, 📌 معلومات
 - Channels in each category
 - Rules and welcome messages
 
@@ -44,7 +44,6 @@ This creates:
 | Command | Description |
 |---------|-------------|
 | `/services` | عرض جميع الخدمات |
-| `/order [id]` | طلب خدمة |
 | `/review [id] [1-5] [comment]` | إضافة تقييم |
 | `/help` | عرض المساعدة |
 
@@ -58,14 +57,6 @@ This creates:
 | `/orders` | عرض الطلبات |
 | `/balance` | عرض الأرباح |
 | `/config` | إعدادات البوت |
-
-## 7. Order Flow
-1. Customer runs `/order [service_id]`
-2. Bot creates private ticket channel
-3. Staff clicks **✅ قبول** to accept
-4. Staff clicks **🏁 إتمام** when done
-5. Customer gets prompted to leave a review
-6. Staff clicks **🗑️ إغلاق** to close ticket
 
 ## Data Files
 All data is stored in `data/` folder:
