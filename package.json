@@ -1,7 +1,7 @@
 {
   "name": "ai-shop-bot",
-  "version": "1.0.0",
-  "description": "Discord Bot for AI Services Shop",
+  "version": "2.0.0",
+  "description": "Full-featured Discord bot for AI Services Shop",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
