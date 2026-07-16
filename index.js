@@ -1186,7 +1186,11 @@ async function start() {
     return;
   }
 
-  // Register commands after bot is connected
+  // Register commands after bot is ready (fire and forget - don't block startup)
+  registerCommands();
+}
+
+async function registerCommands() {
   try {
     const rest = new REST({ version: '10' }).setToken(CFG.token);
     const route = Routes.applicationGuildCommands(CFG.clientId, CFG.guildId);
