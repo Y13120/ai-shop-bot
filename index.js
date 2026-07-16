@@ -1,7 +1,7 @@
 const {
   Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder,
   ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits,
-  REST, Routes, SlashCommandBuilder,
+  SlashCommandBuilder,
 } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -949,8 +949,7 @@ client.on('interactionCreate', async (interaction) => {
 //  EVENTS
 // ══════════════════════════════════════════════════════════════
 client.on('clientReady', () => {
-  console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
-  client.user.setActivity('AI Services Shop', { type: 3 });
+  console.log(`✅ Bot ready: ${client.user.tag}`);
 });
 
 client.on('guildMemberAdd', async (member) => {
@@ -1178,32 +1177,23 @@ async function start() {
   console.log('🚀 Starting bot...');
   console.log(`📋 Config: clientId=${CFG.clientId ? 'OK' : 'MISSING'} guildId=${CFG.guildId ? 'OK' : 'MISSING'} token=${CFG.token ? 'OK' : 'MISSING'}`);
 
-  // Login first - this is critical for Railway health check
+  client.once('clientReady', async () => {
+    console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
+    client.user.setActivity('AI Services Shop', { type: 3 });
+
+    try {
+      const cmds = await client.application.commands.set(COMMANDS.map(c => c.toJSON()), CFG.guildId);
+      console.log(`✅ ${cmds.size} commands registered!`);
+    } catch (err) {
+      console.error('❌ Command registration FAILED:', err.message);
+      console.error('Stack:', err.stack);
+    }
+  });
+
   try {
     await client.login(CFG.token);
   } catch (err) {
     console.error('❌ Discord login failed:', err.message);
-    return;
-  }
-
-  // Register commands after bot is ready (fire and forget - don't block startup)
-  registerCommands();
-}
-
-async function registerCommands() {
-  try {
-    const rest = new REST({ version: '10', timeout: 30000 }).setToken(CFG.token);
-    const route = Routes.applicationGuildCommands(CFG.clientId, CFG.guildId);
-    console.log(`📡 Registering ${COMMANDS.length} commands to guild ${CFG.guildId}...`);
-
-    const body = COMMANDS.map(c => c.toJSON());
-    console.log(`📦 Body size: ${JSON.stringify(body).length} bytes`);
-    
-    const result = await rest.put(route, { body });
-    console.log(`✅ ${COMMANDS.length} commands registered! Result: ${JSON.stringify(result).length} bytes`);
-  } catch (err) {
-    console.error('❌ Command registration FAILED:', err.message);
-    console.error('Stack:', err.stack);
   }
 }
 
