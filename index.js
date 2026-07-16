@@ -1192,15 +1192,18 @@ async function start() {
 
 async function registerCommands() {
   try {
-    const rest = new REST({ version: '10' }).setToken(CFG.token);
+    const rest = new REST({ version: '10', timeout: 30000 }).setToken(CFG.token);
     const route = Routes.applicationGuildCommands(CFG.clientId, CFG.guildId);
     console.log(`📡 Registering ${COMMANDS.length} commands to guild ${CFG.guildId}...`);
 
     const body = COMMANDS.map(c => c.toJSON());
-    await rest.put(route, { body });
-    console.log(`✅ ${COMMANDS.length} commands registered!`);
+    console.log(`📦 Body size: ${JSON.stringify(body).length} bytes`);
+    
+    const result = await rest.put(route, { body });
+    console.log(`✅ ${COMMANDS.length} commands registered! Result: ${JSON.stringify(result).length} bytes`);
   } catch (err) {
     console.error('❌ Command registration FAILED:', err.message);
+    console.error('Stack:', err.stack);
   }
 }
 
