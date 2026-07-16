@@ -1182,6 +1182,9 @@ async function start() {
     client.user.setActivity('AI Services Shop', { type: 3 });
 
     try {
+      await client.application.fetch();
+      console.log(`🔑 Application fetched: ${client.application.name}`);
+      
       const cmds = await client.application.commands.set(COMMANDS.map(c => c.toJSON()), CFG.guildId);
       console.log(`✅ ${cmds.size} commands registered!`);
     } catch (err) {
