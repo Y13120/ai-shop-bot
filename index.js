@@ -1185,7 +1185,10 @@ async function start() {
       await client.application.fetch();
       console.log(`🔑 Application fetched: ${client.application.name}`);
       
-      const cmds = await client.application.commands.set(COMMANDS.map(c => c.toJSON()), CFG.guildId);
+      const cmds = await Promise.race([
+        client.application.commands.set(COMMANDS.map(c => c.toJSON()), CFG.guildId),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Command set timeout (30s)')), 30000)),
+      ]);
       console.log(`✅ ${cmds.size} commands registered!`);
     } catch (err) {
       console.error('❌ Command registration FAILED:', err.message);
