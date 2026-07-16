@@ -1033,6 +1033,11 @@ const apiServer = http.createServer(async (req, res) => {
     const guild = client.guilds.cache.first();
     if (!guild && !p.startsWith('/api/bot')) return jsonRes(res, 500, { error: 'Bot not in guild' });
 
+    // Health Check
+    if (req.method === 'GET' && (p === '/api/health' || p === '/')) {
+      return jsonRes(res, 200, { status: 'ok', uptime: process.uptime() });
+    }
+
     // Bot Info
     if (req.method === 'GET' && p === '/api/bot') {
       return jsonRes(res, 200, {
@@ -1157,8 +1162,8 @@ apiServer.on('error', (err) => {
   }
 });
 
-apiServer.listen(API_PORT, '127.0.0.1', () => {
-  console.log(`📡 Bot API: http://127.0.0.1:${API_PORT}`);
+apiServer.listen(API_PORT, '0.0.0.0', () => {
+  console.log(`📡 Bot API: http://0.0.0.0:${API_PORT}`);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -1170,22 +1175,39 @@ async function start() {
     return;
   }
 
-  const rest = new REST({ version: '10' }).setToken(CFG.token);
+  console.log('🚀 Starting bot...');
 
   try {
+    const rest = new REST({ version: '10' }).setToken(CFG.token);
+
     console.log('🗑️ Clearing old commands...');
-    await rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), { body: [] });
+    await Promise.race([
+      rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), { body: [] }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('Command clear timeout')), 15000)),
+    ]);
+
     await sleep(1000);
+
     console.log('📝 Registering new commands...');
-    await rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), {
-      body: COMMANDS.map(c => c.toJSON()),
-    });
+    await Promise.race([
+      rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), {
+        body: COMMANDS.map(c => c.toJSON()),
+      }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('Command register timeout')), 15000)),
+    ]);
+
     console.log('✅ Commands registered!');
   } catch (err) {
-    console.error('Command registration error:', err.message);
+    console.error('⚠️ Command registration failed:', err.message);
+    console.log('Continuing anyway - bot will still work');
   }
 
-  await client.login(CFG.token);
+  console.log('🔑 Logging in to Discord...');
+  try {
+    await client.login(CFG.token);
+  } catch (err) {
+    console.error('❌ Discord login failed:', err.message);
+  }
 }
 
 start();
