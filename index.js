@@ -1182,17 +1182,33 @@ async function start() {
     client.user.setActivity('AI Services Shop', { type: 3 });
 
     try {
-      await client.application.fetch();
-      console.log(`🔑 Application fetched: ${client.application.name}`);
-      
-      const cmds = await Promise.race([
-        client.application.commands.set(COMMANDS.map(c => c.toJSON()), CFG.guildId),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('Command set timeout (30s)')), 30000)),
-      ]);
-      console.log(`✅ ${cmds.size} commands registered!`);
+      const url = `https://discord.com/api/v10/applications/${CFG.clientId}/guilds/${CFG.guildId}/commands`;
+      console.log(`📡 POST ${url}`);
+
+      for (const cmd of COMMANDS) {
+        const json = cmd.toJSON();
+        console.log(`  ➕ /${json.name}`);
+
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bot ${CFG.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(json),
+        });
+
+        console.log(`  → ${res.status} ${res.statusText}`);
+
+        if (!res.ok) {
+          const body = await res.text();
+          console.error(`  ❌ Body: ${body}`);
+        }
+      }
+
+      console.log(`✅ Done! ${COMMANDS.length} commands processed`);
     } catch (err) {
       console.error('❌ Command registration FAILED:', err.message);
-      console.error('Stack:', err.stack);
     }
   });
 
