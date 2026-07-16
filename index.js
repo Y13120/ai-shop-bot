@@ -1004,7 +1004,7 @@ client.on('guildMemberAdd', async (member) => {
 // ══════════════════════════════════════════════════════════════
 //  HTTP API (for web panel)
 // ══════════════════════════════════════════════════════════════
-const API_PORT = process.env.BOT_API_PORT || 3001;
+const API_PORT = process.env.PORT || process.env.BOT_API_PORT || 3001;
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
