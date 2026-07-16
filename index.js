@@ -1183,30 +1183,26 @@ async function start() {
 
     try {
       const url = `https://discord.com/api/v10/applications/${CFG.clientId}/guilds/${CFG.guildId}/commands`;
-      console.log(`📡 POST ${url}`);
+      console.log(`📡 Bulk PUT ${url} (${COMMANDS.length} commands)`);
 
-      for (const cmd of COMMANDS) {
-        const json = cmd.toJSON();
-        console.log(`  ➕ /${json.name}`);
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bot ${CFG.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(COMMANDS.map(c => c.toJSON())),
+      });
 
-        const res = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bot ${CFG.token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(json),
-        });
+      console.log(`  → ${res.status} ${res.statusText}`);
 
-        console.log(`  → ${res.status} ${res.statusText}`);
-
-        if (!res.ok) {
-          const body = await res.text();
-          console.error(`  ❌ Body: ${body}`);
-        }
+      if (res.ok) {
+        const data = await res.json();
+        console.log(`✅ ${data.length} commands registered!`);
+      } else {
+        const body = await res.text();
+        console.error(`❌ Body: ${body}`);
       }
-
-      console.log(`✅ Done! ${COMMANDS.length} commands processed`);
     } catch (err) {
       console.error('❌ Command registration FAILED:', err.message);
     }
