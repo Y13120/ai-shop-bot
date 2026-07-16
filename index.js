@@ -1182,26 +1182,40 @@ async function start() {
     client.user.setActivity('AI Services Shop', { type: 3 });
 
     try {
-      const url = `https://discord.com/api/v10/applications/${CFG.clientId}/guilds/${CFG.guildId}/commands`;
-      console.log(`📡 Bulk PUT ${url} (${COMMANDS.length} commands)`);
-
-      const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bot ${CFG.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(COMMANDS.map(c => c.toJSON())),
+      const listUrl = `https://discord.com/api/v10/applications/${CFG.clientId}/guilds/${CFG.guildId}/commands`;
+      const listRes = await fetch(listUrl, {
+        headers: { 'Authorization': `Bot ${CFG.token}` },
       });
 
-      console.log(`  → ${res.status} ${res.statusText}`);
+      if (listRes.ok) {
+        const existing = await listRes.json();
+        const existingNames = existing.map(c => c.name);
+        const needed = COMMANDS.filter(c => !existingNames.includes(c.toJSON().name));
 
-      if (res.ok) {
-        const data = await res.json();
-        console.log(`✅ ${data.length} commands registered!`);
-      } else {
-        const body = await res.text();
-        console.error(`❌ Body: ${body}`);
+        if (needed.length === 0) {
+          console.log(`✅ ${existing.length} commands already registered, skipping`);
+          return;
+        }
+
+        console.log(`📡 ${existing.length} exist, adding ${needed.length} new...`);
+        const merged = [...existing.map(c => ({ name: c.name, description: c.description, options: c.options || [] })), ...needed.map(c => c.toJSON())];
+
+        const putRes = await fetch(listUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bot ${CFG.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(merged),
+        });
+
+        if (putRes.ok) {
+          const data = await putRes.json();
+          console.log(`✅ ${data.length} commands total!`);
+        } else {
+          const body = await putRes.text();
+          console.error(`❌ ${putRes.status}: ${body}`);
+        }
       }
     } catch (err) {
       console.error('❌ Command registration FAILED:', err.message);
