@@ -1176,30 +1176,30 @@ async function start() {
   }
 
   console.log('🚀 Starting bot...');
+  console.log(`📋 Config: clientId=${CFG.clientId ? 'OK' : 'MISSING'} guildId=${CFG.guildId ? 'OK' : 'MISSING'} token=${CFG.token ? 'OK' : 'MISSING'}`);
 
   try {
     const rest = new REST({ version: '10' }).setToken(CFG.token);
+    const route = Routes.applicationGuildCommands(CFG.clientId, CFG.guildId);
+    console.log(`📡 Registering ${COMMANDS.length} commands to guild ${CFG.guildId}...`);
 
-    console.log('🗑️ Clearing old commands...');
-    await Promise.race([
-      rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), { body: [] }),
+    const clearResult = await Promise.race([
+      rest.put(route, { body: [] }),
       new Promise((_, rej) => setTimeout(() => rej(new Error('Command clear timeout')), 15000)),
     ]);
+    console.log('🗑️ Commands cleared');
 
     await sleep(1000);
 
-    console.log('📝 Registering new commands...');
-    await Promise.race([
-      rest.put(Routes.applicationGuildCommands(CFG.clientId, CFG.guildId), {
-        body: COMMANDS.map(c => c.toJSON()),
-      }),
+    const body = COMMANDS.map(c => c.toJSON());
+    const regResult = await Promise.race([
+      rest.put(route, { body }),
       new Promise((_, rej) => setTimeout(() => rej(new Error('Command register timeout')), 15000)),
     ]);
-
-    console.log('✅ Commands registered!');
+    console.log(`✅ ${COMMANDS.length} commands registered!`);
   } catch (err) {
-    console.error('⚠️ Command registration failed:', err.message);
-    console.log('Continuing anyway - bot will still work');
+    console.error('❌ Command registration FAILED:', err.message);
+    console.error('Stack:', err.stack);
   }
 
   console.log('🔑 Logging in to Discord...');
