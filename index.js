@@ -948,7 +948,7 @@ client.on('interactionCreate', async (interaction) => {
 // ══════════════════════════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════════════════════════
-client.on('ready', () => {
+client.on('clientReady', () => {
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
   client.user.setActivity('AI Services Shop', { type: 3 });
 });
