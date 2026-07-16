@@ -222,6 +222,28 @@ async function cmdSetup(interaction) {
   await sleep(1500);
   try { await g.channels.fetch(); } catch {}
 
+  const defaultServices = [
+    { id: 1, name: 'ChatGPT Plus 4o', description: 'وصول ChatGPT Plus 4o لمدة شهر', price: 18800000, category: 'chatgpt', emoji: '🤖', active: true, createdAt: Date.now() },
+    { id: 2, name: 'ChatGPT Plus + DALL-E', description: 'ChatGPT Plus مع DALL-E لتوليد الصور', price: 22500000, category: 'chatgpt', emoji: '🎨', active: true, createdAt: Date.now() },
+    { id: 3, name: 'شات Claude Pro', description: 'وصول Claude Pro لمدة شهر', price: 16500000, category: 'chatgpt', emoji: '🧠', active: true, createdAt: Date.now() },
+    { id: 4, name: 'شات Gemini Advanced', description: 'وصول Gemini Advanced لمدة شهر', price: 15000000, category: 'chatgpt', emoji: '💎', active: true, createdAt: Date.now() },
+    { id: 5, name: 'Midjourney Pro', description: 'اشتراك Midjourney Pro لتوليد الصور', price: 21000000, category: 'image', emoji: '🖼️', active: true, createdAt: Date.now() },
+    { id: 6, name: 'تطبيق موبايل', description: 'تطوير تطبيق موبايل بالذكاء الاصطناعي', price: 22500000, category: 'code', emoji: '📱', active: true, createdAt: Date.now() },
+    { id: 7, name: 'تطوير موقع كامل', description: 'تصميم وتطوير موقع احترافي كامل', price: 20300000, category: 'code', emoji: '🌐', active: true, createdAt: Date.now() },
+    { id: 8, name: 'إنشاء فيديو AI', description: 'إنشاء فيديوهات بالذكاء الاصطناعي', price: 15000000, category: 'other', emoji: '🎬', active: true, createdAt: Date.now() },
+    { id: 9, name: 'إنشاء بوت Discord', description: 'إنشاء بوت Discord مخصص بالكامل', price: 11300000, category: 'code', emoji: '🤖', active: true, createdAt: Date.now() },
+    { id: 10, name: 'تحليل بيانات', description: 'تحليل بيانات وتقارير احترافية', price: 9000000, category: 'data', emoji: '📊', active: true, createdAt: Date.now() },
+    { id: 11, name: 'مساعدة برمجية', description: 'مساعدة في البرمجة بأي لغة', price: 6000000, category: 'code', emoji: '💻', active: true, createdAt: Date.now() },
+    { id: 12, name: 'تصميم لوجو AI', description: 'تصميم لوجو احترافي بالذكاء الاصطناعي', price: 5300000, category: 'image', emoji: '✏️', active: true, createdAt: Date.now() },
+    { id: 13, name: 'كتابة مقالات ونصوص', description: 'كتابة مقالات ونصوص احترافية', price: 4500000, category: 'writing', emoji: '📝', active: true, createdAt: Date.now() },
+    { id: 14, name: 'إعداد سيرفر Discord', description: 'إعداد سيرفر Discord كامل', price: 6000000, category: 'other', emoji: '🎮', active: true, createdAt: Date.now() },
+    { id: 15, name: 'ترجمة احترافية', description: 'ترجمة نصوص بأكثر من لغة', price: 3800000, category: 'writing', emoji: '🌐', active: true, createdAt: Date.now() },
+    { id: 16, name: 'صوت AI — نص لكلام', description: 'تحويل النص إلى صوت طبيعي', price: 3000000, category: 'voice', emoji: '🔊', active: true, createdAt: Date.now() },
+    { id: 17, name: 'صوت AI — كلام لنص', description: 'تحويل الصوت إلى نص', price: 3000000, category: 'voice', emoji: '🎙️', active: true, createdAt: Date.now() },
+    { id: 18, name: 'توليد صور AI', description: 'توليد صور بالذكاء الاصطناعي', price: 1500000, category: 'image', emoji: '📸', active: true, createdAt: Date.now() },
+  ];
+  save('services.json', defaultServices);
+
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
     const e = new EmbedBuilder()
@@ -230,25 +252,23 @@ async function cmdSetup(interaction) {
         '━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**الخدمات المتاحة:**\n\n' +
-        '🤖 **ChatGPT Plus** — محادثات ذكية\n' +
-        '🎨 **توليد الصور** — Midjourney, DALL-E 3\n' +
-        '💻 **برمجة** — مساعدة في أي لغة\n' +
-        '📝 **كتابة** — مقالات ونصوص\n' +
-        '📊 **تحليل بيانات** — تقارير\n' +
-        '🔊 **صوت** — تحويل وتعديل\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**💡 كيف تبدأ؟**\n\n' +
-        '> `1️⃣` اكتب `/services` لعرض الخدمات\n' +
-        '> `2️⃣` راجع الخدمات والأسعار\n' +
-        '> `3️⃣` تواصل مع الستاف للطلب\n' +
-        '> `4️⃣` قيّم الخدمة بـ `/review`\n\n' +
+        '**💡 كيف تطلب؟**\n\n' +
+        '> `1️⃣` اضغط الزر أسفله لفتح تذكرة\n' +
+        '> `2️⃣` اختر الخدمة اللي تبيها\n' +
+        '> `3️⃣` الستاف هيساعدك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xFF0000)
       .setTimestamp()
       .setFooter({ text: '🛍️ AI Shop Bot' });
-    await svcCh.send({ embeds: [e] }).catch(() => {});
+
+    const ticketBtn = new ButtonBuilder()
+      .setCustomId('open_ticket')
+      .setLabel('🎫 افتح تذكرة')
+      .setStyle(ButtonStyle.Success);
+
+    const row = new ActionRowBuilder().addComponents(ticketBtn);
+    await svcCh.send({ embeds: [e], components: [row] }).catch(() => {});
   }
 
   const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
@@ -840,6 +860,74 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply({ content: '🔒 جاري إغلاق التذكرة...' });
         await sleep(2000);
         try { await interaction.channel.delete(); } catch {}
+        return;
+      }
+
+      if (cid === 'open_ticket') {
+        const g = interaction.guild;
+        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+        const overwrites = [
+          { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+          { id: interaction.user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+        ];
+        if (staffRole) overwrites.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+        let ticketCat = g.channels.cache.find(c => c.name.includes('التذاكر') && c.type === ChannelType.GuildCategory);
+        if (!ticketCat) {
+          try { ticketCat = await g.channels.create({ name: '╔════════ 🎫 التذاكر ════════', type: ChannelType.GuildCategory }); } catch {}
+        }
+
+        const orders = getOrders();
+        const orderId = nextId(orders);
+        const channelName = `order-${orderId}-${interaction.user.username}`.substring(0, 100);
+
+        const channel = await g.channels.create({
+          name: channelName,
+          type: ChannelType.GuildText,
+          parent: ticketCat ? ticketCat.id : undefined,
+          permissionOverwrites: overwrites,
+        });
+
+        const services = getServices().filter(s => s.active);
+        const svcList = services.map(s => `${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n');
+
+        const order = {
+          id: orderId,
+          type: 'order',
+          serviceName: 'طلب جديد',
+          serviceEmoji: '🎫',
+          userId: interaction.user.id,
+          username: interaction.user.username,
+          channelId: channel.id,
+          status: 'open',
+          createdAt: Date.now(),
+        };
+        orders.push(order);
+        save('orders.json', orders);
+
+        const embed = new EmbedBuilder()
+          .setTitle(`🎫 طلب جديد #${orderId}`)
+          .setDescription(
+            `**العميل:** ${interaction.user}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `**🛒 الخدمات المتاحة:**\n\n${svcList}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `💬 **اكتب الخدمة اللي تبيها** والستاف هيساعدك\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0xF1C40F)
+          .setTimestamp()
+          .setFooter({ text: `Order #${orderId}` });
+
+        const closeBtn = new ButtonBuilder()
+          .setCustomId(`order_close_${orderId}`)
+          .setLabel('🗑️ إغلاق')
+          .setStyle(ButtonStyle.Danger);
+
+        const row = new ActionRowBuilder().addComponents(closeBtn);
+        await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [embed], components: [row] });
+
+        await interaction.reply({ content: `✅ تم فتح التذكرة: ${channel}`, ephemeral: true });
         return;
       }
     }
