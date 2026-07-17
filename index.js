@@ -837,7 +837,6 @@ client.on('interactionCreate', async (interaction) => {
       if (cid.startsWith('svc_order_')) {
         const id = parseInt(cid.replace('svc_order_', ''));
         await interaction.deferReply({ ephemeral: true });
-        await interaction.deferReply({ ephemeral: true });
         const services = getServices(), svc = services.find(s => s.id === id);
         if (!svc) return interaction.editReply('❌ خدمة غير موجودة');
         const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
