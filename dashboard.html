@@ -178,6 +178,30 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
       </div>
       <!-- SETTINGS -->
       <div class="page" id="page-settings">
+        <div class="card">
+          <h3>🤖 البوت</h3>
+          <div id="botSettings"><div class="empty">جاري التحميل...</div></div>
+          <label>اسم البوت الجديد</label>
+          <input id="botNewName" placeholder="اسم البوت" />
+          <button class="btn btn-blue" onclick="changeBotName()">✏️ تغيير الاسم</button>
+          <div style="margin-top:16px">
+            <label>أيقونة البوت (صورة)</label>
+            <input type="file" id="botAvatarFile" accept="image/*" style="margin-bottom:8px" />
+            <button class="btn btn-purple" onclick="changeBotAvatar()">🖼️ تغيير الأيقونة</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🏠 السيرفر</h3>
+          <div id="guildSettings"><div class="empty">جاري التحميل...</div></div>
+          <label>اسم السيرفر الجديد</label>
+          <input id="guildNewName" placeholder="اسم السيرفر" />
+          <button class="btn btn-blue" onclick="changeGuildName()">✏️ تغيير الاسم</button>
+          <div style="margin-top:16px">
+            <label>أيقونة السيرفر (صورة)</label>
+            <input type="file" id="guildIconFile" accept="image/*" style="margin-bottom:8px" />
+            <button class="btn btn-purple" onclick="changeGuildIcon()">🖼️ تغيير الأيقونة</button>
+          </div>
+        </div>
         <div class="card"><h3>🛡️ الحماية التلقائية</h3><div id="automodSettings"><div class="empty">جاري التحميل...</div></div></div>
         <div class="card"><h3>🎭 الرولات التلقائية</h3><div id="autoRolesSettings"><div class="empty">جاري التحميل...</div></div></div>
         <div class="card"><h3>📝 قناة السجلات</h3><select id="logsChannelSelect"></select><br><br><button class="btn btn-blue" onclick="saveLogsChannel()">💾 حفظ</button></div>
@@ -383,8 +407,23 @@ async function loadGiveaways(){
 }
 
 // ── SETTINGS ──
+function toBase64(file){return new Promise(r=>{const reader=new FileReader();reader.onload=()=>r(reader.result);reader.readAsDataURL(file);})}
 async function loadSettings(){
-  const config=await api('api/config');
+  const [config,bot,guild]=await Promise.all([api('api/config'),api('api/bot'),api('api/guild')]);
+  document.getElementById('botSettings').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <img src="${bot.avatar}" width="64" height="64" style="border-radius:50%">
+      <div><strong>${bot.username}</strong><br><small style="color:var(--dim)">ID: ${bot.id}</small></div>
+    </div>
+  `;
+  document.getElementById('botNewName').placeholder=bot.username;
+  document.getElementById('guildSettings').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      ${guild.icon?`<img src="${guild.icon}" width="64" height="64" style="border-radius:50%">`:''}
+      <div><strong>${guild.name}</strong><br><small style="color:var(--dim)">ID: ${guild.id} | ${guild.memberCount} عضو</small></div>
+    </div>
+  `;
+  document.getElementById('guildNewName').placeholder=guild.name;
   document.getElementById('automodSettings').innerHTML=`
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
       <span>🚫 Anti-Spam</span>
@@ -403,6 +442,48 @@ async function loadSettings(){
   `;
   const channels=Array.isArray(allChannels)?allChannels.filter(c=>c.type===0):[];
   document.getElementById('logsChannelSelect').innerHTML=channels.map(c=>`<option value="${c.id}" ${config.logsChannel===c.id?'selected':''}>${c.name}</option>`).join('');
+}
+async function changeBotName(){
+  const name=document.getElementById('botNewName').value.trim();
+  if(!name)return toast('❌ اكتب اسم جديد');
+  if(!confirm(`تغيير اسم البوت إلى "${name}"؟`))return;
+  const r=await api('api/bot/username',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:name})});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم تغيير اسم البوت');
+  document.getElementById('botNewName').value='';
+  loadSettings();
+}
+async function changeBotAvatar(){
+  const file=document.getElementById('botAvatarFile').files[0];
+  if(!file)return toast('❌ اختر صورة');
+  if(!confirm('تغيير أيقونة البوت؟'))return;
+  const b64=await toBase64(file);
+  const r=await api('api/bot/avatar',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64})});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم تغيير أيقونة البوت');
+  document.getElementById('botAvatarFile').value='';
+  loadSettings();
+}
+async function changeGuildName(){
+  const name=document.getElementById('guildNewName').value.trim();
+  if(!name)return toast('❌ اكتب اسم جديد');
+  if(!confirm(`تغيير اسم السيرفر إلى "${name}"؟`))return;
+  const r=await api('api/guild/name',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم تغيير اسم السيرفر');
+  document.getElementById('guildNewName').value='';
+  loadSettings();
+}
+async function changeGuildIcon(){
+  const file=document.getElementById('guildIconFile').files[0];
+  if(!file)return toast('❌ اختر صورة');
+  if(!confirm('تغيير أيقونة السيرفر؟'))return;
+  const b64=await toBase64(file);
+  const r=await api('api/guild/icon',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64})});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم تغيير أيقونة السيرفر');
+  document.getElementById('guildIconFile').value='';
+  loadSettings();
 }
 async function updateAutomod(key,value){
   const config=await api('api/config');

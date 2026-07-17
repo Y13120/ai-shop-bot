@@ -1223,6 +1223,49 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true });
     }
 
+    // ── PUT: Change bot username ──
+    if (req.method === 'PUT' && p === '/api/bot/username') {
+      const d = await parseBody(req);
+      if (!d.username) return jsonRes(res, 400, { error: 'Missing username' });
+      const r = await fetch('https://discord.com/api/v10/users/@me', {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bot ${CFG.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: d.username }),
+      });
+      if (!r.ok) { const err = await r.text(); return jsonRes(res, r.status, { error: err }); }
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── PUT: Change bot avatar ──
+    if (req.method === 'PUT' && p === '/api/bot/avatar') {
+      const d = await parseBody(req);
+      if (!d.image) return jsonRes(res, 400, { error: 'Missing image (base64 data URL)' });
+      const r = await fetch('https://discord.com/api/v10/users/@me', {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bot ${CFG.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: d.image }),
+      });
+      if (!r.ok) { const err = await r.text(); return jsonRes(res, r.status, { error: err }); }
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── PUT: Change guild name ──
+    if (req.method === 'PUT' && p === '/api/guild/name') {
+      const d = await parseBody(req);
+      if (!d.name) return jsonRes(res, 400, { error: 'Missing name' });
+      await guild.setName(d.name);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── PUT: Change guild icon ──
+    if (req.method === 'PUT' && p === '/api/guild/icon') {
+      const d = await parseBody(req);
+      if (!d.image) return jsonRes(res, 400, { error: 'Missing image (base64 data URL)' });
+      const buffer = Buffer.from(d.image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      await guild.setIcon(buffer);
+      return jsonRes(res, 200, { ok: true });
+    }
+
     // ── GET: Dashboard HTML ──
     if (req.method === 'GET' && p === '/dashboard') {
       const html = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8');
