@@ -6,57 +6,77 @@
 <title>AI Shop Bot — Dashboard</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--purple:#bc8cff;--hover:#1f2937}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.login{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px}
-.login h1{font-size:28px;color:var(--accent)}
-.login input{padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);width:400px;font-size:16px}
-.login button{padding:12px 32px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:16px;cursor:pointer;font-weight:600}
-.login button:hover{opacity:.9}
-.app{display:none}
-.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.topbar h2{font-size:18px;color:var(--accent)}
+:root{--bg:#0a0e17;--card:rgba(22,27,34,.85);--border:rgba(88,166,255,.15);--text:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--purple:#bc8cff;--hover:rgba(31,41,55,.7);--glow:0 0 20px rgba(88,166,255,.15)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:20px;position:relative;z-index:1}
+.login h1{font-size:36px;background:linear-gradient(135deg,#58a6ff,#bc8cff,#f85149,#d29922);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.login input{padding:14px 18px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);width:420px;font-size:16px;backdrop-filter:blur(10px);transition:all .3s}
+.login input:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(88,166,255,.3);outline:none}
+.login button{padding:14px 40px;border:none;border-radius:12px;background:linear-gradient(135deg,#58a6ff,#bc8cff);color:#fff;font-size:16px;cursor:pointer;font-weight:700;transition:all .3s;position:relative;overflow:hidden}
+.login button:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(88,166,255,.4)}
+.login button:active{transform:scale(.97)}
+.app{display:none;position:relative;z-index:1}
+.topbar{background:rgba(22,27,34,.9);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.topbar h2{font-size:18px;background:linear-gradient(90deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .topbar .info{display:flex;gap:16px;font-size:13px;color:var(--dim)}
 .layout{display:flex;min-height:calc(100vh - 53px)}
-.sidebar{width:220px;background:var(--card);border-left:1px solid var(--border);padding:12px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;flex-shrink:0}
-.sidebar button{width:100%;text-align:right;padding:10px 20px;background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;display:block}
-.sidebar button:hover,.sidebar button.active{background:var(--hover);color:var(--text)}
+.sidebar{width:220px;background:rgba(22,27,34,.9);border-left:1px solid var(--border);padding:12px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;flex-shrink:0;backdrop-filter:blur(20px)}
+.sidebar button{width:100%;text-align:right;padding:12px 20px;background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;display:block;transition:all .3s;border-right:3px solid transparent}
+.sidebar button:hover,.sidebar button.active{background:rgba(88,166,255,.08);color:var(--text);border-right-color:var(--accent)}
+.sidebar button.active{background:rgba(88,166,255,.12)}
 .main{flex:1;padding:24px;overflow-y:auto;max-height:calc(100vh - 53px)}
-.page{display:none}.page.active{display:block}
+.page{display:none;animation:pageIn .4s ease}.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
-.stat-card .num{font-size:32px;font-weight:700;color:var(--accent)}
-.stat-card .label{color:var(--dim);font-size:13px;margin-top:4px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
-.card h3{margin-bottom:12px;color:var(--accent)}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);font-size:13px}
-th{color:var(--dim);font-weight:600}
-tr:hover{background:var(--hover)}
-.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
-.badge-green{background:#238636;color:#fff}.badge-red{background:#da3633;color:#fff}.badge-yellow{background:#9e6a03;color:#fff}.badge-blue{background:#1f6feb;color:#fff}.badge-purple{background:#8957e5;color:#fff}
-.btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
-.btn-green{background:var(--green);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-blue{background:var(--accent);color:#fff}.btn-yellow{background:var(--yellow);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-sm{padding:4px 10px;font-size:12px}
-.btn:hover{opacity:.85}
-input,select,textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:14px;width:100%;margin-bottom:8px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px;text-align:center;transition:all .4s;backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(88,166,255,.1),transparent 30%);animation:rotateBg 6s linear infinite;opacity:0;transition:opacity .4s}
+.stat-card:hover::before{opacity:1}
+.stat-card:hover{transform:translateY(-5px);border-color:rgba(88,166,255,.3);box-shadow:var(--glow)}
+@keyframes rotateBg{to{transform:rotate(360deg)}}
+.stat-card .num{font-size:36px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;z-index:1}
+.stat-card .label{color:var(--dim);font-size:13px;margin-top:6px;position:relative;z-index:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;backdrop-filter:blur(10px);transition:all .3s}
+.card:hover{border-color:rgba(88,166,255,.25);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.card h3{margin-bottom:12px;background:linear-gradient(90deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:16px}
+table{width:100%;border-collapse:separate;border-spacing:0}
+th,td{padding:12px 14px;text-align:right;border-bottom:1px solid rgba(48,54,61,.5);font-size:13px}
+th{color:var(--dim);font-weight:600;background:rgba(13,17,23,.5)}
+tr{transition:all .2s}
+tr:hover{background:rgba(88,166,255,.05)}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;transition:all .3s}
+.badge:hover{transform:scale(1.05)}
+.badge-green{background:rgba(35,134,54,.8);color:#fff;box-shadow:0 0 12px rgba(63,185,80,.2)}.badge-red{background:rgba(218,54,51,.8);color:#fff;box-shadow:0 0 12px rgba(248,81,73,.2)}.badge-yellow{background:rgba(158,106,3,.8);color:#fff;box-shadow:0 0 12px rgba(210,153,34,.2)}.badge-blue{background:rgba(31,111,235,.8);color:#fff;box-shadow:0 0 12px rgba(88,166,255,.2)}.badge-purple{background:rgba(137,87,229,.8);color:#fff;box-shadow:0 0 12px rgba(188,140,255,.2)}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .3s;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.2);border-radius:50%;transform:translate(-50%,-50%);transition:width .4s,height .4s}
+.btn:active::after{width:200px;height:200px}
+.btn-green{background:linear-gradient(135deg,#238636,#3fb950);color:#fff}.btn-red{background:linear-gradient(135deg,#da3633,#f85149);color:#fff}.btn-blue{background:linear-gradient(135deg,#1f6feb,#58a6ff);color:#fff}.btn-yellow{background:linear-gradient(135deg,#9e6a03,#d29922);color:#fff}.btn-purple{background:linear-gradient(135deg,#8957e5,#bc8cff);color:#fff}.btn-sm{padding:5px 12px;font-size:12px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn:active{transform:scale(.96)}
+input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:rgba(13,17,23,.6);color:var(--text);font-size:14px;width:100%;margin-bottom:10px;transition:all .3s;backdrop-filter:blur(5px)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 15px rgba(88,166,255,.15);outline:none}
 textarea{min-height:80px;resize:vertical}
-label{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
+label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px}
 .form-row{display:flex;gap:12px}.form-row>*{flex:1}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:999;display:none;animation:fadeIn .3s}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#238636,#3fb950);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:600;z-index:999;display:none;animation:toastIn .4s ease;box-shadow:0 8px 25px rgba(63,185,80,.3)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .empty{text-align:center;color:var(--dim);padding:40px;font-size:16px}
-.ticket-reply{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
+.ticket-reply{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px}
 .ticket-reply p{font-size:13px;color:var(--dim);margin-bottom:8px}
-.actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .toggle{position:relative;width:44px;height:24px;cursor:pointer}
 .toggle input{opacity:0;width:0;height:0}
 .toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:12px;transition:.3s}
 .toggle .slider:before{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
-.toggle input:checked+.slider{background:var(--green)}
+.toggle input:checked+.slider{background:var(--green);box-shadow:0 0 10px rgba(63,185,80,.3)}
 .toggle input:checked+.slider:before{transform:translateX(20px)}
+.topbar .info span{padding:4px 10px;background:rgba(88,166,255,.08);border-radius:8px;border:1px solid rgba(88,166,255,.1)}
 </style>
 </head>
 <body>
+<canvas id="particles"></canvas>
 <div class="login" id="loginPage">
   <h1>🤖 AI Shop Bot — Dashboard</h1>
   <input type="text" id="apiUrl" placeholder="http://your-bot.railway.app" />
@@ -500,6 +520,131 @@ async function saveLogsChannel(){
 
 // Auto-refresh
 setInterval(()=>{const p=document.querySelector('.sidebar button.active')?.dataset.page;if(p==='dashboard')loadAll();},30000);
+
+// ══════════════════════════════════════════════════════════════
+//  VISUAL EFFECTS
+// ══════════════════════════════════════════════════════════════
+
+// ── Particle System ──
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+class Particle{
+  constructor(){this.reset()}
+  reset(){
+    this.x=Math.random()*canvas.width;
+    this.y=Math.random()*canvas.height;
+    this.size=Math.random()*2+.5;
+    this.speedX=(Math.random()-.5)*.3;
+    this.speedY=(Math.random()-.5)*.3;
+    this.opacity=Math.random()*.5+.1;
+    this.color=['88,166,255','188,140,255','63,185,80','248,81,73','210,153,34'][Math.floor(Math.random()*5)];
+  }
+  update(){
+    this.x+=this.speedX;
+    this.y+=this.speedY;
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height)this.reset();
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${this.color},${this.opacity})`;
+    ctx.fill();
+  }
+}
+for(let i=0;i<60;i++)particles.push(new Particle());
+
+function connectParticles(){
+  for(let a=0;a<particles.length;a++){
+    for(let b=a+1;b<particles.length;b++){
+      const dx=particles[a].x-particles[b].x;
+      const dy=particles[a].y-particles[b].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<150){
+        ctx.beginPath();
+        ctx.strokeStyle=`rgba(88,166,255,${.08*(1-dist/150)})`;
+        ctx.lineWidth=.5;
+        ctx.moveTo(particles[a].x,particles[a].y);
+        ctx.lineTo(particles[b].x,particles[b].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update();p.draw()});
+  connectParticles();
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── Mouse Glow Effect ──
+document.addEventListener('mousemove',(e)=>{
+  document.body.style.setProperty('--mouse-x',e.clientX+'px');
+  document.body.style.setProperty('--mouse-y',e.clientY+'px');
+});
+
+// ── Scrollbar ──
+const style=document.createElement('style');
+style.textContent=`.main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-track{background:transparent}.main::-webkit-scrollbar-thumb{background:rgba(88,166,255,.2);border-radius:3px}.main::-webkit-scrollbar-thumb:hover{background:rgba(88,166,255,.4)}`;
+document.head.appendChild(style);
+
+// ── Button Ripple ──
+document.querySelectorAll('.btn,.login button').forEach(btn=>{
+  btn.addEventListener('click',function(e){
+    const r=this.getBoundingClientRect();
+    const ripple=document.createElement('span');
+    ripple.style.cssText=`position:absolute;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.25);transform:translate(-50%,-50%);left:${e.clientX-r.left}px;top:${e.clientY-r.top}px;pointer-events:none;animation:rippleAnim .6s ease-out`;
+    this.style.position='relative';this.style.overflow='hidden';this.appendChild(ripple);
+    setTimeout(()=>ripple.remove(),600);
+  });
+});
+const rippleStyle=document.createElement('style');
+rippleStyle.textContent=`@keyframes rippleAnim{to{width:300px;height:300px;opacity:0}}`;
+document.head.appendChild(rippleStyle);
+
+// ── Stat Card Counter Animation ──
+const origLoadAll=typeof loadAll==='function'?loadAll:null;
+function animateCounters(){
+  document.querySelectorAll('.stat-card .num').forEach(el=>{
+    const target=parseInt(el.textContent.replace(/[^0-9]/g,''))||0;
+    if(!target)return;
+    let current=0;
+    const step=Math.ceil(target/30);
+    const timer=setInterval(()=>{
+      current+=step;
+      if(current>=target){current=target;clearInterval(timer)}
+      el.textContent=current.toLocaleString();
+    },30);
+  });
+}
+
+// ── Page Transition Observer ──
+const observer=new MutationObserver(()=>{
+  document.querySelectorAll('.page.active').forEach(p=>{
+    p.style.animation='none';
+    p.offsetHeight;
+    p.style.animation='pageIn .4s ease';
+  });
+  setTimeout(animateCounters,100);
+});
+document.querySelectorAll('.page').forEach(p=>observer.observe(p,{attributes:true,attributeFilter:['class']}));
+
+// ── Keyboard Shortcut (ESC to close modals) ──
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.card[style*="display: none"]').forEach(c=>c.style.display='');
+  }
+});
+
+console.log('%c🤖 AI Shop Bot Dashboard', 'font-size:20px;color:#58a6ff;font-weight:bold');
+console.log('%cVisual effects loaded!', 'color:#3fb950');
 </script>
 </body>
 </html>
