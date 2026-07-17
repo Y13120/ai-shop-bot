@@ -1083,7 +1083,7 @@ client.on('guildBanAdd', async (ban) => {
 });
 
 // ══════════════════════════════════════════════════════════════
-//  HTTP API
+//  HTTP API (Full Management)
 // ══════════════════════════════════════════════════════════════
 const API_PORT = process.env.PORT || process.env.BOT_API_PORT || 3001;
 function parseBody(req) { return new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => { try { r(JSON.parse(b || '{}')); } catch { r({}); } }); }); }
@@ -1100,14 +1100,188 @@ const apiServer = http.createServer(async (req, res) => {
     const guild = client.guilds.cache.first();
     if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild' });
 
+    // ── GET ──
     if (req.method === 'GET' && p === '/api/bot') return jsonRes(res, 200, { id: client.user?.id, username: client.user?.username, avatar: client.user?.displayAvatarURL({ dynamic: true, size: 256 }) });
-    if (req.method === 'GET' && p === '/api/guild') return jsonRes(res, 200, { id: guild.id, name: guild.name, icon: guild.iconURL({ dynamic: true, size: 256 }), memberCount: guild.memberCount, ownerId: guild.ownerId, boostCount: guild.premiumSubscriptionCount || 0 });
+    if (req.method === 'GET' && p === '/api/guild') return jsonRes(res, 200, { id: guild.id, name: guild.name, icon: guild.iconURL({ dynamic: true, size: 256 }), memberCount: guild.memberCount, ownerId: guild.ownerId, boostCount: guild.premiumSubscriptionCount || 0, createdAt: guild.createdAt?.toISOString() });
     if (req.method === 'GET' && p === '/api/stats') return jsonRes(res, 200, { orders: getOrders().length, completed: getOrders().filter(o => o.status === 'completed').length, reviews: getReviews().length, services: getServices().filter(s => s.active).length, coins: getCoins().reduce((s, c) => s + (c.coins || 0), 0), members: guild?.memberCount || 0, giveaways: getGiveaways().length });
     if (req.method === 'GET' && p === '/api/services') return jsonRes(res, 200, getServices());
+    if (req.method === 'GET' && p === '/api/categories') return jsonRes(res, 200, getCategories());
     if (req.method === 'GET' && p === '/api/tickets') return jsonRes(res, 200, getOrders());
     if (req.method === 'GET' && p === '/api/reviews') return jsonRes(res, 200, getReviews());
     if (req.method === 'GET' && p === '/api/coins') return jsonRes(res, 200, getCoins());
     if (req.method === 'GET' && p === '/api/warnings') return jsonRes(res, 200, getWarnings());
+    if (req.method === 'GET' && p === '/api/giveaways') return jsonRes(res, 200, getGiveaways());
+    if (req.method === 'GET' && p === '/api/config') return jsonRes(res, 200, { autoRoles: CFG.autoRoles, logsChannel: CFG.logsChannel, automod: CFG.automod });
+    if (req.method === 'GET' && p === '/api/channels') {
+      const channels = [];
+      for (const [, c] of guild.channels.cache) channels.push({ id: c.id, name: c.name, type: c.type });
+      return jsonRes(res, 200, channels);
+    }
+    if (req.method === 'GET' && p === '/api/roles') {
+      const roles = [];
+      for (const [, r] of guild.roles.cache) roles.push({ id: r.id, name: r.name, color: r.hexColor, members: r.members?.size || 0 });
+      return jsonRes(res, 200, roles);
+    }
+    if (req.method === 'GET' && p === '/api/members') {
+      try { await guild.members.fetch(); } catch {}
+      const members = [];
+      for (const [, m] of guild.members.cache) {
+        const roleIds = []; for (const [, r] of m.roles.cache) { if (r.id !== guild.id) roleIds.push(r.id); }
+        members.push({ id: m.id, username: m.user.username, displayName: m.displayName, avatar: m.user.displayAvatarURL({ dynamic: true, size: 64 }), roles: roleIds, joinedAt: m.joinedAt?.toISOString(), banned: m.banned, timeout: m.isCommunicationDisabledUntil?.toISOString() || null });
+      }
+      return jsonRes(res, 200, members);
+    }
+
+    // ── POST: Send message ──
+    if (req.method === 'POST' && p === '/api/send-message') {
+      const d = await parseBody(req);
+      const ch = guild.channels.cache.get(d.channelId);
+      if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      const embed = d.title ? new EmbedBuilder().setTitle(d.title).setDescription(d.content || '').setColor(d.color || 0x3498DB).setTimestamp() : null;
+      await ch.send({ content: d.content || undefined, embeds: embed ? [embed] : undefined });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Reply to ticket ──
+    if (req.method === 'POST' && p.match(/^\/api\/tickets\/\d+\/reply$/)) {
+      const id = parseInt(p.split('/')[3]);
+      const order = getOrders().find(o => o.id === id);
+      if (!order) return jsonRes(res, 404, { error: 'Ticket not found' });
+      const ch = guild.channels.cache.get(order.channelId);
+      if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      const d = await parseBody(req);
+      const embed = new EmbedBuilder().setTitle('💬 رد من لوحة التحكم').setDescription(d.message).setColor(0x3498DB).setTimestamp().setFooter({ text: '🌐 Dashboard' });
+      await ch.send({ embeds: [embed] });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Close ticket ──
+    if (req.method === 'POST' && p.match(/^\/api\/tickets\/\d+\/close$/)) {
+      const id = parseInt(p.split('/')[3]);
+      const orders = getOrders();
+      const order = orders.find(o => o.id === id);
+      if (!order) return jsonRes(res, 404, { error: 'Ticket not found' });
+      order.status = 'closed'; order.closedAt = Date.now(); order.closedBy = 'dashboard';
+      save('orders.json', orders);
+      const ch = guild.channels.cache.get(order.channelId);
+      if (ch) { try { await ch.send({ embeds: [new EmbedBuilder().setTitle('🔒 تم الإغلاق من لوحة التحكم').setColor(0xE74C3C).setTimestamp()] }); await sleep(2000); await ch.delete(); } catch {} }
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Announce ──
+    if (req.method === 'POST' && p === '/api/announce') {
+      const d = await parseBody(req);
+      let ch = guild.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
+      if (!ch) return jsonRes(res, 404, { error: 'No announcements channel' });
+      const embed = new EmbedBuilder().setTitle(`${d.emoji || '📣'} ${safe(d.title, 200)}`).setDescription(safe(d.content, 4000)).setColor(0xFF0000).setTimestamp().setFooter({ text: '📢 من لوحة التحكم' });
+      await ch.send({ embeds: [embed] });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Mod actions ──
+    if (req.method === 'POST' && p === '/api/mod/ban') {
+      const d = await parseBody(req);
+      const member = await guild.members.fetch(d.userId).catch(() => null);
+      if (!member) return jsonRes(res, 404, { error: 'Member not found' });
+      await member.ban({ reason: d.reason || 'Dashboard ban' });
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/mod/kick') {
+      const d = await parseBody(req);
+      const member = await guild.members.fetch(d.userId).catch(() => null);
+      if (!member) return jsonRes(res, 404, { error: 'Member not found' });
+      await member.kick(d.reason || 'Dashboard kick');
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/mod/mute') {
+      const d = await parseBody(req);
+      const member = await guild.members.fetch(d.userId).catch(() => null);
+      if (!member) return jsonRes(res, 404, { error: 'Member not found' });
+      await member.timeout((d.minutes || 5) * 60 * 1000, d.reason || 'Dashboard mute');
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/mod/warn') {
+      const d = await parseBody(req);
+      const warnings = getWarnings();
+      warnings.push({ id: nextId(warnings), userId: d.userId, username: d.username || d.userId, reason: d.reason || 'Dashboard warn', issuedBy: 'dashboard', issuedByName: 'Dashboard', createdAt: Date.now() });
+      save('warnings.json', warnings);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── PUT: Update service ──
+    if (req.method === 'PUT' && p.match(/^\/api\/services\/\d+$/)) {
+      const id = parseInt(p.split('/').pop());
+      const services = getServices();
+      const svc = services.find(s => s.id === id);
+      if (!svc) return jsonRes(res, 404, { error: 'Not found' });
+      const d = await parseBody(req);
+      Object.assign(svc, d, { id: svc.id });
+      save('services.json', services);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Add service ──
+    if (req.method === 'POST' && p === '/api/services') {
+      const d = await parseBody(req);
+      const services = getServices();
+      const id = nextId(services);
+      services.push({ id, name: d.name, description: d.description, price: d.price, category: d.category, emoji: d.emoji || '🛒', active: true, createdAt: Date.now() });
+      save('services.json', services);
+      return jsonRes(res, 200, { ok: true, id });
+    }
+
+    // ── DELETE: Remove service ──
+    if (req.method === 'DELETE' && p.match(/^\/api\/services\/\d+$/)) {
+      const id = parseInt(p.split('/').pop());
+      const services = getServices().filter(s => s.id !== id);
+      save('services.json', services);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Add category ──
+    if (req.method === 'POST' && p === '/api/categories') {
+      const d = await parseBody(req);
+      const cats = getCategories();
+      if (cats.find(c => c.id === d.id)) return jsonRes(res, 400, { error: 'Category exists' });
+      cats.push({ id: d.id, name: d.name, emoji: d.emoji || '📁' });
+      saveCategories(cats);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── DELETE: Remove category ──
+    if (req.method === 'DELETE' && p.match(/^\/api\/categories\/.+$/)) {
+      const id = decodeURIComponent(p.split('/').pop());
+      const servicesUsing = getServices().filter(s => s.category === id);
+      if (servicesUsing.length) return jsonRes(res, 400, { error: `Category has ${servicesUsing.length} services` });
+      saveCategories(getCategories().filter(c => c.id !== id));
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── PUT: Update config ──
+    if (req.method === 'PUT' && p === '/api/config') {
+      const d = await parseBody(req);
+      if (d.autoRoles !== undefined) CFG.autoRoles = d.autoRoles;
+      if (d.logsChannel !== undefined) CFG.logsChannel = d.logsChannel;
+      if (d.automod !== undefined) CFG.automod = { ...CFG.automod, ...d.automod };
+      save('config.json', CFG);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── POST: Send to channel ──
+    if (req.method === 'POST' && p === '/api/channels/send') {
+      const d = await parseBody(req);
+      const ch = guild.channels.cache.get(d.channelId);
+      if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      await ch.send({ content: d.content });
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── GET: Dashboard HTML ──
+    if (req.method === 'GET' && p === '/dashboard') {
+      const html = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    }
 
     jsonRes(res, 404, { error: 'Not found' });
   } catch (e) { console.error('API Error:', e.message); jsonRes(res, 500, { error: e.message }); }

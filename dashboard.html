@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Shop Bot — Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--purple:#bc8cff;--hover:#1f2937}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.login{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px}
+.login h1{font-size:28px;color:var(--accent)}
+.login input{padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);width:400px;font-size:16px}
+.login button{padding:12px 32px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:16px;cursor:pointer;font-weight:600}
+.login button:hover{opacity:.9}
+.app{display:none}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar h2{font-size:18px;color:var(--accent)}
+.topbar .info{display:flex;gap:16px;font-size:13px;color:var(--dim)}
+.layout{display:flex;min-height:calc(100vh - 53px)}
+.sidebar{width:220px;background:var(--card);border-left:1px solid var(--border);padding:12px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;flex-shrink:0}
+.sidebar button{width:100%;text-align:right;padding:10px 20px;background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;display:block}
+.sidebar button:hover,.sidebar button.active{background:var(--hover);color:var(--text)}
+.main{flex:1;padding:24px;overflow-y:auto;max-height:calc(100vh - 53px)}
+.page{display:none}.page.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.stat-card .num{font-size:32px;font-weight:700;color:var(--accent)}
+.stat-card .label{color:var(--dim);font-size:13px;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h3{margin-bottom:12px;color:var(--accent)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);font-size:13px}
+th{color:var(--dim);font-weight:600}
+tr:hover{background:var(--hover)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:#238636;color:#fff}.badge-red{background:#da3633;color:#fff}.badge-yellow{background:#9e6a03;color:#fff}.badge-blue{background:#1f6feb;color:#fff}.badge-purple{background:#8957e5;color:#fff}
+.btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+.btn-green{background:var(--green);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-blue{background:var(--accent);color:#fff}.btn-yellow{background:var(--yellow);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-sm{padding:4px 10px;font-size:12px}
+.btn:hover{opacity:.85}
+input,select,textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:14px;width:100%;margin-bottom:8px}
+textarea{min-height:80px;resize:vertical}
+label{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
+.form-row{display:flex;gap:12px}.form-row>*{flex:1}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:999;display:none;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.empty{text-align:center;color:var(--dim);padding:40px;font-size:16px}
+.ticket-reply{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
+.ticket-reply p{font-size:13px;color:var(--dim);margin-bottom:8px}
+.actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:12px;transition:.3s}
+.toggle .slider:before{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
+.toggle input:checked+.slider{background:var(--green)}
+.toggle input:checked+.slider:before{transform:translateX(20px)}
+</style>
+</head>
+<body>
+<div class="login" id="loginPage">
+  <h1>🤖 AI Shop Bot — Dashboard</h1>
+  <input type="text" id="apiUrl" placeholder="http://your-bot.railway.app" />
+  <button onclick="connect()">اتصل</button>
+</div>
+<div class="app" id="appPage">
+  <div class="topbar">
+    <h2>🤖 AI Shop Bot</h2>
+    <div class="info">
+      <span id="guildName">—</span>
+      <span id="memberCount">—</span>
+      <span id="botStatus" style="color:var(--green)">● متصل</span>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <button onclick="showPage('dashboard')" class="active" data-page="dashboard">📊 الرئيسية</button>
+      <button onclick="showPage('tickets')" data-page="tickets">🎫 التذاكر</button>
+      <button onclick="showPage('services')" data-page="services">🛒 الخدمات</button>
+      <button onclick="showPage('categories')" data-page="categories">📂 التصنيفات</button>
+      <button onclick="showPage('members')" data-page="members">👥 الأعضاء</button>
+      <button onclick="showPage('announce')" data-page="announce">📢 إعلان</button>
+      <button onclick="showPage('giveaways')" data-page="giveaways">🎉 السحبيات</button>
+      <button onclick="showPage('settings')" data-page="settings">⚙️ الإعدادات</button>
+    </div>
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="card"><h3>🎫 أحدث التذاكر</h3><div id="recentTickets"><div class="empty">جاري التحميل...</div></div></div>
+        <div class="card"><h3>⭐ أحدث التقييمات</h3><div id="recentReviews"><div class="empty">جاري التحميل...</div></div></div>
+      </div>
+      <!-- TICKETS -->
+      <div class="page" id="page-tickets">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3>🎫 التذاكر</h3>
+            <select id="ticketFilter" onchange="loadTickets()" style="width:auto;margin:0">
+              <option value="all">الكل</option><option value="pending">بانتظار القبول</option><option value="progress">قيد التنفيذ</option><option value="completed">مكتملة</option><option value="closed">مغلقة</option>
+            </select>
+          </div>
+          <div id="ticketsList"><div class="empty">جاري التحميل...</div></div>
+        </div>
+        <div class="card" id="ticketDetail" style="display:none">
+          <h3 id="ticketDetailTitle">تفاصيل التذكرة</h3>
+          <div id="ticketDetailContent"></div>
+          <div style="margin-top:16px">
+            <label>رسالة للعميل:</label>
+            <textarea id="ticketReplyMsg" placeholder="اكتب ردك هنا..."></textarea>
+            <div class="actions">
+              <button class="btn btn-blue" onclick="replyToTicket()">💬 إرسال الرد</button>
+              <button class="btn btn-green" onclick="closeTicketFromDetail()">🔒 إغلاق التذكرة</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- SERVICES -->
+      <div class="page" id="page-services">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3>🛒 الخدمات</h3>
+            <button class="btn btn-green" onclick="showAddService()">+ إضافة خدمة</button>
+          </div>
+          <div id="servicesList"><div class="empty">جاري التحميل...</div></div>
+        </div>
+        <div class="card" id="addServiceForm" style="display:none">
+          <h3>إضافة خدمة جديدة</h3>
+          <div class="form-row"><div><label>الاسم</label><input id="svcName" /></div><div><label>السعر</label><input id="svcPrice" type="number" /></div></div>
+          <div class="form-row"><div><label>التصنيف (ID)</label><input id="svcCategory" placeholder="chatgpt, image, photoshop..." /></div><div><label>الإيموجي</label><input id="svcEmoji" value="🛒" /></div></div>
+          <label>الوصف</label><textarea id="svcDesc"></textarea>
+          <div class="actions"><button class="btn btn-green" onclick="addService()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addServiceForm').style.display='none'">إلغاء</button></div>
+        </div>
+      </div>
+      <!-- CATEGORIES -->
+      <div class="page" id="page-categories">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3>📂 التصنيفات</h3>
+            <button class="btn btn-green" onclick="showAddCategory()">+ إضافة تصنيف</button>
+          </div>
+          <div id="categoriesList"><div class="empty">جاري التحميل...</div></div>
+        </div>
+        <div class="card" id="addCategoryForm" style="display:none">
+          <h3>إضافة تصنيف جديد</h3>
+          <div class="form-row"><div><label>المعرف (إنجليزي)</label><input id="catId" placeholder="montage" /></div><div><label>الاسم بالعربي</label><input id="catName" placeholder="🎬 مونتاج" /></div></div>
+          <div class="form-row"><div><label>الإيموجي</label><input id="catEmoji" value="📁" /></div></div>
+          <div class="actions"><button class="btn btn-green" onclick="addCategory()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addCategoryForm').style.display='none'">إلغاء</button></div>
+        </div>
+      </div>
+      <!-- MEMBERS -->
+      <div class="page" id="page-members">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3>👥 الأعضاء</h3>
+            <input id="memberSearch" placeholder="بحث..." oninput="filterMembers()" style="width:250px;margin:0" />
+          </div>
+          <div id="membersList"><div class="empty">جاري التحميل...</div></div>
+        </div>
+      </div>
+      <!-- ANNOUNCE -->
+      <div class="page" id="page-announce">
+        <div class="card">
+          <h3>📢 إرسال إعلان</h3>
+          <label>العنوان</label><input id="annTitle" />
+          <label>المحتوى</label><textarea id="annContent"></textarea>
+          <label>الإيموجي</label><input id="annEmoji" value="📣" />
+          <button class="btn btn-green" onclick="sendAnnounce()">📢 إرسال</button>
+        </div>
+        <div class="card">
+          <h3>💬 إرسال رسالة مباشرة</h3>
+          <label>القناة</label><select id="sendChannel"></select>
+          <label>المحتوى</label><textarea id="sendContent"></textarea>
+          <button class="btn btn-blue" onclick="sendDirectMessage()">✉️ إرسال</button>
+        </div>
+      </div>
+      <!-- GIVEAWAYS -->
+      <div class="page" id="page-giveaways">
+        <div class="card"><h3>🎉 السحبيات</h3><div id="giveawaysList"><div class="empty">جاري التحميل...</div></div></div>
+      </div>
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="card"><h3>🛡️ الحماية التلقائية</h3><div id="automodSettings"><div class="empty">جاري التحميل...</div></div></div>
+        <div class="card"><h3>🎭 الرولات التلقائية</h3><div id="autoRolesSettings"><div class="empty">جاري التحميل...</div></div></div>
+        <div class="card"><h3>📝 قناة السجلات</h3><select id="logsChannelSelect"></select><br><br><button class="btn btn-blue" onclick="saveLogsChannel()">💾 حفظ</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let API='',allMembers=[],allChannels=[];
+async function api(path,opts={}){try{const r=await fetch(API+path,opts);return await r.json();}catch(e){return{error:e.message}}}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3000)}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString()}
+function statusBadge(s){const m={pending:['بانتظار القبول','yellow'],open:['مفتوحة','blue'],progress:['قيد التنفيذ','purple'],completed:['مكتملة','green'],closed:['مغلقة','red']};const[n,c]=m[s]||[s,'blue'];return`<span class="badge badge-${c}">${n}</span>`}
+function timeAgo(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('ar-SA')}
+
+async function connect(){
+  API=document.getElementById('apiUrl').value.replace(/\/$/,'')+'/';
+  const h=await api('api/health');
+  if(h.error){toast('❌ خطأ الاتصال: '+h.error);return}
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('appPage').style.display='block';
+  await loadAll();
+}
+
+async function loadAll(){
+  const [guild,stats]=await Promise.all([api('api/guild'),api('api/stats')]);
+  document.getElementById('guildName').textContent=guild.name||'—';
+  document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="num">${stats.orders}</div><div class="label">🎫 الطلبات</div></div>
+    <div class="stat-card"><div class="num">${stats.completed}</div><div class="label">✅ مكتملة</div></div>
+    <div class="stat-card"><div class="num">${stats.services}</div><div class="label">🛒 الخدمات</div></div>
+    <div class="stat-card"><div class="num">${stats.reviews}</div><div class="label">⭐ التقييمات</div></div>
+    <div class="stat-card"><div class="num">${fmt(stats.coins)}</div><div class="label">💰 الكريديت</div></div>
+    <div class="stat-card"><div class="num">${stats.members}</div><div class="label">👥 الأعضاء</div></div>
+    <div class="stat-card"><div class="num">${stats.giveaways}</div><div class="label">🎉 السحبيات</div></div>
+  `;
+  const tickets=await api('api/tickets');
+  if(Array.isArray(tickets)){
+    const recent=tickets.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+    document.getElementById('recentTickets').innerHTML=recent.length?`<table><tr><th>#</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>التاريخ</th></tr>${recent.map(t=>`<tr><td>${t.id}</td><td>${t.username}</td><td>${t.serviceEmoji||'🎫'} ${t.serviceName}</td><td>${statusBadge(t.status)}</td><td>${timeAgo(t.createdAt)}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تذاكر</div>';
+  }
+  const reviews=await api('api/reviews');
+  if(Array.isArray(reviews)){
+    const recent=reviews.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+    document.getElementById('recentReviews').innerHTML=recent.length?`<table><tr><th>الخدمة</th><th>المستخدم</th><th>التقييم</th><th>التعليق</th></tr>${recent.map(r=>`<tr><td>${r.serviceName}</td><td>${r.username}</td><td>${'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)}</td><td>${r.comment||'—'}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تقييمات</div>';
+  }
+  [allChannels,allMembers]=await Promise.all([api('api/channels'),api('api/members')]);
+  const chSelect=document.getElementById('sendChannel');
+  if(Array.isArray(allChannels)){chSelect.innerHTML=allChannels.filter(c=>c.type===0).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');}
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  if(name==='tickets')loadTickets();
+  if(name==='services')loadServices();
+  if(name==='categories')loadCategories();
+  if(name==='members')loadMembers();
+  if(name==='giveaways')loadGiveaways();
+  if(name==='settings')loadSettings();
+}
+
+// ── TICKETS ──
+let currentTicketId=null;
+async function loadTickets(){
+  const filter=document.getElementById('ticketFilter').value;
+  let tickets=await api('api/tickets');
+  if(!Array.isArray(tickets))tickets=[];
+  if(filter!=='all')tickets=tickets.filter(t=>t.status===filter);
+  tickets.sort((a,b)=>b.createdAt-a.createdAt);
+  document.getElementById('ticketsList').innerHTML=tickets.length?`<table><tr><th>#</th><th>النوع</th><th>العميل</th><th>الخدمة</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr>${tickets.map(t=>`<tr><td>${t.id}</td><td>${t.type==='support'?'🛠️':'🛒'}</td><td>${t.username}</td><td>${t.serviceEmoji||'🎫'} ${(t.serviceName||'').substring(0,25)}</td><td>${statusBadge(t.status)}</td><td>${timeAgo(t.createdAt)}</td><td><button class="btn btn-blue btn-sm" onclick="viewTicket(${t.id})">👁️ عرض</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تذاكر</div>';
+}
+async function viewTicket(id){
+  currentTicketId=id;
+  const tickets=await api('api/tickets');
+  const t=tickets.find(x=>x.id===id);if(!t)return;
+  document.getElementById('ticketDetail').style.display='block';
+  document.getElementById('ticketDetailTitle').textContent=`🎫 تذكرة #${id}`;
+  document.getElementById('ticketDetailContent').innerHTML=`
+    <p><strong>العميل:</strong> ${t.username} (${t.userId})</p>
+    <p><strong>الخدمة:</strong> ${t.serviceEmoji||'🎫'} ${t.serviceName}</p>
+    <p><strong>السعر:</strong> ${fmt(t.servicePrice||0)}</p>
+    <p><strong>الحالة:</strong> ${statusBadge(t.status)}</p>
+    <p><strong>القناة:</strong> ${t.channelId}</p>
+    <p><strong>تاريخ الإنشاء:</strong> ${timeAgo(t.createdAt)}</p>
+  `;
+}
+async function replyToTicket(){
+  if(!currentTicketId)return;
+  const msg=document.getElementById('ticketReplyMsg').value.trim();
+  if(!msg)return toast('اكتب رسالة أولاً');
+  await api(`api/tickets/${currentTicketId}/reply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+  document.getElementById('ticketReplyMsg').value='';
+  toast('✅ تم إرسال الرد');
+}
+async function closeTicketFromDetail(){
+  if(!currentTicketId)return;
+  if(!confirm('أنت متأكد من إغلاق التذكرة؟'))return;
+  await api(`api/tickets/${currentTicketId}/close`,{method:'POST'});
+  document.getElementById('ticketDetail').style.display='none';
+  toast('✅ تم إغلاق التذكرة');
+  loadTickets();
+}
+
+// ── SERVICES ──
+async function loadServices(){
+  const services=await api('api/services');
+  const cats=await api('api/categories');
+  const catMap={};if(Array.isArray(cats))cats.forEach(c=>catMap[c.id]=c);
+  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
+}
+function showAddService(){document.getElementById('addServiceForm').style.display='block';}
+async function addService(){
+  const d={name:document.getElementById('svcName').value,description:document.getElementById('svcDesc').value,price:parseFloat(document.getElementById('svcPrice').value),category:document.getElementById('svcCategory').value,emoji:document.getElementById('svcEmoji').value};
+  if(!d.name||!d.price||!d.category)return toast('❌ اكمل كل الحقول');
+  await api('api/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  document.getElementById('addServiceForm').style.display='none';
+  toast('✅ تمت إضافة الخدمة');
+  loadServices();
+}
+async function removeService(id){
+  if(!confirm('أنت متأكد من حذف الخدمة؟'))return;
+  await api(`api/services/${id}`,{method:'DELETE'});
+  toast('✅ تم الحذف');
+  loadServices();
+}
+
+// ── CATEGORIES ──
+async function loadCategories(){
+  const cats=await api('api/categories');
+  const services=await api('api/services');
+  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
+}
+function showAddCategory(){document.getElementById('addCategoryForm').style.display='block';}
+async function addCategory(){
+  const d={id:document.getElementById('catId').value,name:document.getElementById('catName').value,emoji:document.getElementById('catEmoji').value};
+  if(!d.id||!d.name)return toast('❌ اكمل كل الحقول');
+  await api('api/categories',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  document.getElementById('addCategoryForm').style.display='none';
+  toast('✅ تمت إضافة التصنيف');
+  loadCategories();
+}
+async function removeCategory(id){
+  if(!confirm(`حذف التصنيف ${id}؟`))return;
+  const r=await api(`api/categories/${encodeURIComponent(id)}`,{method:'DELETE'});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم الحذف');
+  loadCategories();
+}
+
+// ── MEMBERS ──
+async function loadMembers(){
+  if(!allMembers.length)allMembers=await api('api/members');
+  renderMembers(allMembers);
+}
+function renderMembers(members){
+  document.getElementById('membersList').innerHTML=Array.isArray(members)&&members.length?`<table><tr><th>الصورة</th><th>الاسم</th><th>ID</th><th>دخول</th><th>إجراءات</th></tr>${members.map(m=>`<tr><td><img src="${m.avatar}" width="32" height="32" style="border-radius:50%"></td><td>${m.displayName||m.username}</td><td><small>${m.id}</small></td><td>${m.joinedAt?timeAgo(m.joinedAt):'—'}</td><td class="actions"><button class="btn btn-red btn-sm" onclick="modMember('${m.id}','${m.username}','ban')">🔨 حظر</button><button class="btn btn-yellow btn-sm" onclick="modMember('${m.id}','${m.username}','kick')">🚪 طرد</button><button class="btn btn-purple btn-sm" onclick="modMember('${m.id}','${m.username}','mute')">🔇 كتم</button></td></tr>`).join('')}</table>`:'<div class="empty">لا يوجد أعضاء</div>';
+}
+function filterMembers(){
+  const q=document.getElementById('memberSearch').value.toLowerCase();
+  renderMembers(allMembers.filter(m=>(m.username||'').toLowerCase().includes(q)||(m.displayName||'').toLowerCase().includes(q)||m.id.includes(q)));
+}
+async function modMember(userId,username,action){
+  const reasons={ban:'حظر من Dashboard',kick:'طرد من Dashboard',mute:'كتم من Dashboard'};
+  const labels={ban:'حظر',kick:'طرد',mute:'كتم'};
+  if(!confirm(`أنت متأكد من ${labels[action]} ${username}؟`))return;
+  if(action==='mute'){
+    const mins=prompt('مدة الكتم بالدقائق:',5);
+    if(!mins)return;
+    await api('api/mod/mute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId,minutes:parseInt(mins),reason:reasons[action]})});
+  }else{
+    await api(`api/mod/${action}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId,reason:reasons[action]})});
+  }
+  toast(`✅ تم ${labels[action]} ${username}`);
+}
+
+// ── ANNOUNCE ──
+async function sendAnnounce(){
+  const d={title:document.getElementById('annTitle').value,content:document.getElementById('annContent').value,emoji:document.getElementById('annEmoji').value};
+  if(!d.title||!d.content)return toast('❌ اكمل العنوان والمحتوى');
+  const r=await api('api/announce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم الإرسال');
+  document.getElementById('annTitle').value='';document.getElementById('annContent').value='';
+}
+async function sendDirectMessage(){
+  const ch=document.getElementById('sendChannel').value;
+  const content=document.getElementById('sendContent').value;
+  if(!content)return toast('❌ اكتب المحتوى');
+  const r=await api('api/send-message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channelId:ch,content})});
+  if(r.error)return toast('❌ '+r.error);
+  toast('✅ تم الإرسال');
+  document.getElementById('sendContent').value='';
+}
+
+// ── GIVEAWAYS ──
+async function loadGiveaways(){
+  const g=await api('api/giveaways');
+  document.getElementById('giveawaysList').innerHTML=Array.isArray(g)&&g.length?`<table><tr><th>الجائزة</th><th>الفائزين</th><th>المشاركين</th><th>الحالة</th></tr>${g.map(x=>`<tr><td>${x.prize}</td><td>${x.winners}</td><td>${x.participants?.length||0}</td><td>${x.ended?'<span class="badge badge-red">منتهية</span>':'<span class="badge badge-green">نشطة</span>'}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد سحبيات</div>';
+}
+
+// ── SETTINGS ──
+async function loadSettings(){
+  const config=await api('api/config');
+  document.getElementById('automodSettings').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+      <span>🚫 Anti-Spam</span>
+      <label class="toggle"><input type="checkbox" ${config.automod?.antispam?'checked':''} onchange="updateAutomod('antispam',this.checked)"><span class="slider"></span></label>
+      <span class="badge badge-${config.automod?.antispam?'green':'red'}">${config.automod?.antispam?'مفعّل':'معطّل'}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+      <span>🔤 Bad Words Filter</span>
+      <label class="toggle"><input type="checkbox" ${config.automod?.badwords?'checked':''} onchange="updateAutomod('badwords',this.checked)"><span class="slider"></span></label>
+      <span class="badge badge-${config.automod?.badwords?'green':'red'}">${config.automod?.badwords?'مفعّل':'معطّل'}</span>
+    </div>
+    <p style="color:var(--dim);font-size:13px;margin-top:8px">الكلمات الممنوعة: ${(config.automod?.badwordsList||[]).map(w=>`<code>${w}</code>`).join(', ')||'—'}</p>
+  `;
+  document.getElementById('autoRolesSettings').innerHTML=`
+    <p>${(config.autoRoles||[]).length?config.autoRoles.map(id=>`<span class="badge badge-blue"><@&${id}></span>`).join(' '):'لا توجد رولات تلقائية'}</p>
+  `;
+  const channels=Array.isArray(allChannels)?allChannels.filter(c=>c.type===0):[];
+  document.getElementById('logsChannelSelect').innerHTML=channels.map(c=>`<option value="${c.id}" ${config.logsChannel===c.id?'selected':''}>${c.name}</option>`).join('');
+}
+async function updateAutomod(key,value){
+  const config=await api('api/config');
+  const automod={...config.automod,[key]:value};
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({automod})});
+  toast('✅ تم التحديث');
+  loadSettings();
+}
+async function saveLogsChannel(){
+  const ch=document.getElementById('logsChannelSelect').value;
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({logsChannel:ch})});
+  toast('✅ تم حفظ قناة السجلات');
+}
+
+// Auto-refresh
+setInterval(()=>{const p=document.querySelector('.sidebar button.active')?.dataset.page;if(p==='dashboard')loadAll();},30000);
+</script>
+</body>
+</html>
