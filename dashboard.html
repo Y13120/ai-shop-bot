@@ -418,9 +418,10 @@ async function closeTicketFromDetail(){
 // ── SERVICES ──
 async function loadServices(){
   const services=await api('api/services');
+  window._allServices=Array.isArray(services)?services:[];
   const cats=await api('api/categories');
   const catMap={};if(Array.isArray(cats))cats.forEach(c=>catMap[c.id]=c);
-  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-blue btn-sm" onclick='editService(${JSON.stringify(s).replace(/'/g,"&#39;")})'>✏️</button> <button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
+  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-blue btn-sm" onclick="editServiceById(${s.id})">✏️</button> <button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
 }
 function showAddService(){document.getElementById('addServiceForm').style.display='block';}
 async function addService(){
@@ -437,7 +438,9 @@ async function removeService(id){
   toast('✅ تم الحذف');
   loadServices();
 }
-function editService(s){
+function editServiceById(id){
+  const s=window._allServices.find(x=>x.id===id);
+  if(!s)return;
   document.getElementById('editServiceForm').style.display='block';
   document.getElementById('addServiceForm').style.display='none';
   document.getElementById('editSvcId').value=s.id;
@@ -461,8 +464,9 @@ async function updateService(){
 // ── CATEGORIES ──
 async function loadCategories(){
   const cats=await api('api/categories');
+  window._allCats=Array.isArray(cats)?cats:[];
   const services=await api('api/services');
-  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-blue btn-sm" onclick='editCategory(${JSON.stringify(c).replace(/'/g,"&#39;")})'>✏️</button> <button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
+  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-blue btn-sm" onclick="editCategoryById('${c.id}')">✏️</button> <button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
 }
 function showAddCategory(){document.getElementById('addCategoryForm').style.display='block';}
 async function addCategory(){
@@ -480,7 +484,9 @@ async function removeCategory(id){
   toast('✅ تم الحذف');
   loadCategories();
 }
-function editCategory(c){
+function editCategoryById(id){
+  const c=window._allCats.find(x=>x.id===id);
+  if(!c)return;
   document.getElementById('editCategoryForm').style.display='block';
   document.getElementById('addCategoryForm').style.display='none';
   document.getElementById('editCatOrigId').value=c.id;
