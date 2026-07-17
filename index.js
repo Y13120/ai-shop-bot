@@ -75,10 +75,10 @@ const DEFAULT_SERVICES = [
   { id: 40, name: 'تطبيق ويب كامل', description: 'تطوير تطبيق ويب كامل — Frontend + Backend', price: 42000000, category: 'code', emoji: '💻', active: true },
 ];
 const DEFAULT_CATEGORIES = [
-  { id: 'chatgpt', name: '🤖 ChatGPT & AI', emoji: '🤖' },
-  { id: 'photoshop', name: '🖌️ فوتوشوب', emoji: '🖌️' },
-  { id: 'montage', name: '🎬 مونتاج', emoji: '🎬' },
-  { id: 'code', name: '💻 برمجة', emoji: '💻' },
+  { id: 'chatgpt', name: 'ChatGPT & AI', emoji: '🤖' },
+  { id: 'photoshop', name: 'فوتوشوب', emoji: '🖌️' },
+  { id: 'montage', name: 'مونتاج', emoji: '🎬' },
+  { id: 'code', name: 'برمجة', emoji: '💻' },
 ];
 
 const getServices  = () => load('services.json', DEFAULT_SERVICES);
