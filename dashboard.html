@@ -753,7 +753,7 @@ document.querySelectorAll('.page').forEach(p=>observer.observe(p,{attributes:tru
 // ── Keyboard Shortcut (ESC to close modals) ──
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Escape'){
-    document.querySelectorAll('.card[style*="display: none"]').forEach(c=>c.style.display='');
+    document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'));
   }
 });
 
@@ -762,7 +762,7 @@ console.log('%cVisual effects loaded!', 'color:#3fb950');
 </script>
 
 <!-- EDIT MODALS -->
-<div class="modal-overlay" id="editServiceModal" onclick="if(event.target===this)this.style.display='none'">
+<div class="modal-overlay" id="editServiceModal" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="modal-box">
     <div class="modal-header"><h3>✏️ تعديل الخدمة</h3><button class="modal-close" onclick="document.getElementById('editServiceModal').style.display='none'">&times;</button></div>
     <input type="hidden" id="editSvcId" />
@@ -770,17 +770,17 @@ console.log('%cVisual effects loaded!', 'color:#3fb950');
     <div class="form-row"><div><label>التصنيف (ID)</label><input id="editSvcCategory" placeholder="chatgpt, photoshop..." /></div><div><label>الإيموجي</label><input id="editSvcEmoji" /></div></div>
     <label>الوصف</label><textarea id="editSvcDesc"></textarea>
     <div class="form-row"><div><label>الحالة</label><select id="editSvcActive"><option value="true">نشط</option><option value="false">معطّل</option></select></div></div>
-    <div class="actions"><button class="btn btn-blue" onclick="updateService()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editServiceModal').style.display='none'">إلغاء</button></div>
+    <div class="actions"><button class="btn btn-blue" onclick="updateService()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editServiceModal').classList.remove('show')">إلغاء</button></div>
   </div>
 </div>
 
-<div class="modal-overlay" id="editCategoryModal" onclick="if(event.target===this)this.style.display='none'">
+<div class="modal-overlay" id="editCategoryModal" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="modal-box">
-    <div class="modal-header"><h3>✏️ تعديل التصنيف</h3><button class="modal-close" onclick="document.getElementById('editCategoryModal').style.display='none'">&times;</button></div>
+    <div class="modal-header"><h3>✏️ تعديل التصنيف</h3><button class="modal-close" onclick="document.getElementById('editCategoryModal').classList.remove('show')">&times;</button></div>
     <input type="hidden" id="editCatOrigId" />
     <div class="form-row"><div><label>المعرف (إنجليزي)</label><input id="editCatId" /></div><div><label>الاسم بالعربي</label><input id="editCatName" /></div></div>
     <div class="form-row"><div><label>الإيموجي</label><input id="editCatEmoji" /></div></div>
-    <div class="actions"><button class="btn btn-blue" onclick="updateCategory()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editCategoryModal').style.display='none'">إلغاء</button></div>
+    <div class="actions"><button class="btn btn-blue" onclick="updateCategory()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editCategoryModal').classList.remove('show')">إلغاء</button></div>
   </div>
 </div>
 
