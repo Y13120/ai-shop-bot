@@ -387,9 +387,10 @@ function buildNav(){
   const active=allServices.filter(s=>s.active);
   active.forEach(s=>{const c=s.category||'other';if(!grouped[c])grouped[c]=[];grouped[c].push(s)});
   const t=T[lang];
+  const catName=lang==='en'&&(c.nameEn||c.name):c.name;
   let html=`<button class="active" onclick="filterCat('all',this)">${t.navAll}</button>`;
   allCategories.forEach(c=>{
-    if(grouped[c.id])html+=`<button onclick="filterCat('${c.id}',this)">${c.emoji} ${c.name}</button>`;
+    if(grouped[c.id])html+=`<button onclick="filterCat('${c.id}',this)">${c.emoji} ${lang==='en'&&(c.nameEn||c.name):c.name}</button>`;
   });
   html+=`<button id="langToggle" onclick="toggleLang()">${lang==='en'?'🇸🇦 عربي':'🇺🇸 English'}</button>`;
   nav.innerHTML=html;
@@ -415,25 +416,30 @@ function renderServices(){
   catsToShow.forEach(cat=>{
     const svcs=grouped[cat.id];
     if(!svcs||!svcs.length)return;
+    const catLabel=lang==='en'&&(cat.nameEn||cat.name):cat.name;
     html+=`<div class="category-section">
       <div class="category-header">
         <div class="cat-icon">${cat.emoji}</div>
-        <h2>${cat.name}</h2>
+        <h2>${catLabel}</h2>
         <span class="count">${svcs.length} ${t.svcCount}</span>
       </div>
-      <div class="grid">${svcs.map(s=>`
+      <div class="grid">${svcs.map(s=>{
+        const sName=lang==='en'&&(s.nameEn||s.name):s.name;
+        const sDesc=lang==='en'&&(s.descriptionEn||s.description):s.description;
+        const cardData={...s,name:sName,description:sDesc};
+        return`
         <div class="card">
           <div class="card-top"></div>
           <div class="card-body">
             <span class="emoji">${s.emoji||'🛒'}</span>
-            <h3>${s.name}</h3>
-            <div class="desc">${s.description||''}</div>
+            <h3>${sName}</h3>
+            <div class="desc">${sDesc||''}</div>
             <div class="card-footer">
               <div class="price">${fmtPriceAll(s.price)}</div>
-              <button class="btn-order" onclick='openOrder(${JSON.stringify(s).replace(/'/g,"&#39;")})'>${t.orderBtn}</button>
+              <button class="btn-order" onclick='openOrder(${JSON.stringify(cardData).replace(/'/g,"&#39;")})'>${t.orderBtn}</button>
             </div>
           </div>
-        </div>`).join('')}
+        </div>`}).join('')}
       </div>
     </div>`;
   });
@@ -444,7 +450,8 @@ function renderServices(){
 function openOrder(s){
   selectedService=s;
   const t=T[lang];
-  document.getElementById('modalServiceInfo').innerHTML=`<div class="svc-emoji">${s.emoji||'🛒'}</div><div class="svc-name">${s.name}</div><div class="svc-price">${fmtPriceAll(s.price)}</div>`;
+  const oName=lang==='en'?(s.nameEn||s.name):s.name;
+  document.getElementById('modalServiceInfo').innerHTML=`<div class="svc-emoji">${s.emoji||'🛒'}</div><div class="svc-name">${oName}</div><div class="svc-price">${fmtPriceAll(s.price)}</div>`;
   document.getElementById('orderQty').value=1;
   document.getElementById('orderNotes').value='';
   document.getElementById('orderModal').classList.add('show');

@@ -1,6 +1,6 @@
 [
-  { "id": "chatgpt", "name": "ChatGPT & AI", "emoji": "🤖" },
-  { "id": "photoshop", "name": "فوتوشوب", "emoji": "🖌️" },
-  { "id": "montage", "name": "مونتاج", "emoji": "🎬" },
-  { "id": "code", "name": "برمجة", "emoji": "💻" }
+  { "id": "chatgpt", "name": "ChatGPT & AI", "nameEn": "ChatGPT & AI", "emoji": "🤖" },
+  { "id": "photoshop", "name": "فوتوشوب", "nameEn": "Design & Photoshop", "emoji": "🖌️" },
+  { "id": "montage", "name": "مونتاج", "nameEn": "Video Editing", "emoji": "🎬" },
+  { "id": "code", "name": "برمجة", "nameEn": "Programming", "emoji": "💻" }
 ]
