@@ -348,5 +348,15 @@
     "emoji": "💻",
     "active": true,
     "createdAt": 1752556800000
+  },
+  {
+    "id": 36,
+    "name": "سيستم متجر",
+    "price": 83000000,
+    "category": "code",
+    "emoji": "🛒",
+    "description": "نظام متجر إلكتروني كامل مع سلة مشتريات ودفع إلكتروني",
+    "active": true,
+    "cooldown": 0
   }
 ]
