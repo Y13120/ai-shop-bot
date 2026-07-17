@@ -205,12 +205,26 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
     <h3>📝 اطلب الخدمة</h3>
     <div class="selected-service" id="modalServiceInfo"></div>
     <div class="form-group">
-      <label>الاسم الكامل</label>
+      <label>الاسم الكامل <span style="color:var(--accent)">*</span></label>
       <input id="orderName" placeholder="اسمك هنا" />
     </div>
     <div class="form-group">
-      <label>اسم المستخدم في Discord</label>
+      <label>اسم المستخدم في Discord <span style="color:var(--accent)">*</span></label>
       <input id="orderDiscord" placeholder="username" />
+      <small style="color:var(--muted);font-size:.8em;margin-top:4px;display:block">اسم المستخدم بدون # — مثال: ahmed</small>
+    </div>
+    <div class="form-group">
+      <label>طريقة التواصل <span style="color:var(--accent)">*</span></label>
+      <select id="orderContactType">
+        <option value="discord">Discord</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="telegram">Telegram</option>
+        <option value="email">بريد إلكتروني</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>رقم / يوزر طريقة التواصل <span style="color:var(--accent)">*</span></label>
+      <input id="orderContact" placeholder="رقم الجوال أو يوزر أو إيميل" />
     </div>
     <div class="form-group">
       <label>الكمية</label>
@@ -342,12 +356,16 @@ async function submitOrder(){
   if(!selectedService)return;
   const name=document.getElementById('orderName').value.trim();
   const discord=document.getElementById('orderDiscord').value.trim();
+  const contactType=document.getElementById('orderContactType').value;
+  const contact=document.getElementById('orderContact').value.trim();
   const qty=parseInt(document.getElementById('orderQty').value)||1;
   const notes=document.getElementById('orderNotes').value.trim();
-  if(!name||!discord)return toast('❌ اكمل الاسم واسم المستخدم في Discord');
+  if(!name)return toast('❌ اكتب اسمك الكامل');
+  if(!discord||discord.length<2)return toast('❌ اكتب يوزر Discord صحيح');
+  if(!contact)return toast('❌ اكتب رقم أو يوزر طريقة التواصل');
   const btn=document.querySelector('.btn-submit');
   btn.textContent='⏳ جاري الإرسال...';btn.disabled=true;
-  const r=await api('api/shop/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serviceId:selectedService.id,name,discord,qty,notes})});
+  const r=await api('api/shop/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serviceId:selectedService.id,name,discord,contactType,contact,qty,notes})});
   btn.textContent='✅ إرسال الطلب';btn.disabled=false;
   if(r&&r.error)return toast('❌ '+r.error);
   closeModal();
