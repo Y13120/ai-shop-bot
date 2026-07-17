@@ -322,26 +322,41 @@ function showPage(name){
 }
 
 // ── SHOP ORDERS ──
+const CREDITS_TO_EGP_D=0.6/1000000;
+const EGP_TO_USD_D=1/50.5;
+function fmtOrderPrice(credits){
+  const egp=(credits*CREDITS_TO_EGP_D).toFixed(2);
+  const usd=(credits*CREDITS_TO_EGP_D*EGP_TO_USD_D).toFixed(2);
+  return `${fmt(credits)}<br><small style="color:var(--dim)">${egp} ج.م | $${usd}</small>`;
+}
 let ordersRefreshInterval=null;
 async function loadShopOrders(){
   let orders=await api('api/shop-orders');
   if(!Array.isArray(orders))orders=[];
   const filter=document.getElementById('orderStatusFilter').value;
   if(filter!=='all')orders=orders.filter(o=>o.status===filter);
-  const statusLabels={pending:'⏳ بانتظار القبول',accepted:'✅ مقبول',completed:'🏆 مكتمل',closed:'🔒 مغلق'};
-  const statusColors={pending:'#f1c40f',accepted:'#3498db',completed:'#2ecc71',closed:'#e74c3c'};
+  const statusLabels={pending:'⏳ بانتظار القبول',accepted:'✅ مقبول',completed:'🏆 مكتمل',closed:'🔒 مغلق',cancelled:'❌ ملغي'};
+  const statusColors={pending:'#f1c40f',accepted:'#3498db',completed:'#2ecc71',closed:'#e74c3c',cancelled:'#95a5a6'};
   const contactLabels={discord:'Discord',whatsapp:'WhatsApp',telegram:'Telegram',email:'بريد إلكتروني'};
-  document.getElementById('shopOrdersList').innerHTML=orders.length?`<table><tr><th>#</th><th>العميل</th><th>Discord</th><th>التواصل</th><th>الخدمة</th><th>الكمية</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th></tr>${orders.map(o=>`<tr>
+  document.getElementById('shopOrdersList').innerHTML=orders.length?`<table><tr><th>#</th><th>العميل</th><th>Discord</th><th>التواصل</th><th>الخدمة</th><th>الكمية</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr>${orders.map(o=>`<tr>
     <td><strong>${o.id}</strong></td>
     <td>${o.customerName||'—'}</td>
     <td><code>${o.username||'—'}</code></td>
     <td>${contactLabels[o.contactType]||o.contactType||'—'}: ${o.contact||'—'}</td>
     <td>${o.serviceEmoji||'🛒'} ${o.serviceName||'—'}</td>
     <td>${o.qty||1}</td>
-    <td>${fmt(o.servicePrice*(o.qty||1))}</td>
+    <td>${fmtOrderPrice(o.servicePrice*(o.qty||1))}</td>
     <td><span style="color:${statusColors[o.status]||'#888'};font-weight:700">${statusLabels[o.status]||o.status}</span></td>
     <td>${timeAgo(o.createdAt)}</td>
+    <td class="actions">${o.status==='pending'?`<button class="btn btn-green btn-sm" onclick="updateOrderStatus(${o.id},'accepted')">✅ قبول</button>`:''}${o.status==='accepted'?`<button class="btn btn-blue btn-sm" onclick="updateOrderStatus(${o.id},'completed')">🏆 إنهاء</button>`:''}${o.status!=='closed'&&o.status!=='cancelled'?`<button class="btn btn-red btn-sm" onclick="updateOrderStatus(${o.id},'closed')">🔒 إغلاق</button>`:''}</td>
   </tr>`).join('')}</table>`:'<div class="empty">لا توجد طلبات</div>';
+}
+async function updateOrderStatus(id,status){
+  const labels={accepted:'قبول',completed:'إنهاء',closed:'إغلاق',cancelled:'إلغاء'};
+  if(!confirm(`تأكيد ${labels[action||status]} الطلب؟`))return;
+  await api(`api/shop-orders/${id}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+  toast('✅ تم تحديث الطلب');
+  loadShopOrders();
 }
 function startOrdersAutoRefresh(){
   if(ordersRefreshInterval)clearInterval(ordersRefreshInterval);

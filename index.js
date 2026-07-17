@@ -1303,6 +1303,30 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, orders);
     }
 
+    // ── POST: Update shop order status ──
+    if (req.method === 'POST' && p.match(/^\/api\/shop-orders\/\d+\/status$/)) {
+      const id = parseInt(p.split('/')[3]);
+      const d = await parseBody(req);
+      const orders = getOrders();
+      const order = orders.find(o => o.id === id);
+      if (!order) return jsonRes(res, 404, { error: 'Order not found' });
+      order.status = d.status;
+      order.updatedAt = Date.now();
+      save('orders.json', orders);
+      if (d.status === 'accepted' && order.channelId) {
+        const g = client.guilds.cache.get(CFG.guildId);
+        if (g) {
+          const ch = g.channels.cache.get(order.channelId);
+          if (ch) {
+            const invite = await ch.createInvite({ maxAge: 86400 * 7, reason: `Order #${id} accepted` }).catch(() => null);
+            const inviteUrl = invite ? `https://discord.gg/${invite.code}` : 'https://discord.gg/a85fhmx4X';
+            await ch.send({ content: `✅ **تم قبول الطلب!**\n\n🎯 انضم للسيرفر عشان تكمل طلبك:\n${inviteUrl}\n\n💡 ادخل التذكرة وتابع طلبك` }).catch(() => {});
+          }
+        }
+      }
+      return jsonRes(res, 200, { ok: true });
+    }
+
     // ── POST: Shop order ──
     if (req.method === 'POST' && p === '/api/shop/order') {
       const d = await parseBody(req);
@@ -1325,6 +1349,9 @@ const apiServer = http.createServer(async (req, res) => {
         .setDescription(`**العميل:** ${d.name}\n**Discord:** ${d.discord}\n**طريقة التواصل:** ${contactLabels[d.contactType] || d.contactType}: ${d.contact}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**الكمية:** ${parseInt(d.qty) || 1}\n**السعر:** \`${fmt(svc.price)}\` × ${parseInt(d.qty) || 1} = \`${fmt(total)}\`\n**الوصف:** ${svc.description || '—'}\n${d.notes ? `**ملاحظات:** ${d.notes}\n` : ''}━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`)
         .setColor(0xF1C40F).setTimestamp();
       await channel.send({ content: `${staffRole || ''}`, embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+      const invite = await channel.createInvite({ maxAge: 86400 * 7, reason: `Shop order #${orderId}` }).catch(() => null);
+      const inviteUrl = invite ? `https://discord.gg/${invite.code}` : 'https://discord.gg/a85fhmx4X';
+      await channel.send({ content: `👋 **مرحباً ${d.name}!**\n\n🎯 انضم للسيرفر عشان تتابع طلبك:\n${inviteUrl}\n\n💡 اكتب في التذكرة وأي حد من الستاف هيرد عليك` }).catch(() => {});
       await sendLog(g, new EmbedBuilder().setTitle('🛒 طلب من المتجر').setDescription(`**العميل:** ${d.name} (${d.discord})\n**الخدمة:** ${svc.name}\n**المبلغ:** ${fmt(total)}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
       return jsonRes(res, 200, { ok: true, orderId });
     }
