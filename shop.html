@@ -282,7 +282,7 @@ async function init(){
   renderServices();
 }
 
-function buildNav(){
+function animateCounters(){
   document.querySelectorAll('.hero-stat .num').forEach(el=>{
     const target=parseInt(el.textContent)||0;
     if(!target)return;
