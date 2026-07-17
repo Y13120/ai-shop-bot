@@ -52,10 +52,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* ── NAV ── */
 nav{position:sticky;top:0;z-index:100;background:rgba(6,6,11,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center}
-nav .nav-currency{margin-left:auto;display:flex;gap:4px}
-nav .nav-currency button{background:rgba(30,30,48,.6);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.8em;font-weight:600;transition:all .3s}
-nav .nav-currency button:hover{background:rgba(245,197,24,.1);color:var(--gold);border-color:rgba(245,197,24,.3)}
-nav .nav-currency button.active{background:var(--gold);color:#000;border-color:var(--gold);box-shadow:0 0 15px rgba(245,197,24,.3)}
 nav button{background:rgba(30,30,48,.6);border:1px solid var(--border);color:var(--muted);padding:9px 24px;border-radius:30px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.9em;font-weight:600;transition:all .3s}
 nav button:hover{background:rgba(233,69,96,.1);color:var(--accent);border-color:rgba(233,69,96,.3)}
 nav button.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 20px rgba(233,69,96,.35)}
@@ -83,13 +79,10 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 .card h3{font-size:1.1em;font-weight:700;margin-bottom:8px;color:#fff}
 .card .desc{color:var(--muted);font-size:.88em;margin-bottom:20px;line-height:1.7;flex:1}
 .card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border)}
-.card .price{font-size:1em;font-weight:900;color:var(--gold);display:flex;flex-direction:column;gap:2px}
-.card .price .price-credits{font-size:1.1em}
-.card .price .price-egp,.card .price .price-usd{font-size:.8em;color:var(--muted);font-weight:600}
-.card .price [data-cur]:not(.active){display:none}
-.card .price[data-show="credits"] .price-credits{display:block}
-.card .price[data-show="egp"] .price-egp{display:block}
-.card .price[data-show="usd"] .price-usd{display:block}
+.card .price{font-size:.9em;font-weight:700;color:var(--gold);display:flex;flex-direction:column;gap:3px}
+.card .price .price-usd{font-size:1.1em;font-weight:900;color:var(--gold)}
+.card .price .price-egp{color:var(--green)}
+.card .price .price-credits{color:var(--muted);font-size:.85em}
 .btn-order{background:linear-gradient(135deg,var(--accent),#c0392b);color:#fff;border:none;padding:10px 24px;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.9em;font-weight:700;transition:all .3s;position:relative;overflow:hidden}
 .btn-order::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.15);border-radius:50%;transform:translate(-50%,-50%);transition:width .4s,height .4s}
 .btn-order:hover::after{width:200px;height:200px}
@@ -104,12 +97,10 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 .modal .selected-service{background:var(--card);border:1px solid rgba(233,69,96,.3);border-radius:14px;padding:18px;margin-bottom:24px;text-align:center}
 .modal .selected-service .svc-emoji{font-size:2.2em;margin-bottom:8px}
 .modal .selected-service .svc-name{font-weight:700;font-size:1.1em;color:#fff;margin-bottom:4px}
-.modal .selected-service .svc-price{color:var(--gold);font-weight:900;font-size:1em;display:flex;flex-direction:column;gap:2px}
-.modal .selected-service .svc-price .price-credits{font-size:1.1em}
-.modal .selected-service .svc-price .price-egp,.modal .selected-service .svc-price .price-usd{font-size:.85em;color:var(--muted);font-weight:600}
-.modal .selected-service .svc-price[data-show="credits"] .price-credits{display:block}
-.modal .selected-service .svc-price[data-show="egp"] .price-egp{display:block}
-.modal .selected-service .svc-price[data-show="usd"] .price-usd{display:block}
+.modal .selected-service .svc-price{font-weight:700;font-size:.9em;display:flex;flex-direction:column;gap:3px}
+.modal .selected-service .svc-price .price-usd{font-size:1.1em;font-weight:900;color:var(--gold)}
+.modal .selected-service .svc-price .price-egp{color:var(--green)}
+.modal .selected-service .svc-price .price-credits{color:var(--muted);font-size:.85em}
 .form-group{margin-bottom:18px}
 .form-group label{display:block;margin-bottom:8px;font-weight:600;color:var(--muted);font-size:.88em}
 .form-group input,.form-group textarea{width:100%;padding:13px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:#fff;font-family:'Cairo',sans-serif;font-size:.95em;transition:all .3s}
@@ -198,9 +189,7 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 </div>
 
 <!-- NAV -->
-<nav id="catNav">
-  <div class="nav-currency" id="currencyNav"></div>
-</nav>
+<nav id="catNav"></nav>
 
 <!-- SERVICES -->
 <div class="container" id="shopContent">
@@ -259,7 +248,6 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 
 <script>
 let allServices=[],allCategories=[],selectedService=null;
-let currentCurrency='credits';
 const API=location.origin+'/';
 const CREDITS_TO_EGP=0.6/1000000;
 const EGP_TO_USD=1/50.5;
@@ -268,16 +256,17 @@ async function api(u,opts={}){
   try{const r=await fetch(API+u,opts);return await r.json()}catch{return null}
 }
 
-function fmtCredits(n){return (n||0).toLocaleString('ar-EG')+' كريديت'}
-function fmtEGP(n){return (n*CREDITS_TO_EGP).toFixed(2)+' ج.م'}
-function fmtUSD(n){return '$'+(n*CREDITS_TO_EGP*EGP_TO_USD).toFixed(2)}
-function fmtPrice(credits){
-  if(currentCurrency==='egp')return fmtEGP(credits);
-  if(currentCurrency==='usd')return fmtUSD(credits);
-  return fmtCredits(credits);
+function compactNum(n){
+  if(n>=1000000000)return(n/1000000000).toFixed(1).replace(/\.0$/,'')+'b';
+  if(n>=1000000)return(n/1000000).toFixed(1).replace(/\.0$/,'')+'m';
+  if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'k';
+  return n.toString();
 }
+function fmtCredits(n){return compactNum(n||0)}
+function fmtEGP(n){return compactNum(Math.round(n*CREDITS_TO_EGP))+' ج.م'}
+function fmtUSD(n){return '$'+(n*CREDITS_TO_EGP*EGP_TO_USD).toFixed(1)}
 function fmtPriceAll(credits){
-  return `<span class="price-credits">${fmtCredits(credits)}</span><span class="price-egp">${fmtEGP(credits)}</span><span class="price-usd">${fmtUSD(credits)}</span>`;
+  return `<span class="price-usd">${fmtUSD(credits)}</span><span class="price-egp">${fmtEGP(credits)}</span><span class="price-credits">${fmtCredits(credits)} كريديت</span>`;
 }
 
 async function init(){
@@ -289,27 +278,11 @@ async function init(){
   document.getElementById('statServices').textContent=active.length;
   document.getElementById('statCategories').textContent=allCategories.length;
   animateCounters();
-  buildCurrencyNav();
   buildNav();
   renderServices();
 }
 
-function buildCurrencyNav(){
-  document.getElementById('currencyNav').innerHTML=`
-    <button class="active" onclick="setCurrency('credits',this)">كريديت</button>
-    <button onclick="setCurrency('egp',this)">ج.م</button>
-    <button onclick="setCurrency('usd',this)">$ USD</button>
-  `;
-}
-
-function setCurrency(c,btn){
-  currentCurrency=c;
-  document.querySelectorAll('.nav-currency button').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  renderServices();
-}
-
-function animateCounters(){
+function buildNav(){
   document.querySelectorAll('.hero-stat .num').forEach(el=>{
     const target=parseInt(el.textContent)||0;
     if(!target)return;
@@ -368,7 +341,7 @@ function renderServices(){
             <h3>${s.name}</h3>
             <div class="desc">${s.description||'لا يوجد وصف'}</div>
             <div class="card-footer">
-              <div class="price" data-show="${currentCurrency}">${fmtPriceAll(s.price)}</div>
+              <div class="price">${fmtPriceAll(s.price)}</div>
               <button class="btn-order" onclick='openOrder(${JSON.stringify(s).replace(/'/g,"&#39;")})'>اطلب الآن</button>
             </div>
           </div>
@@ -382,7 +355,7 @@ function renderServices(){
 
 function openOrder(s){
   selectedService=s;
-  document.getElementById('modalServiceInfo').innerHTML=`<div class="svc-emoji">${s.emoji||'🛒'}</div><div class="svc-name">${s.name}</div><div class="svc-price" data-show="${currentCurrency}">${fmtPriceAll(s.price)}</div>`;
+  document.getElementById('modalServiceInfo').innerHTML=`<div class="svc-emoji">${s.emoji||'🛒'}</div><div class="svc-name">${s.name}</div><div class="svc-price">${fmtPriceAll(s.price)}</div>`;
   document.getElementById('orderQty').value=1;
   document.getElementById('orderNotes').value='';
   document.getElementById('orderModal').classList.add('show');

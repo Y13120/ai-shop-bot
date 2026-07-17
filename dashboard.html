@@ -324,10 +324,17 @@ function showPage(name){
 // ── SHOP ORDERS ──
 const CREDITS_TO_EGP_D=0.6/1000000;
 const EGP_TO_USD_D=1/50.5;
+function compactNumD(n){
+  if(n>=1000000000)return(n/1000000000).toFixed(1).replace(/\.0$/,'')+'b';
+  if(n>=1000000)return(n/1000000).toFixed(1).replace(/\.0$/,'')+'m';
+  if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'k';
+  return n.toString();
+}
 function fmtOrderPrice(credits){
-  const egp=(credits*CREDITS_TO_EGP_D).toFixed(2);
-  const usd=(credits*CREDITS_TO_EGP_D*EGP_TO_USD_D).toFixed(2);
-  return `${fmt(credits)}<br><small style="color:var(--dim)">${egp} ج.م | $${usd}</small>`;
+  const egp=compactNumD(Math.round(credits*CREDITS_TO_EGP_D));
+  const usd='$'+(credits*CREDITS_TO_EGP_D*EGP_TO_USD_D).toFixed(1);
+  const cr=compactNumD(credits);
+  return `<strong style="color:var(--gold)">${usd}</strong> <span style="color:var(--green)">${egp} ج.م</span> <span style="color:var(--dim)">${cr} كريديت</span>`;
 }
 let ordersRefreshInterval=null;
 async function loadShopOrders(){
