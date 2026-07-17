@@ -387,9 +387,8 @@ async function cmdSetup(interaction) {
 
   const ticketCh = g.channels.cache.find(c => c.name.includes('فتح-تذكرة') && c.isTextBased());
   if (ticketCh) {
-    const btn1 = new ButtonBuilder().setCustomId('open_ticket_order').setLabel('🛒 طلب خدمة').setStyle(ButtonStyle.Success);
     const btn2 = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
-    await ticketCh.send({ embeds: [new EmbedBuilder().setTitle('🎫 فتح تذكرة').setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**اختر نوع التذكرة:**\n\n🛒 **طلب خدمة** — لطلب أي خدمة\n🛠️ **دعم فني** — للمساعدة والدعم\n\n━━━━━━━━━━━━━━━━━━━━━').setColor(0x9B59B6).setTimestamp()], components: [new ActionRowBuilder().addComponents(btn1, btn2)] }).catch(() => {});
+    await ticketCh.send({ embeds: [new EmbedBuilder().setTitle('🎫 فتح تذكرة').setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**اضغط الزر لفتح تذكرة دعم فني:**\n\n🛠️ **دعم فني** — للمساعدة والدعم\n\n━━━━━━━━━━━━━━━━━━━━━').setColor(0x9B59B6).setTimestamp()], components: [new ActionRowBuilder().addComponents(btn2)] }).catch(() => {});
   }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
@@ -490,19 +489,7 @@ function getTicketOverwrites(g, userId) {
 }
 
 async function cmdOrder(interaction) {
-  await interaction.deferReply({ ephemeral: true });
-  const id = parseInt(interaction.options.getString('service')), services = getServices(), svc = services.find(s => s.id === id);
-  if (!svc) return interaction.editReply('❌ خدمة غير موجودة. استخدم `/services`');
-  const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
-  const channel = await g.channels.create({ name: `ticket-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
-  const order = { id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() };
-  orders.push(order); save('orders.json', orders);
-  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-  const embed = new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n**الوصف:** ${svc.description || '—'}\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp();
-  await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-  await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
-
-  await sendLog(g, new EmbedBuilder().setTitle('🎫 تذكرة جديدة').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
+  await interaction.reply({ content: '🛒 **اطلب من المتجر:**\nhttps://ai-shop-bot-production.up.railway.app/shop\n\nهناك تقدر تشوف كل الخدمات بالأسعار وتعمل طلب مباشر.', ephemeral: true });
 }
 
 async function cmdSupport(interaction) {
@@ -825,9 +812,8 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.isStringSelectMenu() && interaction.customId === 'services_menu') {
       const id = parseInt(interaction.values[0]), services = getServices(), svc = services.find(s => s.id === id);
       if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
-      const embed = new EmbedBuilder().setTitle(`${svc.emoji || '🛒'} ${svc.name}`).setDescription(svc.description).addFields({ name: '💰 السعر', value: `\`${fmt(svc.price)}\``, inline: true }, { name: '📂 التصنيف', value: svc.category, inline: true }).setColor(0x3498DB).setTimestamp();
-      const btn = new ButtonBuilder().setCustomId(`svc_order_${svc.id}`).setLabel('🛒 اطلب الآن').setStyle(ButtonStyle.Success);
-      await interaction.reply({ embeds: [embed], components: [new ActionRowBuilder().addComponents(btn)], ephemeral: true });
+      const embed = new EmbedBuilder().setTitle(`${svc.emoji || '🛒'} ${svc.name}`).setDescription(svc.description).addFields({ name: '💰 السعر', value: `\`${fmt(svc.price)}\``, inline: true }, { name: '📂 التصنيف', value: svc.category, inline: true }, { name: '🌐 اطلب من المتجر', value: '[AI Shop](https://ai-shop-bot-production.up.railway.app/shop)', inline: true }).setColor(0x3498DB).setTimestamp();
+      await interaction.reply({ embeds: [embed], ephemeral: true });
       return;
     }
 
@@ -835,41 +821,14 @@ client.on('interactionCreate', async (interaction) => {
       const cid = interaction.customId;
 
       if (cid.startsWith('svc_order_')) {
-        const id = parseInt(cid.replace('svc_order_', ''));
-        await interaction.deferReply({ ephemeral: true });
-        const services = getServices(), svc = services.find(s => s.id === id);
-        if (!svc) return interaction.editReply('❌ خدمة غير موجودة');
-        const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
-        const channel = await g.channels.create({ name: `ticket-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
-        orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
-        save('orders.json', orders);
-        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-        await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
-        await sendLog(g, new EmbedBuilder().setTitle('🎫 طلب جديد').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
-        return;
+        return interaction.reply({ content: '❌ هذه الخدمة غير متاحة حالياً', ephemeral: true });
       }
 
       if (cid === 'open_ticket_order') {
-        const g = interaction.guild, services = getServices().filter(s => s.active);
-        if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات', ephemeral: true });
-        const select = new StringSelectMenuBuilder().setCustomId('ticket_service_select').setPlaceholder('🛒 اختر الخدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} كريديت`.substring(0, 100), value: String(s.id) })));
-        await interaction.reply({ content: '🛒 **اختر الخدمة:**', components: [new ActionRowBuilder().addComponents(select)], ephemeral: true });
-        return;
+        return interaction.reply({ content: '❌ استخدم المتجر لطلب الخدمات: https://ai-shop-bot-production.up.railway.app/shop', ephemeral: true });
       }
 
       if (cid === 'ticket_service_select') {
-        const id = parseInt(interaction.values[0]);
-        const services = getServices(), svc = services.find(s => s.id === id);
-        if (!svc) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
-        await interaction.deferReply({ ephemeral: true });
-        const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
-        const channel = await g.channels.create({ name: `ticket-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
-        orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
-        save('orders.json', orders);
-        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n⏳ **في انتظار القبول...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-        await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
         return;
       }
 
