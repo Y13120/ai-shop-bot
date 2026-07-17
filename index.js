@@ -308,38 +308,68 @@ async function cmdSetup(interaction) {
 
   const roles = {};
   const roleDefs = [
+    { k: 'owner', n: '👑 ┃ Owner', c: '#FFD700', p: [PermissionFlagsBits.Administrator] },
     { k: 'admin', n: '⚡⚡⚡ ┃ Admin', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
+    { k: 'mod', n: '🔧 ┃ Moderator', c: '#E67E22', p: [PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.SendMessages] },
     { k: 'staff', n: '⭐⭐⭐ ┃ Staff', c: '#F1C40F', p: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
-    { k: 'customer', n: '🛒 ┃ Customer', c: '#1ABC9C', p: [] },
+    { k: 'trial', n: '🌟 ┃ Trial Staff', c: '#3498DB', p: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
     { k: 'vip', n: '💎 ┃ VIP', c: '#9B59B6', p: [] },
+    { k: 'customer', n: '🛒 ┃ Customer', c: '#1ABC9C', p: [] },
   ];
   for (const rd of roleDefs) {
     try { roles[rd.k] = await g.roles.create({ name: rd.n, color: rd.c, permissions: rd.p }); log.push(`✅ ${rd.n}`); } catch { log.push(`❌ ${rd.n}`); }
     await sleep(600);
   }
 
+  const staffOnly = [
+    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+    { id: roles.staff?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+    { id: roles.admin?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+    { id: roles.owner?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+    { id: roles.mod?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+  ].filter(o => o.id);
+  const adminOnly = [
+    { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+    { id: roles.admin?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+    { id: roles.owner?.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+  ].filter(o => o.id);
   const noSend = [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }];
   const full = [{ id: g.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }];
 
   const structure = [
-    { n: '╔════════ 🏪 المتجر ════════', chs: [
-      { n: '🛒・الخدمات', p: full }, { n: '📝・كيف-تطلب', p: noSend },
+    { n: '╔════════════ 🏪 المتجر ════════════', chs: [
+      { n: '🛒・الخدمات', p: full },
+      { n: '📝・كيف-تطلب', p: noSend },
       { n: '⭐・التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
+      { n: '💬・التواصل-مع-الستاف', p: full },
     ]},
-    { n: '╔════════ 📢 الإعلانات ════════', chs: [
-      { n: '📣・الإعلانات', p: noSend }, { n: '📋・القواعد', p: noSend },
+    { n: '╔════════════ 📢 الإعلانات ════════════', chs: [
+      { n: '📣・الإعلانات', p: noSend },
+      { n: '📋・القواعد', p: noSend },
     ]},
-    { n: '╔════════ 💬 الدردشة ════════', chs: [
-      { n: '💬・العامة', p: full }, { n: '🤖・اوامر-البوت', p: full },
+    { n: '╔════════════ 💬 الدردشة ════════════', chs: [
+      { n: '💬・العامة', p: full },
+      { n: '🤖・اوامر-البوت', p: full },
     ]},
-    { n: '╔════════ 📌 معلومات ════════', chs: [
-      { n: '📊・حالة-السيرفر', p: noSend }, { n: '👋・الترحيب', p: noSend },
+    { n: '╔════════════ 📌 معلومات ════════════', chs: [
+      { n: '📊・حالة-السيرفر', p: noSend },
+      { n: '👋・الترحيب', p: noSend },
     ]},
-    { n: '╔════════ 🎫 التذاكر ════════', chs: [
+    { n: '╔════════════ 🎫 التذاكر ════════════', chs: [
       { n: '🎫・فتح-تذكرة', p: full },
     ]},
-    { n: '╔════════ 🛡️ السجلات ════════', chs: [
+    { n: '╔════════════ 📦 التوصيل ════════════', chs: [
+      { n: '📦・التسليمات', p: noSend },
+    ]},
+    { n: '╔════════════ 👔 الستاف ════════════', chs: [
+      { n: '💼・شات-الستاف', p: staffOnly },
+      { n: '📋・ملاحظات-الستاف', p: staffOnly },
+    ]},
+    { n: '╔════════════ 🛡️ السجلات ════════════', chs: [
       { n: '📝・السجلات', p: noSend },
+    ]},
+    { n: '╔════════════ ⚙️ الإدارة ════════════', chs: [
+      { n: '🔧・لوحة-التحكم', p: adminOnly },
     ]},
   ];
 
@@ -369,28 +399,439 @@ async function cmdSetup(interaction) {
     saveCategories(DEFAULT_CATEGORIES);
   }
 
+  // ── 🛒 الخدمات — Embed + Select Menu + زر طلب ──
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
-    const e = new EmbedBuilder().setTitle('🤖 مرحباً بك في متجر الذكاء الاصطناعي').setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي!** 🚀\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**💡 كيف تطلب؟**\n\n> `1️⃣` اختر الخدمة من القائمة\n> `2️⃣` الستاف هيساعدك\n> `3️⃣` ادفع واستلم\n\n━━━━━━━━━━━━━━━━━━━━━').setColor(0xFF0000).setTimestamp().setFooter({ text: '🛍️ AI Shop Bot' });
-    const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختر خدمة...').addOptions(getServices().filter(s => s.active).slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} كريديت`.substring(0, 100), value: String(s.id) })));
-    const row = new ActionRowBuilder().addComponents(select);
-    await svcCh.send({ embeds: [e], components: [row] }).catch(() => {});
+    const e = new EmbedBuilder()
+      .setTitle('━━━━━━━━━━━ 🏪 متجر الذكاء الاصطناعي ━━━━━━━━━━━')
+      .setDescription(
+        '> **مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي** 🚀\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**💡 كيف تطلب؟**\n\n' +
+        '> `1️⃣` اختر الخدمة من القائمة أدناه\n' +
+        '> `2️⃣` شوف تفاصيل الخدمة والسعر\n' +
+        '> `3️⃣` اضغط زر **"🛒 اطلب الآن"**\n' +
+        '> `4️⃣` هنفتحلك تذكرة وننجز طلبك\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🔗 أو زور متجرنا الإلكتروني:**\n' +
+        '> [🛒 AI Shop — متجرنا](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xFF0000)
+      .setThumbnail(g.iconURL({ dynamic: true }))
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name} — متجر الذكاء الاصطناعي`, iconURL: g.iconURL({ dynamic: true }) });
+    const select = new StringSelectMenuBuilder()
+      .setCustomId('services_menu')
+      .setPlaceholder('🛒 اختر الخدمة التي تريد...')
+      .addOptions(getServices().filter(s => s.active).slice(0, 25).map(s => ({
+        label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
+        description: `${fmt(s.price)} كريديت — ${s.category}`.substring(0, 100),
+        value: String(s.id),
+      })));
+    const row1 = new ActionRowBuilder().addComponents(select);
+    const row2 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop'),
+    );
+    await svcCh.send({ embeds: [e], components: [row1, row2] }).catch(() => {});
   }
 
-  const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
-  if (rulesCh) {
-    await rulesCh.send({ embeds: [new EmbedBuilder().setTitle('📋 قواعد السيرفر').setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**1.** 🤝 احترام الجميع\n**2.** 🚫 لا محتوى مخالف\n**3.** 💰 الدفع مقدماً\n**4.** 🔒 لا تشارك حساباتك\n**5.** 👑 اتبع الادمن\n\n━━━━━━━━━━━━━━━━━━━━━').setColor(0xFFB900).setTimestamp()] }).catch(() => {});
-  }
-
+  // ── 📝 كيف تطلب — Embed محسّن ──
   const howCh = g.channels.cache.find(c => c.name.includes('كيف-تطلب') && c.isTextBased());
   if (howCh) {
-    await howCh.send({ embeds: [new EmbedBuilder().setTitle('📝 دليل طلب الخدمة').setDescription('**Step 1** 🛒 اختر خدمة من القائمة\n**Step 2** 📋 راجع الأسعار\n**Step 3** 💬 تواصل مع الستاف\n**Step 4** 💰 ادفع\n**Step 5** ✅ استلم وقيّم بـ `/review`').setColor(0x2ECC71).setTimestamp()] }).catch(() => {});
+    await howCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📝 دليل طلب الخدمة ━━━━━━━━')
+      .setDescription(
+        '**اتبع الخطوات التالية لطلب أي خدمة:**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**`1️⃣`** 🛒 اختر الخدمة من قناة **🛒・الخدمات**\n\n' +
+        '**`2️⃣`** 📋 راجع تفاصيل الخدمة والسعر\n\n' +
+        '**`3️⃣`** 💬 اضغط زر **"🛒 اطلب الآن"** لفتح تذكرة\n\n' +
+        '**`4️⃣`** 💰 ادفع بالطريقة المناسبة (فودافون كاش / IRAQ PAY)\n\n' +
+        '**`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
+        '**`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**💡 نصائح:**\n' +
+        '> • تأكد من اختيار الخدمة الصحيحة قبل الطلب\n' +
+        '> • احتفظ بـ إيصال الدفع\n' +
+        '> • للأسئلة، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x2ECC71)
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
   }
 
+  // ── ⭐ التقييمات ──
+  const reviewCh = g.channels.cache.find(c => c.name.includes('التقييمات') && c.isTextBased());
+  if (reviewCh) {
+    await reviewCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ ⭐ تقييمات العملاء ━━━━━━━━')
+      .setDescription(
+        '**قيّم تجربتك معنا!**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**كيف تقيّم؟**\n' +
+        '> استخدم أمر `/review` مع رقم الخدمة والتقييم\n\n' +
+        '**مثال:**\n' +
+        '> `/review service:1 rating:5 comment:خدمة ممتازة!`\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📊 رصد التقييمات:**\n' +
+        '> استخدم `/leaderboard` لرؤية أفضل الزبائن\n' +
+        '> استخدم `/stats` لرؤية إحصائيات البوت\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xF1C40F)
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 💬 التواصل مع الستاف — جديد ──
+  const contactCh = g.channels.cache.find(c => c.name.includes('التواصل-مع-الستاف') && c.isTextBased());
+  if (contactCh) {
+    await contactCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 💬 التواصل مع الستاف ━━━━━━━━')
+      .setDescription(
+        '**تحتاج مساعدة؟ تواصل مع الستاف:**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🎫 فتح تذكرة:**\n' +
+        '> اذهب إلى قناة **🎫・فتح-تذكرة** واضغط زر الدعم الفني\n\n' +
+        '**🛒 طلب خدمة:**\n' +
+        '> اذهب إلى قناة **🛒・الخدمات** واختر الخدمة المطلوبة\n\n' +
+        '**💬 الشات العام:**\n' +
+        '> يمكنك كتابة أي سؤال في قناة **💬・العامة**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**⏰ أوقات الاستجابة:**\n' +
+        '> • **الدعم الفني:** خلال 5-15 دقيقة\n' +
+        '> • **الطلبات:** خلال 5-30 دقيقة\n' +
+        '> • **الاستفسارات:** خلال ساعة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x58A6FF)
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 📣 الإعلانات ──
+  const annCh = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
+  if (annCh) {
+    await annCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📣 الإعلانات ━━━━━━━━')
+      .setDescription(
+        '**تابع آخر الإعلانات والأخبار هنا**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 🔔 فعّل الإشعارات عشان ما تفوتك أي حاجة\n' +
+        '> 📢 الإعلانات تشمل العروض والخدمات الجديدة\n' +
+        '> 🎉 مسابقات وسحبية أحياناً\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x9B59B6)
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 📋 القواعد — محسّنة ومحترمة ──
+  const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
+  if (rulesCh) {
+    await rulesCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━━━ 📋 قواعد السيرفر ━━━━━━━━━━')
+      .setDescription(
+        '> **القواعد العامة لسيرفر `AI Shop Bot`**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📌 القسم الأول — السلوك العام**\n\n' +
+        '> **1.** 🤝 **الاحترام المتبادل** — يُمنع الإهانة أو السخرية من أي عضو بأي شكل\n' +
+        '> **2.** 🚫 **لا محتوى مخالف** — يُمنع أي محتوى خارج أو عنصري أو مسيء\n' +
+        '> **3.** 🗣️ **اللغة العربية** — يُفضل التواصل بالعربية، الإنجليزية مقبولة\n' +
+        '> **4.** 🔞 **لا محتوى 18+** — يُمنع أي محتوى للبالغين\n\n' +
+        '**📌 القسم الثاني — الطلبات والخدمات**\n\n' +
+        '> **5.** 💰 **الدفع مقدماً** — لا يُنفّذ أي طلب بدون دفع مسبق\n' +
+        '> **6.** 📋 **التفاصيل الصحيحة** — تأكد من صحة بياناتك عند الطلب\n' +
+        '> **7.** ⏳ **الانتظار** — الستاف ينجزوا الطلبات بالترتيب، لا تستعجل\n\n' +
+        '**📌 القسم الثالث — الحماية والخصوصية**\n\n' +
+        '> **8.** 🔒 **لا تشارك حساباتك** — يُمنع مشاركة أي بيانات حساباتك\n' +
+        '> **9.** 🛡️ **لا سبام** — يُمنع إرسال الرسائل المتكررة أو الرسائل المزعجة\n\n' +
+        '**📌 القسم الرابع — القيادة**\n\n' +
+        '> **10.** 👑 **اتبع الستاف** — أوامر الستاف نهائية ولا تُناقش علنياً\n' +
+        '> **11.** 📢 **لا سبام أوامر** — لا تكرر الأوامر أو الاستفسارات\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**⚠️ عقوبات المخالفات:**\n' +
+        '> • **مخالفة أولى:** تحذير شفهي\n' +
+        '> • **مخالفة ثانية:** كتم لمدة ساعة\n' +
+        '> • **مخالفة ثالثة:** طرد من السيرفر\n' +
+        '> • **مخالفة رابعة:** حظر دائم\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📝 بالدخول للسيرفر، أنت توافق على هذه القواعد**'
+      )
+      .setColor(0xE67E22)
+      .setTimestamp()
+      .setFooter({ text: `⚖️ ${g.name} — القواعد والإرشادات`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 💬 العامة ──
+  const generalCh = g.channels.cache.find(c => c.name.includes('العامة') && c.isTextBased());
+  if (generalCh) {
+    await generalCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 💬 الشات العام ━━━━━━━━')
+      .setDescription(
+        '**مرحباً بك في الشات العام!** 🎉\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 💬 تواصل مع الأعضاء وشارك أفكارك\n' +
+        '> 🤝 تعرّف على أعضاء السيرفر الجدد\n' +
+        '> ❓ اسأل أي سؤال عن الخدمات\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📌 تذكّر:**\n' +
+        '> احترم الجميع · لا سبام · لا محتوى مخالف\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x58A6FF)
+      .setTimestamp()
+      .setFooter({ text: `💬 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 🤖 اوامر البوت ──
+  const botCmdCh = g.channels.cache.find(c => c.name.includes('اوامر-البوت') && c.isTextBased());
+  if (botCmdCh) {
+    await botCmdCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 🤖 أوامر البوت ━━━━━━━━')
+      .setDescription(
+        '**قائمة أوامر البوت المتاحة:**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🛒 المتجر والطلبات:**\n' +
+        '> `/services` — عرض قائمة الخدمات\n' +
+        '> `/order service:رقم` — طلب خدمة\n' +
+        '> `/support` — فتح تذكرة دعم فني\n' +
+        '> `/close` — إغلاق التذكرة الحالية\n\n' +
+        '**⭐ التقييمات:**\n' +
+        '> `/review service:رقم rating:1-5` — تقييم خدمة\n' +
+        '> `/leaderboard` — ترتيب الزبائن\n' +
+        '> `/top-customers` — أفضل الزبائن\n\n' +
+        '**🛡️ الإدارة (للستاف فقط):**\n' +
+        '> `/ban` — حظر عضو\n' +
+        '> `/kick` — طرد عضو\n' +
+        '> `/mute` — كتم عضو\n' +
+        '> `/warn` — تحذير عضو\n' +
+        '> `/purge` — مسح رسائل\n\n' +
+        '**📌 معلومات:**\n' +
+        '> `/server-info` — معلومات السيرفر\n' +
+        '> `/user-info` — معلومات عضو\n' +
+        '> `/stats` — إحصائيات البوت\n' +
+        '> `/ticket-stats` — إحصائيات التذاكر\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x7D8590)
+      .setTimestamp()
+      .setFooter({ text: `🤖 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 📊 حالة السيرفر ──
+  const statusCh = g.channels.cache.find(c => c.name.includes('حالة-السيرفر') && c.isTextBased());
+  if (statusCh) {
+    const memberCount = g.memberCount || 0;
+    await statusCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📊 حالة السيرفر ━━━━━━━━')
+      .setDescription(
+        `**إحصائيات السيرفر الحية:**\n\n` +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        `👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
+        `📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
+        `🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
+        `🎫 **التذاكر النشطة:** يتم تحديثها تلقائياً\n\n` +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 🔄 هذه القناة تتحدث تلقائياً كل فترة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x9B59B6)
+      .setTimestamp()
+      .setFooter({ text: `📊 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 👋 الترحيب ──
+  const welcomeCh = g.channels.cache.find(c => c.name.includes('الترحيب') && c.isTextBased());
+  if (welcomeCh) {
+    await welcomeCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 👋 مرحباً بك ━━━━━━━━')
+      .setDescription(
+        '**هنا هتستقبل ترحيب كل عضو جديد يدخل السيرفر!**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 🎉 **الترحيب التلقائي** — كل عضو جديد هيستقبل رسالة ترحيب\n' +
+        '> 🤖 **الرول التلقائي** — يتم إعطاء الأعضاء الجدد رول تلقائياً\n' +
+        '> 📢 **معلومات السيرفر** — روابط مهمة للأعضاء الجدد\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🔗 روابط مهمة:**\n' +
+        '> 🛒 [المتجر](https://ai-shop-bot-production.up.railway.app/shop)\n' +
+        '> 📋 [القواعد](#)\n' +
+        '> 🛠️ [الدعم الفني](#)\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x2ECC71)
+      .setTimestamp()
+      .setFooter({ text: `👋 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 🎫 فتح تذكرة ──
   const ticketCh = g.channels.cache.find(c => c.name.includes('فتح-تذكرة') && c.isTextBased());
   if (ticketCh) {
     const btn2 = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
-    await ticketCh.send({ embeds: [new EmbedBuilder().setTitle('🎫 فتح تذكرة').setDescription('━━━━━━━━━━━━━━━━━━━━━\n\n**اضغط الزر لفتح تذكرة دعم فني:**\n\n🛠️ **دعم فني** — للمساعدة والدعم\n\n━━━━━━━━━━━━━━━━━━━━━').setColor(0x9B59B6).setTimestamp()], components: [new ActionRowBuilder().addComponents(btn2)] }).catch(() => {});
+    const btnShop = new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop');
+    await ticketCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━━━ 🎫 فتح تذكرة ━━━━━━━━━━')
+      .setDescription(
+        '**تحتاج مساعدة؟ افتح تذكرة دعم فني**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🛠️ الدعم الفني**\n' +
+        '> • للمساعدة في الطلبات\n' +
+        '> • للاستفسارات عن الخدمات\n' +
+        '> • للشكاوى والاقتراحات\n\n' +
+        '**⏰ وقت الاستجابة:** 5-15 دقيقة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**💡 نصيحة:**\n' +
+        '> قبل فتح تذكرة، تأكد أن الإجابة موجودة في:\n' +
+        '> • قناة **📝・كيف-تطلب** — لدليل الطلب\n' +
+        '> • قناة **🤖・اوامر-البوت** — لقائمة الأوامر\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x9B59B6)
+      .setTimestamp()
+      .setFooter({ text: `🎫 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ], components: [new ActionRowBuilder().addComponents(btn2, btnShop)] }).catch(() => {});
+  }
+
+  // ── 📦 التتسليمات — جديد ──
+  const deliveryCh = g.channels.cache.find(c => c.name.includes('التسليمات') && c.isTextBased());
+  if (deliveryCh) {
+    await deliveryCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📦 التوصيل والتسليمات ━━━━━━━━')
+      .setDescription(
+        '**تتبع طلباتك وتسليماتك هنا**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📦 كيف يعمل نظام التوصيل؟**\n\n' +
+        '> `1️⃣` بعد الدفع، يتم فتح تذكرة خاصة بك\n' +
+        '> `2️⃣` الستاف يبدأ في تنفيذ طلبك\n' +
+        '> `3️⃣` بعد الانتهاء، يتم إرسال التسليم هنا\n' +
+        '> `4️⃣` تأكد من استلام طلبك وقيّم بـ `/review`\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**⚠️ ملاحظات مهمة:**\n' +
+        '> • تأكد من فصل التسليم في التذكرة\n' +
+        '> • للتعديل، افتح تذكرة دعم فني جديدة\n' +
+        '> • لا تشارك معلومات التسليم مع أحد\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x2ECC71)
+      .setTimestamp()
+      .setFooter({ text: `📦 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 💼 شات الستاف — جديد ──
+  const staffChatCh = g.channels.cache.find(c => c.name.includes('شات-الستاف') && c.isTextBased());
+  if (staffChatCh) {
+    await staffChatCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 💼 شات الستاف ━━━━━━━━')
+      .setDescription(
+        '**محادثة الستاف الداخلية** 🔒\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 👥 **للستاف فقط** — هذه القناة مقيدة للأعضاء المصرح لهم\n' +
+        '> 📋 **تنسيق الطلبات** — ناقش الطلبات الجديدة والمعلقة\n' +
+        '> 💡 **مشاركة الأفكار** — اقترح تحسينات للخدمة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📌 إرشادات:**\n' +
+        '> • احترم زملاءك في الستاف\n' +
+        '> • لا تشارك معلومات العملاء علنياً\n' +
+        '> • وثّق أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xE74C3C)
+      .setTimestamp()
+      .setFooter({ text: `🔒 ${g.name} — مقيد للستاف`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 📋 ملاحظات الستاف — جديد ──
+  const staffNotesCh = g.channels.cache.find(c => c.name.includes('ملاحظات-الستاف') && c.isTextBased());
+  if (staffNotesCh) {
+    await staffNotesCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📋 ملاحظات الستاف ━━━━━━━━')
+      .setDescription(
+        '**توثيق الملاحظات والتقارير** 📝\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 📊 **تقارير يومية** — سجّل ملخص الطلبات والتسليمات\n' +
+        '> ⚠️ **ملاحظات مهمة** — وثّق أي مشاكل أو ملاحظات\n' +
+        '> 💡 **اقتراحات** — اقترح تحسينات للخدمة أو السيرفر\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📌 كيفية التوثيق:**\n' +
+        '> • ابدأ بعنوان واضح للملاحظة\n' +
+        '> • أضف التاريخ والوقت\n' +
+        '> • اذكر الأعضاء المعنيين إن وجدوا\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xF1C40F)
+      .setTimestamp()
+      .setFooter({ text: `📋 ${g.name} — ملاحظات الستاف`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 📝 السجلات ──
+  if (logsCh) {
+    await logsCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 📝 السجلات ━━━━━━━━')
+      .setDescription(
+        '**سجلات البوت التلقائية** 🔒\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '> 👋 **الترحيب والوداع** — تسجيل دخول وخروج الأعضاء\n' +
+        '> 🛠️ **الدعم الفني** — فتح وإغلاق التذاكر\n' +
+        '> 🛒 **الطلبات** — الطلبات الجديدة والتسليمات\n' +
+        '> ⚠️ **الحماية** — محاولات السبام والكلمات الممنوعة\n' +
+        '> 🛡️ **الإدارة** — التحذيرات والكتم والطرد\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🔒 هذه القناة مقيدة للستاف والمالك فقط**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0x7D8590)
+      .setTimestamp()
+      .setFooter({ text: `🛡️ ${g.name} — السجلات`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
+  }
+
+  // ── 🔧 لوحة التحكم — جديد ──
+  const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة-التحكم') && c.isTextBased());
+  if (adminPanelCh) {
+    await adminPanelCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('━━━━━━━━ 🔧 لوحة التحكم ━━━━━━━━')
+      .setDescription(
+        '**لوحة تحكم البوت الإدارية** 🔒\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🔗 روابط مهمة:**\n\n' +
+        '> 🖥️ [**الداشبورد**](https://ai-shop-bot-production.up.railway.app/dashboard)\n' +
+        '> 🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**📋 أوامر الإدارة:**\n\n' +
+        '> `/setup` — إعداد السيرفر بالكامل\n' +
+        '> `/add-service` — إضافة خدمة جديدة\n' +
+        '> `/edit-service` — تعديل خدمة\n' +
+        '> `/remove-service` — حذف خدمة\n' +
+        '> `/add-category` — إضافة تصنيف\n' +
+        '> `/announce` — إرسال إعلان\n' +
+        '> `/giveaway` — إنشاء سحبية\n' +
+        '> `/auto-role add` — إضافة رول تلقائي\n' +
+        '> `/set-logs` — ضبط قناة السجلات\n' +
+        '> `/automod` — إعداد الحماية\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**🔒 هذه القناة مقيدة للمالك والادمن فقط**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xE74C3C)
+      .setTimestamp()
+      .setFooter({ text: `🔧 ${g.name} — لوحة التحكم`, iconURL: g.iconURL({ dynamic: true }) })
+    ] }).catch(() => {});
   }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
@@ -814,8 +1255,27 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.isStringSelectMenu() && interaction.customId === 'services_menu') {
       const id = parseInt(interaction.values[0]), services = getServices(), svc = services.find(s => s.id === id);
       if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
-      const embed = new EmbedBuilder().setTitle(`${svc.emoji || '🛒'} ${svc.name}`).setDescription(svc.description).addFields({ name: '💰 السعر', value: `\`${fmt(svc.price)}\``, inline: true }, { name: '📂 التصنيف', value: svc.category, inline: true }, { name: '🌐 اطلب من المتجر', value: '[AI Shop](https://ai-shop-bot-production.up.railway.app/shop)', inline: true }).setColor(0x3498DB).setTimestamp();
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      const embed = new EmbedBuilder()
+        .setTitle(`${svc.emoji || '🛒'} ${svc.name}`)
+        .setDescription(svc.description || 'لا يوجد وصف')
+        .addFields(
+          { name: '💰 السعر', value: `\`${fmt(svc.price)} كريديت\``, inline: true },
+          { name: '📂 التصنيف', value: svc.category || 'غير محدد', inline: true },
+          { name: '🌐 اطلب من المتجر', value: `[🛒 AI Shop](https://ai-shop-bot-production.up.railway.app/shop)`, inline: true },
+        )
+        .setColor(0x3498DB)
+        .setTimestamp()
+        .setFooter({ text: '🛍️ اضغط الزر أدناه لطلب هذه الخدمة' });
+      const orderBtn = new ButtonBuilder()
+        .setCustomId(`svc_order_${svc.id}`)
+        .setLabel(`🛒 اطلب — ${svc.name}`)
+        .setStyle(ButtonStyle.Success);
+      const shopBtn = new ButtonBuilder()
+        .setLabel('🌐 زيارة المتجر')
+        .setStyle(ButtonStyle.Link)
+        .setURL('https://ai-shop-bot-production.up.railway.app/shop');
+      const row = new ActionRowBuilder().addComponents(orderBtn, shopBtn);
+      await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
       return;
     }
 
@@ -823,7 +1283,49 @@ client.on('interactionCreate', async (interaction) => {
       const cid = interaction.customId;
 
       if (cid.startsWith('svc_order_')) {
-        return interaction.reply({ content: '❌ هذه الخدمة غير متاحة حالياً', ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
+        const svcId = parseInt(cid.replace('svc_order_', ''));
+        const services = getServices();
+        const svc = services.find(s => s.id === svcId);
+        if (!svc) return interaction.editReply('❌ خدمة غير موجودة');
+
+        const g = interaction.guild;
+        const orderId = Date.now().toString(36).toUpperCase();
+        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+
+        const ow = [
+          { id: g.id, deny: [PermissionFlagsBits.ViewChannel] },
+          { id: interaction.user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+        ];
+        if (staffRole) ow.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+
+        const channel = await g.channels.create({
+          name: `order-${orderId}-${interaction.user.username}`.substring(0, 100),
+          type: ChannelType.GuildText,
+          parent: getTicketCat(g)?.id,
+          permissionOverwrites: ow,
+        });
+
+        const e = new EmbedBuilder()
+          .setTitle(`🛒 طلب خدمة — ${svc.emoji || '🛒'} ${svc.name}`)
+          .setDescription(
+            `**العميل:** ${interaction.user}\n` +
+            `**الخدمة:** ${svc.emoji || '🛒'} ${svc.name}\n` +
+            `**السعر:** \`${fmt(svc.price)} كريديت\`\n` +
+            `**رقم الطلب:** \`${orderId}\`\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `**📝 وصف الخدمة:**\n${svc.description || 'لا يوجد وصف'}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `**💬 اكتب تفاصيل طلبك هنا** و الستاف هيساعدك إن شاء الله`
+          )
+          .setColor(0x2ECC71)
+          .setTimestamp()
+          .setFooter({ text: `🛒 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) });
+
+        await channel.send({ embeds: [e], content: `${interaction.user} ${staffRole ? `— ${staffRole}` : ''}` });
+        await interaction.editReply(`✅ تم فتح تذكرة طلبك: ${channel}`);
+        sendLog(g, `🛒 طلب خدمة جديد — ${svc.name} — ${interaction.user.tag}`);
+        return;
       }
 
       if (cid === 'open_ticket_order') {
