@@ -887,10 +887,9 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       if (cid.startsWith('order_accept_')) {
-        await interaction.deferUpdate();
         const orderId = parseInt(cid.replace('order_accept_', '')), orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.followUp({ content: '❌ غير موجود', ephemeral: true });
-        if (order.status !== 'pending') return interaction.followUp({ content: '❌ تم التعامل معه', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
+        if (order.status !== 'pending') return interaction.reply({ content: '❌ تم التعامل معه', ephemeral: true });
         order.status = 'progress'; order.acceptedBy = interaction.user.id; order.acceptedAt = Date.now();
         save('orders.json', orders);
         await interaction.update({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId} — قيد التنفيذ`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**السعر:** \`${fmt(order.servicePrice || 0)}\`\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n🔄 **جاري التنفيذ...**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
@@ -899,10 +898,9 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       if (cid.startsWith('order_complete_')) {
-        await interaction.deferUpdate();
         const orderId = parseInt(cid.replace('order_complete_', '')), orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.followUp({ content: '❌ غير موجود', ephemeral: true });
-        if (order.status !== 'progress') return interaction.followUp({ content: '❌ لا يمكن الإتمام', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
+        if (order.status !== 'progress') return interaction.reply({ content: '❌ لا يمكن الإتمام', ephemeral: true });
         order.status = 'completed'; order.completedAt = Date.now(); order.completedBy = interaction.user.id;
         save('orders.json', orders);
         await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — مكتمل`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم الإتمام!**\n<@${order.userId}> استخدم \`/review\` لتقييم الخدمة`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
@@ -911,22 +909,20 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       if (cid.startsWith('order_close_') || cid.startsWith('ticket_close_')) {
-        await interaction.deferUpdate();
         const orderId = parseInt(cid.replace('order_close_', '').replace('ticket_close_', ''));
         const orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.followUp({ content: '❌ غير موجودة', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
         order.status = 'closed'; order.closedAt = Date.now(); order.closedBy = interaction.user.id;
         save('orders.json', orders);
-        await interaction.editReply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
+        await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
         await sleep(3000); try { await interaction.channel.delete(); } catch {}
         return;
       }
 
       if (cid === 'giveaway_join') {
-        await interaction.deferUpdate();
         const giveaways = getGiveaways();
         const gw = giveaways.find(g => g.id === interaction.message.id);
-        if (!gw || gw.ended) return interaction.followUp({ content: '❌ السحبية خلصت', ephemeral: true });
+        if (!gw || gw.ended) return interaction.reply({ content: '❌ السحبية خلصت', ephemeral: true });
         const idx = gw.participants.indexOf(interaction.user.id);
         if (idx >= 0) { gw.participants.splice(idx, 1); save('giveaways.json', giveaways); await interaction.update({ components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('giveaway_join').setLabel(`✅ ت participate (${gw.participants.length})`).setStyle(ButtonStyle.Success))] }); return; }
         gw.participants.push(interaction.user.id);
