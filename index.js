@@ -47,7 +47,7 @@ const getServices  = () => load('services.json', []);
 const getReviews   = () => load('reviews.json', []);
 const getOrders    = () => load('orders.json', []);
 const getWarnings  = () => load('warnings.json', []);
-const getCoins     = () => load('coins.json', []);
+
 const getGiveaways = () => load('giveaways.json', []);
 const getSpamData  = () => load('spam.json', []);
 const getRaidData  = () => load('raid.json', []);
@@ -79,29 +79,6 @@ function nextId(arr) {
 
 function ts() { return `<t:${Math.floor(Date.now() / 1000)}:R>`; }
 
-function addCoins(userId, amount) {
-  const coins = getCoins();
-  let entry = coins.find(c => c.userId === userId);
-  if (!entry) { entry = { userId, username: '', coins: 0, totalEarned: 0 }; coins.push(entry); }
-  entry.coins += amount;
-  entry.totalEarned += amount;
-  save('coins.json', coins);
-  return entry.coins;
-}
-
-function removeCoins(userId, amount) {
-  const coins = getCoins();
-  let entry = coins.find(c => c.userId === userId);
-  if (!entry || entry.coins < amount) return false;
-  entry.coins -= amount;
-  save('coins.json', coins);
-  return true;
-}
-
-function getCoinsOf(userId) {
-  const entry = getCoins().find(c => c.userId === userId);
-  return entry ? entry.coins : 0;
-}
 
 async function sendLog(guild, embed) {
   if (!CFG.logsChannel) return;
@@ -244,13 +221,7 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('support').setDescription('فتح تذكرة دعم فني'),
   new SlashCommandBuilder().setName('close').setDescription('إغلاق التذكرة'),
 
-  // ── Coins / Giveaway ──
-  new SlashCommandBuilder().setName('coins').setDescription('عرض رصيدك')
-    .addUserOption(o => o.setName('user').setDescription('عضو')),
-  new SlashCommandBuilder().setName('givecoins').setDescription('إعطاء كريديت لعضو')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
-    .addNumberOption(o => o.setName('amount').setDescription('المبلغ').setRequired(true)),
+  // ── Giveaway ──
   new SlashCommandBuilder().setName('giveaway'). setDescription('إنشاء سحبية')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('prize').setDescription('الجائزة').setRequired(true))
@@ -261,15 +232,11 @@ const COMMANDS = [
     .addStringOption(o => o.setName('message-id').setDescription('رسالة السحبية').setRequired(true)),
 
   // ── General ──
-  new SlashCommandBuilder().setName('credits').setDescription('عرض أو إرسال كريديت')
-    .addUserOption(o => o.setName('user').setDescription('المستخدم'))
-    .addNumberOption(o => o.setName('amount').setDescription('المبلغ')),
   new SlashCommandBuilder().setName('review').setDescription('تقييم خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
     .addNumberOption(o => o.setName('rating').setDescription('التقييم 1-5').setRequired(true))
     .addStringOption(o => o.setName('comment').setDescription('تعليق')),
   new SlashCommandBuilder().setName('leaderboard').setDescription('ترتيب التقييمات'),
-  new SlashCommandBuilder().setName('leaderboard-coins').setDescription('ترتيب الكريديت'),
   new SlashCommandBuilder().setName('server-info').setDescription('معلومات السيرفر'),
   new SlashCommandBuilder().setName('user-info').setDescription('معلومات عضو')
     .addUserOption(o => o.setName('user').setDescription('العضو')),
@@ -363,20 +330,20 @@ async function cmdSetup(interaction) {
     { id: 2, name: 'ChatGPT Plus + DALL-E', description: 'ChatGPT Plus مع DALL-E', price: 22500000, category: 'chatgpt', emoji: '🎨', active: true, createdAt: Date.now() },
     { id: 3, name: 'شات Claude Pro', description: 'وصول Claude Pro لمدة شهر', price: 16500000, category: 'chatgpt', emoji: '🧠', active: true, createdAt: Date.now() },
     { id: 4, name: 'شات Gemini Advanced', description: 'وصول Gemini Advanced', price: 15000000, category: 'chatgpt', emoji: '💎', active: true, createdAt: Date.now() },
-    { id: 5, name: 'Midjourney Pro', description: 'اشتراك Midjourney Pro', price: 21000000, category: 'image', emoji: '🖼️', active: true, createdAt: Date.now() },
-    { id: 6, name: 'تطبيق موبايل', description: 'تطوير تطبيق موبايل بالذكاء الاصطناعي', price: 22500000, category: 'code', emoji: '📱', active: true, createdAt: Date.now() },
-    { id: 7, name: 'تطوير موقع كامل', description: 'تصميم وتطوير موقع احترافي', price: 20300000, category: 'code', emoji: '🌐', active: true, createdAt: Date.now() },
-    { id: 8, name: 'إنشاء فيديو AI', description: 'إنشاء فيديوهات بالذكاء الاصطناعي', price: 15000000, category: 'other', emoji: '🎬', active: true, createdAt: Date.now() },
-    { id: 9, name: 'إنشاء بوت Discord', description: 'إنشاء بوت Discord مخصص', price: 11300000, category: 'code', emoji: '🤖', active: true, createdAt: Date.now() },
-    { id: 10, name: 'تحليل بيانات', description: 'تحليل بيانات وتقارير', price: 9000000, category: 'data', emoji: '📊', active: true, createdAt: Date.now() },
-    { id: 11, name: 'مساعدة برمجية', description: 'مساعدة في البرمجة', price: 6000000, category: 'code', emoji: '💻', active: true, createdAt: Date.now() },
-    { id: 12, name: 'تصميم لوجو AI', description: 'تصميم لوجو بالذكاء الاصطناعي', price: 5300000, category: 'image', emoji: '✏️', active: true, createdAt: Date.now() },
-    { id: 13, name: 'كتابة مقالات ونصوص', description: 'كتابة مقالات ونصوص', price: 4500000, category: 'writing', emoji: '📝', active: true, createdAt: Date.now() },
-    { id: 14, name: 'إعداد سيرفر Discord', description: 'إعداد سيرفر Discord كامل', price: 6000000, category: 'other', emoji: '🎮', active: true, createdAt: Date.now() },
-    { id: 15, name: 'ترجمة احترافية', description: 'ترجمة نصوص بأكثر من لغة', price: 3800000, category: 'writing', emoji: '🌐', active: true, createdAt: Date.now() },
-    { id: 16, name: 'صوت AI — نص لكلام', description: 'تحويل النص إلى صوت', price: 3000000, category: 'voice', emoji: '🔊', active: true, createdAt: Date.now() },
-    { id: 17, name: 'صوت AI — كلام لنص', description: 'تحويل الصوت إلى نص', price: 3000000, category: 'voice', emoji: '🎙️', active: true, createdAt: Date.now() },
-    { id: 18, name: 'توليد صور AI', description: 'توليد صور بالذكاء الاصطناعي', price: 1500000, category: 'image', emoji: '📸', active: true, createdAt: Date.now() },
+    { id: 5, name: 'Midjourney Pro', description: 'اشتراك Midjourney Pro', price: 21000000, category: 'chatgpt', emoji: '🖼️', active: true, createdAt: Date.now() },
+    { id: 6, name: 'تطبيق موبايل', description: 'تطوير تطبيق موبايل بالذكاء الاصطناعي', price: 22500000, category: 'chatgpt', emoji: '📱', active: true, createdAt: Date.now() },
+    { id: 7, name: 'تطوير موقع كامل', description: 'تصميم وتطوير موقع احترافي', price: 20300000, category: 'chatgpt', emoji: '🌐', active: true, createdAt: Date.now() },
+    { id: 8, name: 'إنشاء فيديو AI', description: 'إنشاء فيديوهات بالذكاء الاصطناعي', price: 15000000, category: 'chatgpt', emoji: '🎬', active: true, createdAt: Date.now() },
+    { id: 9, name: 'إنشاء بوت Discord', description: 'إنشاء بوت Discord مخصص', price: 11300000, category: 'chatgpt', emoji: '🤖', active: true, createdAt: Date.now() },
+    { id: 10, name: 'تحليل بيانات', description: 'تحليل بيانات وتقارير', price: 9000000, category: 'chatgpt', emoji: '📊', active: true, createdAt: Date.now() },
+    { id: 11, name: 'مساعدة برمجية', description: 'مساعدة في البرمجة', price: 6000000, category: 'chatgpt', emoji: '💻', active: true, createdAt: Date.now() },
+    { id: 12, name: 'تصميم لوجو AI', description: 'تصميم لوجو بالذكاء الاصطناعي', price: 5300000, category: 'chatgpt', emoji: '✏️', active: true, createdAt: Date.now() },
+    { id: 13, name: 'كتابة مقالات ونصوص', description: 'كتابة مقالات ونصوص', price: 4500000, category: 'chatgpt', emoji: '📝', active: true, createdAt: Date.now() },
+    { id: 14, name: 'إعداد سيرفر Discord', description: 'إعداد سيرفر Discord كامل', price: 6000000, category: 'chatgpt', emoji: '🎮', active: true, createdAt: Date.now() },
+    { id: 15, name: 'ترجمة احترافية', description: 'ترجمة نصوص بأكثر من لغة', price: 3800000, category: 'chatgpt', emoji: '🌐', active: true, createdAt: Date.now() },
+    { id: 16, name: 'صوت AI — نص لكلام', description: 'تحويل النص إلى صوت', price: 3000000, category: 'chatgpt', emoji: '🔊', active: true, createdAt: Date.now() },
+    { id: 17, name: 'صوت AI — كلام لنص', description: 'تحويل الصوت إلى نص', price: 3000000, category: 'chatgpt', emoji: '🎙️', active: true, createdAt: Date.now() },
+    { id: 18, name: 'توليد صور AI', description: 'توليد صور بالذكاء الاصطناعي', price: 1500000, category: 'chatgpt', emoji: '📸', active: true, createdAt: Date.now() },
   ];
   save('services.json', defaultServices);
 
@@ -614,38 +581,8 @@ async function cmdPurge(interaction) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  HANDLERS: CREDITS / COINS / REVIEW / LEADERBOARD
+//  HANDLERS: REVIEW / LEADERBOARD
 // ══════════════════════════════════════════════════════════════
-async function cmdCredits(interaction) {
-  const user = interaction.options.getUser('user') || interaction.user, amount = interaction.options.getNumber('amount');
-  if (amount && interaction.user.id === user.id) return interaction.reply({ content: '❌ لا تقدر تبعت لنفسك', ephemeral: true });
-  if (amount) {
-    await interaction.reply({ embeds: [new EmbedBuilder().setTitle('💰 تحويل كريديت').setDescription(`استخدم:\n\`/credits ${user} ${amount}\``).setColor(0x3498DB).setTimestamp()], ephemeral: true });
-  } else {
-    await interaction.reply({ embeds: [new EmbedBuilder().setTitle('💰 الكريديت').setDescription(`**${user.username}** — استخدم أمر **ProBot**:\n\`/credits\``).setColor(0x2ECC71).setTimestamp()], ephemeral: true });
-  }
-}
-
-async function cmdCoins(interaction) {
-  const user = interaction.options.getUser('user') || interaction.user;
-  const coins = getCoinsOf(user.id);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('💰 الكريديت').setDescription(`**${user.username}** — \`${fmt(coins)}\` كريديت`).setColor(0xF1C40F).setTimestamp()], ephemeral: true });
-}
-
-async function cmdGiveCoins(interaction) {
-  const user = interaction.options.getUser('user'), amount = interaction.options.getNumber('amount');
-  addCoins(user.id, amount);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('💰 تم الإعطاء').setDescription(`**${user}** حصل على \`${fmt(amount)}\` كريديت`).setColor(0x2ECC71).setTimestamp()], ephemeral: true });
-  await sendLog(interaction.guild, new EmbedBuilder().setTitle('💰 كريديت جديد').setDescription(`**بواسطة:** ${interaction.user}\n**لـ:** ${user}\n**المبلغ:** \`${fmt(amount)}\``).setColor(0x2ECC71).setTimestamp());
-}
-
-async function cmdLeaderboardCoins(interaction) {
-  const coins = getCoins().filter(c => c.coins > 0).sort((a, b) => b.coins - a.coins).slice(0, 10);
-  if (!coins.length) return interaction.reply({ content: '📭 لا يوجد كريديت بعد', ephemeral: true });
-  const medals = ['🥇', '🥈', '🥉'];
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('💰 ترتيب الكريديت').setDescription(coins.map((c, i) => `${medals[i] || `**${i + 1}.**`} <@${c.userId}> — \`${fmt(c.coins)}\``).join('\n')).setColor(0xFFD700).setTimestamp()] });
-}
-
 async function cmdReview(interaction) {
   const id = parseInt(interaction.options.getString('service')), rating = interaction.options.getNumber('rating'), comment = interaction.options.getString('comment') || '';
   const services = getServices(), svc = services.find(s => s.id === id);
@@ -654,8 +591,7 @@ async function cmdReview(interaction) {
   const reviews = getReviews();
   reviews.push({ id: nextId(reviews), serviceId: id, serviceName: svc.name, userId: interaction.user.id, username: interaction.user.username, rating, comment, createdAt: Date.now() });
   save('reviews.json', reviews);
-  addCoins(interaction.user.id, 10);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('⭐ تم التقييم').setDescription(`**الخدمة:** ${svc.emoji} ${svc.name}\n**التقييم:** ${'★'.repeat(rating) + '☆'.repeat(5 - rating)}\n**التعليق:** ${comment || '—'}\n\n💰 حصلت على **10 كريديت**`).setColor(0xF1C40F).setTimestamp()] });
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('⭐ تم التقييم').setDescription(`**الخدمة:** ${svc.emoji} ${svc.name}\n**التقييم:** ${'★'.repeat(rating) + '☆'.repeat(5 - rating)}\n**التعليق:** ${comment || '—'}`).setColor(0xF1C40F).setTimestamp()] });
 }
 
 async function cmdLeaderboard(interaction) {
@@ -746,17 +682,15 @@ async function cmdEndGiveaway(interaction) {
 //  HANDLERS: STATS
 // ══════════════════════════════════════════════════════════════
 async function cmdStats(interaction) {
-  const orders = getOrders(), reviews = getReviews(), coins = getCoins(), services = getServices();
+  const orders = getOrders(), reviews = getReviews(), services = getServices();
   const completed = orders.filter(o => o.status === 'completed').length;
   const pending = orders.filter(o => o.status === 'pending' || o.status === 'open' || o.status === 'progress').length;
-  const totalRevenue = coins.reduce((sum, c) => sum + (c.totalEarned || 0), 0);
   const embed = new EmbedBuilder()
     .setTitle('📊 إحصائيات البوت')
     .addFields(
       { name: '🎫 الطلبات', value: `**إجمالي:** ${orders.length}\n**مكتملة:** ${completed}\n**قيد التنفيذ:** ${pending}`, inline: true },
       { name: '⭐ التقييمات', value: `**إجمالي:** ${reviews.length}`, inline: true },
       { name: '🛒 الخدمات', value: `**إجمالي:** ${services.length}`, inline: true },
-      { name: '💰 الكريديت', value: `**إجمالي:** \`${fmt(totalRevenue)}\``, inline: true },
       { name: '👥 الأعضاء', value: `**${interaction.guild.memberCount}**`, inline: true },
       { name: '🎫 السحبيات', value: `**${getGiveaways().length}**`, inline: true },
     )
@@ -832,13 +766,13 @@ async function cmdServerInfo(interaction) {
 async function cmdUserInfo(interaction) {
   const user = interaction.options.getUser('user') || interaction.user, member = await interaction.guild.members.fetch(user.id).catch(() => null);
   const warns = getWarnings().filter(w => w.userId === user.id).length;
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`👤 ${user.username}`).setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 })).addFields({ name: '🆔 ID', value: user.id, inline: true }, { name: '📅 الحساب', value: `<t:${Math.floor(user.createdAt.getTime() / 1000)}:R>`, inline: true }, { name: '📥 دخل', value: member?.joinedAt ? `<t:${Math.floor(member.joinedAt.getTime() / 1000)}:R>` : '—', inline: true }, { name: '⚠️ تحذيرات', value: `${warns}`, inline: true }, { name: '💰 كريديت', value: `\`${fmt(getCoinsOf(user.id))}\``, inline: true }).setColor(0x3498DB).setTimestamp()] });
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`👤 ${user.username}`).setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 })).addFields({ name: '🆔 ID', value: user.id, inline: true }, { name: '📅 الحساب', value: `<t:${Math.floor(user.createdAt.getTime() / 1000)}:R>`, inline: true }, { name: '📥 دخل', value: member?.joinedAt ? `<t:${Math.floor(member.joinedAt.getTime() / 1000)}:R>` : '—', inline: true },     { name: '⚠️ تحذيرات', value: `${warns}`, inline: true }).setColor(0x3498DB).setTimestamp()] });
 }
 
 async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
-    { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/credits` `/coins` `/review` `/leaderboard` `/leaderboard-coins` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
-    { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/givecoins` `/giveaway` `/end-giveaway`' },
+    { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/review` `/leaderboard` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
+    { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/giveaway` `/end-giveaway`' },
     { name: '🔨 moderation', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
   ).setColor(0xFF0000).setTimestamp()], ephemeral: true });
 }
@@ -850,8 +784,8 @@ client.on('interactionCreate', async (interaction) => {
   try {
     if (interaction.isChatInputCommand()) {
       const map = {
-        setup: cmdSetup, services: cmdServices, credits: cmdCredits, coins: cmdCoins, givecoins: cmdGiveCoins,
-        review: cmdReview, leaderboard: cmdLeaderboard, 'leaderboard-coins': cmdLeaderboardCoins,
+        setup: cmdSetup, services: cmdServices,
+        review: cmdReview, leaderboard: cmdLeaderboard,
         help: cmdHelp, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
         'auto-role': cmdAutoRole, 'set-logs': cmdSetLogs, automod: cmdAutomod, announce: cmdAnnounce,
         'add-category': cmdAddCategory, 'remove-category': cmdRemoveCategory, 'list-categories': cmdListCategories,
@@ -947,9 +881,8 @@ client.on('interactionCreate', async (interaction) => {
         if (order.status !== 'progress') return interaction.reply({ content: '❌ لا يمكن الإتمام', ephemeral: true });
         order.status = 'completed'; order.completedAt = Date.now(); order.completedBy = interaction.user.id;
         save('orders.json', orders);
-        addCoins(order.userId, 50);
-        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — مكتمل`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم الإتمام!**\n<@${order.userId}> استخدم \`/review\` + حصلت على **50 كريديت**`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلم! استخدم \`/review\` لتقييم الخدمة + حصلت على **50 كريديت**`).catch(() => {}); } catch {}
+        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — مكتمل`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم الإتمام!**\n<@${order.userId}> استخدم \`/review\` لتقييم الخدمة`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلم! استخدم \`/review\` لتقييم الخدمة`).catch(() => {}); } catch {}
         return;
       }
 
@@ -1028,7 +961,7 @@ client.on('guildMemberAdd', async (member) => {
     if (!ch) return;
     const embed = new EmbedBuilder()
       .setTitle(`مرحباً ${member.user.username}! 🎉`)
-      .setDescription(`━━━━━━━━━━━━━━━━━━━━━\n\n**اهلاً وسهلاً بك في ${g.name}!** 🚀\n\nأنت العضو رقم **${g.memberCount}**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**📦 ابدأ هنا:**\n> 🛒 اختر خدمة من القائمة\n> 💰 رصيدك: \`${fmt(getCoinsOf(member.user.id))}\`\n> ⭐ قيّم بـ \`/review\`\n\n━━━━━━━━━━━━━━━━━━━━━`)
+      .setDescription(`━━━━━━━━━━━━━━━━━━━━━\n\n**اهلاً وسهلاً بك في ${g.name}!** 🚀\n\nأنت العضو رقم **${g.memberCount}**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**📦 ابدأ هنا:**\n> 🛒 اختر خدمة من القائمة\n> ⭐ قيّم بـ \`/review\`\n\n━━━━━━━━━━━━━━━━━━━━━`)
       .setColor(0x2ECC71).setTimestamp().setFooter({ text: `${g.name} • ${g.memberCount} عضو` });
     try { const av = member.user.displayAvatarURL({ dynamic: true, size: 256 }); if (av) embed.setThumbnail(av); } catch {}
     await ch.send({ content: `${member}`, embeds: [embed] }).catch(() => {});
@@ -1041,11 +974,6 @@ client.on('guildMemberRemove', async (member) => {
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.guild) return;
-
-  // Coins for activity
-  if (message.content.length > 5) {
-    addCoins(message.author.id, 1);
-  }
 
   // Anti-spam
   if (checkSpam(message.author.id)) {
@@ -1103,12 +1031,11 @@ const apiServer = http.createServer(async (req, res) => {
     // ── GET ──
     if (req.method === 'GET' && p === '/api/bot') return jsonRes(res, 200, { id: client.user?.id, username: client.user?.username, avatar: client.user?.displayAvatarURL({ dynamic: true, size: 256 }) });
     if (req.method === 'GET' && p === '/api/guild') return jsonRes(res, 200, { id: guild.id, name: guild.name, icon: guild.iconURL({ dynamic: true, size: 256 }), memberCount: guild.memberCount, ownerId: guild.ownerId, boostCount: guild.premiumSubscriptionCount || 0, createdAt: guild.createdAt?.toISOString() });
-    if (req.method === 'GET' && p === '/api/stats') return jsonRes(res, 200, { orders: getOrders().length, completed: getOrders().filter(o => o.status === 'completed').length, reviews: getReviews().length, services: getServices().filter(s => s.active).length, coins: getCoins().reduce((s, c) => s + (c.coins || 0), 0), members: guild?.memberCount || 0, giveaways: getGiveaways().length });
+    if (req.method === 'GET' && p === '/api/stats') return jsonRes(res, 200, { orders: getOrders().length, completed: getOrders().filter(o => o.status === 'completed').length, reviews: getReviews().length, services: getServices().filter(s => s.active).length, members: guild?.memberCount || 0, giveaways: getGiveaways().length });
     if (req.method === 'GET' && p === '/api/services') return jsonRes(res, 200, getServices());
     if (req.method === 'GET' && p === '/api/categories') return jsonRes(res, 200, getCategories());
     if (req.method === 'GET' && p === '/api/tickets') return jsonRes(res, 200, getOrders());
     if (req.method === 'GET' && p === '/api/reviews') return jsonRes(res, 200, getReviews());
-    if (req.method === 'GET' && p === '/api/coins') return jsonRes(res, 200, getCoins());
     if (req.method === 'GET' && p === '/api/warnings') return jsonRes(res, 200, getWarnings());
     if (req.method === 'GET' && p === '/api/giveaways') return jsonRes(res, 200, getGiveaways());
     if (req.method === 'GET' && p === '/api/config') return jsonRes(res, 200, { autoRoles: CFG.autoRoles, logsChannel: CFG.logsChannel, automod: CFG.automod });
