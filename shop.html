@@ -280,6 +280,17 @@ async function init(){
   animateCounters();
   buildNav();
   renderServices();
+  setInterval(async()=>{
+    const sv=await api('api/services');
+    const ct=await api('api/categories');
+    if(Array.isArray(sv))allServices=sv;
+    if(Array.isArray(ct))allCategories=ct;
+    const a=allServices.filter(s=>s.active);
+    document.getElementById('statServices').textContent=a.length;
+    document.getElementById('statCategories').textContent=allCategories.length;
+    buildNav();
+    renderServices();
+  },10000);
 }
 
 function animateCounters(){
