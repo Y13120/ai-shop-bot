@@ -387,7 +387,6 @@ function buildNav(){
   const active=allServices.filter(s=>s.active);
   active.forEach(s=>{const c=s.category||'other';if(!grouped[c])grouped[c]=[];grouped[c].push(s)});
   const t=T[lang];
-  const catName=lang==='en'?(c.nameEn||c.name):c.name;
   let html=`<button class="active" onclick="filterCat('all',this)">${t.navAll}</button>`;
   allCategories.forEach(c=>{
     if(grouped[c.id])html+=`<button onclick="filterCat('${c.id}',this)">${c.emoji} ${lang==='en'?(c.nameEn||c.name):c.name}</button>`;
