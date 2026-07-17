@@ -405,15 +405,15 @@ async function cmdSetup(interaction) {
     const e = new EmbedBuilder()
       .setTitle('━━━━━━━━━━━ 🏪 متجر الذكاء الاصطناعي ━━━━━━━━━━━')
       .setDescription(
-        '> **مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي** 🚀\n\n' +
+        '# مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي 🚀\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**💡 كيف تطلب؟**\n\n' +
-        '> `1️⃣` اختر الخدمة من القائمة أدناه\n' +
-        '> `2️⃣` شوف تفاصيل الخدمة والسعر\n' +
-        '> `3️⃣` اضغط زر **"🛒 اطلب الآن"**\n' +
-        '> `4️⃣` هنفتحلك تذكرة وننجز طلبك\n\n' +
+        '## 💡 كيف تطلب؟\n\n' +
+        '> **`1️⃣`** اختر الخدمة من القائمة أدناه\n' +
+        '> **`2️⃣`** شوف تفاصيل الخدمة والسعر\n' +
+        '> **`3️⃣`** اضغط زر **🛒 اطلب الآن**\n' +
+        '> **`4️⃣`** هنفتحلك تذكرة وننجز طلبك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🔗 أو زور متجرنا الإلكتروني:**\n' +
+        '## 🔗 زور متجرنا الإلكتروني\n\n' +
         '> [🛒 AI Shop — متجرنا](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
@@ -443,16 +443,17 @@ async function cmdSetup(interaction) {
     await howCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📝 دليل طلب الخدمة ━━━━━━━━')
       .setDescription(
-        '**اتبع الخطوات التالية لطلب أي خدمة:**\n\n' +
+        '# 📝 دليل طلب الخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**`1️⃣`** 🛒 اختر الخدمة من قناة **🛒・الخدمات**\n\n' +
-        '**`2️⃣`** 📋 راجع تفاصيل الخدمة والسعر\n\n' +
-        '**`3️⃣`** 💬 اضغط زر **"🛒 اطلب الآن"** لفتح تذكرة\n\n' +
-        '**`4️⃣`** 💰 ادفع بالطريقة المناسبة (فودافون كاش / IRAQ PAY)\n\n' +
-        '**`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
-        '**`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
+        '## اتبع الخطوات التالية:\n\n' +
+        '> **`1️⃣`** 🛒 اختر الخدمة من قناة **🛒・الخدمات**\n\n' +
+        '> **`2️⃣`** 📋 راجع تفاصيل الخدمة والسعر\n\n' +
+        '> **`3️⃣`** 💬 اضغط زر **🛒 اطلب الآن** لفتح تذكرة\n\n' +
+        '> **`4️⃣`** 💰 ادفع بالطريقة المناسبة\n\n' +
+        '> **`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
+        '> **`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**💡 نصائح:**\n' +
+        '## 💡 نصائح مهمة\n\n' +
         '> • تأكد من اختيار الخدمة الصحيحة قبل الطلب\n' +
         '> • احتفظ بـ إيصال الدفع\n' +
         '> • للأسئلة، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
@@ -470,14 +471,14 @@ async function cmdSetup(interaction) {
     await reviewCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ ⭐ تقييمات العملاء ━━━━━━━━')
       .setDescription(
-        '**قيّم تجربتك معنا!**\n\n' +
+        '# ⭐ تقييمات العملاء\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**كيف تقيّم؟**\n' +
+        '## كيف تقيّم؟\n\n' +
         '> استخدم أمر `/review` مع رقم الخدمة والتقييم\n\n' +
-        '**مثال:**\n' +
+        '## مثال\n\n' +
         '> `/review service:1 rating:5 comment:خدمة ممتازة!`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📊 رصد التقييمات:**\n' +
+        '## 📊 رصد التقييمات\n\n' +
         '> استخدم `/leaderboard` لرؤية أفضل الزبائن\n' +
         '> استخدم `/stats` لرؤية إحصائيات البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
@@ -494,19 +495,19 @@ async function cmdSetup(interaction) {
     await contactCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 💬 التواصل مع الستاف ━━━━━━━━')
       .setDescription(
-        '**تحتاج مساعدة؟ تواصل مع الستاف:**\n\n' +
+        '# 💬 التواصل مع الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🎫 فتح تذكرة:**\n' +
+        '## 🎫 فتح تذكرة\n' +
         '> اذهب إلى قناة **🎫・فتح-تذكرة** واضغط زر الدعم الفني\n\n' +
-        '**🛒 طلب خدمة:**\n' +
+        '## 🛒 طلب خدمة\n' +
         '> اذهب إلى قناة **🛒・الخدمات** واختر الخدمة المطلوبة\n\n' +
-        '**💬 الشات العام:**\n' +
+        '## 💬 الشات العام\n' +
         '> يمكنك كتابة أي سؤال في قناة **💬・العامة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**⏰ أوقات الاستجابة:**\n' +
-        '> • **الدعم الفني:** خلال 5-15 دقيقة\n' +
-        '> • **الطلبات:** خلال 5-30 دقيقة\n' +
-        '> • **الاستفسارات:** خلال ساعة\n\n' +
+        '## ⏰ أوقات الاستجابة\n\n' +
+        '> **الدعم الفني:** خلال 5-15 دقيقة\n' +
+        '> **الطلبات:** خلال 5-30 دقيقة\n' +
+        '> **الاستفسارات:** خلال ساعة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x58A6FF)
@@ -521,8 +522,9 @@ async function cmdSetup(interaction) {
     await annCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📣 الإعلانات ━━━━━━━━')
       .setDescription(
-        '**تابع آخر الإعلانات والأخبار هنا**\n\n' +
+        '# 📣 الإعلانات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## تابع آخر الإعلانات والأخبار هنا\n\n' +
         '> 🔔 فعّل الإشعارات عشان ما تفوتك أي حاجة\n' +
         '> 📢 الإعلانات تشمل العروض والخدمات الجديدة\n' +
         '> 🎉 مسابقات وسحبية أحياناً\n\n' +
@@ -540,31 +542,31 @@ async function cmdSetup(interaction) {
     await rulesCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━━━ 📋 قواعد السيرفر ━━━━━━━━━━')
       .setDescription(
-        '> **القواعد العامة لسيرفر `AI Shop Bot`**\n\n' +
+        '# 📋 قواعد السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📌 القسم الأول — السلوك العام**\n\n' +
-        '> **1.** 🤝 **الاحترام المتبادل** — يُمنع الإهانة أو السخرية من أي عضو بأي شكل\n' +
-        '> **2.** 🚫 **لا محتوى مخالف** — يُمنع أي محتوى خارج أو عنصري أو مسيء\n' +
-        '> **3.** 🗣️ **اللغة العربية** — يُفضل التواصل بالعربية، الإنجليزية مقبولة\n' +
+        '## 📌 القسم الأول — السلوك العام\n\n' +
+        '> **1.** 🤝 **الاحترام المتبادل** — يُمنع الإهانة أو السخرية من أي عضو\n' +
+        '> **2.** 🚫 **لا محتوى مخالف** — يُمنع أي محتوى خارج أو عنصري\n' +
+        '> **3.** 🗣️ **اللغة العربية** — يُفضل التواصل بالعربية\n' +
         '> **4.** 🔞 **لا محتوى 18+** — يُمنع أي محتوى للبالغين\n\n' +
-        '**📌 القسم الثاني — الطلبات والخدمات**\n\n' +
-        '> **5.** 💰 **الدفع مقدماً** — لا يُنفّذ أي طلب بدون دفع مسبق\n' +
-        '> **6.** 📋 **التفاصيل الصحيحة** — تأكد من صحة بياناتك عند الطلب\n' +
-        '> **7.** ⏳ **الانتظار** — الستاف ينجزوا الطلبات بالترتيب، لا تستعجل\n\n' +
-        '**📌 القسم الثالث — الحماية والخصوصية**\n\n' +
-        '> **8.** 🔒 **لا تشارك حساباتك** — يُمنع مشاركة أي بيانات حساباتك\n' +
-        '> **9.** 🛡️ **لا سبام** — يُمنع إرسال الرسائل المتكررة أو الرسائل المزعجة\n\n' +
-        '**📌 القسم الرابع — القيادة**\n\n' +
-        '> **10.** 👑 **اتبع الستاف** — أوامر الستاف نهائية ولا تُناقش علنياً\n' +
-        '> **11.** 📢 **لا سبام أوامر** — لا تكرر الأوامر أو الاستفسارات\n\n' +
+        '## 📌 القسم الثاني — الطلبات والخدمات\n\n' +
+        '> **5.** 💰 **الدفع مقدماً** — لا يُنفّذ أي طلب بدون دفع\n' +
+        '> **6.** 📋 **التفاصيل الصحيحة** — تأكد من صحة بياناتك\n' +
+        '> **7.** ⏳ **الانتظار** — الستاف ينجزوا بالترتيب\n\n' +
+        '## 📌 القسم الثالث — الحماية والخصوصية\n\n' +
+        '> **8.** 🔒 **لا تشارك حساباتك** — يُمنع مشاركة بياناتك\n' +
+        '> **9.** 🛡️ **لا سبام** — يُمنع إرسال الرسائل المتكررة\n\n' +
+        '## 📌 القسم الرابع — القيادة\n\n' +
+        '> **10.** 👑 **اتبع الستاف** — أوامر الستاف نهائية\n' +
+        '> **11.** 📢 **لا سبام أوامر** — لا تكرر الاستفسارات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**⚠️ عقوبات المخالفات:**\n' +
-        '> • **مخالفة أولى:** تحذير شفهي\n' +
-        '> • **مخالفة ثانية:** كتم لمدة ساعة\n' +
-        '> • **مخالفة ثالثة:** طرد من السيرفر\n' +
-        '> • **مخالفة رابعة:** حظر دائم\n\n' +
+        '## ⚠️ عقوبات المخالفات\n\n' +
+        '> **مخالفة أولى:** تحذير شفهي\n' +
+        '> **مخالفة ثانية:** كتم لمدة ساعة\n' +
+        '> **مخالفة ثالثة:** طرد من السيرفر\n' +
+        '> **مخالفة رابعة:** حظر دائم\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📝 بالدخول للسيرفر، أنت توافق على هذه القواعد**'
+        '## 📝 بالدخول للسيرفر، أنت توافق على هذه القواعد'
       )
       .setColor(0xE67E22)
       .setTimestamp()
@@ -578,13 +580,14 @@ async function cmdSetup(interaction) {
     await generalCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 💬 الشات العام ━━━━━━━━')
       .setDescription(
-        '**مرحباً بك في الشات العام!** 🎉\n\n' +
+        '# 💬 الشات العام\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## مرحباً بك! 🎉\n\n' +
         '> 💬 تواصل مع الأعضاء وشارك أفكارك\n' +
         '> 🤝 تعرّف على أعضاء السيرفر الجدد\n' +
         '> ❓ اسأل أي سؤال عن الخدمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📌 تذكّر:**\n' +
+        '## 📌 تذكّر\n\n' +
         '> احترم الجميع · لا سبام · لا محتوى مخالف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
@@ -600,24 +603,24 @@ async function cmdSetup(interaction) {
     await botCmdCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 🤖 أوامر البوت ━━━━━━━━')
       .setDescription(
-        '**قائمة أوامر البوت المتاحة:**\n\n' +
+        '# 🤖 أوامر البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🛒 المتجر والطلبات:**\n' +
+        '## 🛒 المتجر والطلبات\n' +
         '> `/services` — عرض قائمة الخدمات\n' +
         '> `/order service:رقم` — طلب خدمة\n' +
         '> `/support` — فتح تذكرة دعم فني\n' +
         '> `/close` — إغلاق التذكرة الحالية\n\n' +
-        '**⭐ التقييمات:**\n' +
+        '## ⭐ التقييمات\n' +
         '> `/review service:رقم rating:1-5` — تقييم خدمة\n' +
         '> `/leaderboard` — ترتيب الزبائن\n' +
         '> `/top-customers` — أفضل الزبائن\n\n' +
-        '**🛡️ الإدارة (للستاف فقط):**\n' +
+        '## 🛡️ الإدارة (للستاف فقط)\n' +
         '> `/ban` — حظر عضو\n' +
         '> `/kick` — طرد عضو\n' +
         '> `/mute` — كتم عضو\n' +
         '> `/warn` — تحذير عضو\n' +
         '> `/purge` — مسح رسائل\n\n' +
-        '**📌 معلومات:**\n' +
+        '## 📌 معلومات\n' +
         '> `/server-info` — معلومات السيرفر\n' +
         '> `/user-info` — معلومات عضو\n' +
         '> `/stats` — إحصائيات البوت\n' +
@@ -637,12 +640,13 @@ async function cmdSetup(interaction) {
     await statusCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📊 حالة السيرفر ━━━━━━━━')
       .setDescription(
-        `**إحصائيات السيرفر الحية:**\n\n` +
+        `# 📊 حالة السيرفر\n\n` +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        `👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
-        `📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
-        `🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
-        `🎫 **التذاكر النشطة:** يتم تحديثها تلقائياً\n\n` +
+        `## إحصائيات السيرفر الحية\n\n` +
+        `> 👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
+        `> 📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
+        `> 🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
+        `> 🎫 **التذاكر النشطة:** يتم تحديثها تلقائياً\n\n` +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '> 🔄 هذه القناة تتحدث تلقائياً كل فترة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
@@ -659,13 +663,14 @@ async function cmdSetup(interaction) {
     await welcomeCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 👋 مرحباً بك ━━━━━━━━')
       .setDescription(
-        '**هنا هتستقبل ترحيب كل عضو جديد يدخل السيرفر!**\n\n' +
+        '# 👋 مرحباً بك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## هنا هتستقبل ترحيب كل عضو جديد!\n\n' +
         '> 🎉 **الترحيب التلقائي** — كل عضو جديد هيستقبل رسالة ترحيب\n' +
         '> 🤖 **الرول التلقائي** — يتم إعطاء الأعضاء الجدد رول تلقائياً\n' +
         '> 📢 **معلومات السيرفر** — روابط مهمة للأعضاء الجدد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🔗 روابط مهمة:**\n' +
+        '## 🔗 روابط مهمة\n\n' +
         '> 🛒 [المتجر](https://ai-shop-bot-production.up.railway.app/shop)\n' +
         '> 📋 [القواعد](#)\n' +
         '> 🛠️ [الدعم الفني](#)\n\n' +
@@ -685,15 +690,17 @@ async function cmdSetup(interaction) {
     await ticketCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━━━ 🎫 فتح تذكرة ━━━━━━━━━━')
       .setDescription(
-        '**تحتاج مساعدة؟ افتح تذكرة دعم فني**\n\n' +
+        '# 🎫 فتح تذكرة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🛠️ الدعم الفني**\n' +
+        '## تحتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
+        '## 🛠️ الدعم الفني\n' +
         '> • للمساعدة في الطلبات\n' +
         '> • للاستفسارات عن الخدمات\n' +
         '> • للشكاوى والاقتراحات\n\n' +
-        '**⏰ وقت الاستجابة:** 5-15 دقيقة\n\n' +
+        '## ⏰ وقت الاستجابة\n' +
+        '> **5-15 دقيقة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**💡 نصيحة:**\n' +
+        '## 💡 نصيحة\n\n' +
         '> قبل فتح تذكرة، تأكد أن الإجابة موجودة في:\n' +
         '> • قناة **📝・كيف-تطلب** — لدليل الطلب\n' +
         '> • قناة **🤖・اوامر-البوت** — لقائمة الأوامر\n\n' +
@@ -711,15 +718,16 @@ async function cmdSetup(interaction) {
     await deliveryCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📦 التوصيل والتسليمات ━━━━━━━━')
       .setDescription(
-        '**تتبع طلباتك وتسليماتك هنا**\n\n' +
+        '# 📦 التوصيل والتسليمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📦 كيف يعمل نظام التوصيل؟**\n\n' +
-        '> `1️⃣` بعد الدفع، يتم فتح تذكرة خاصة بك\n' +
-        '> `2️⃣` الستاف يبدأ في تنفيذ طلبك\n' +
-        '> `3️⃣` بعد الانتهاء، يتم إرسال التسليم هنا\n' +
-        '> `4️⃣` تأكد من استلام طلبك وقيّم بـ `/review`\n\n' +
+        '## تتبع طلباتك وتسليماتك هنا\n\n' +
+        '## 📦 كيف يعمل نظام التوصيل؟\n\n' +
+        '> **`1️⃣`** بعد الدفع، يتم فتح تذكرة خاصة بك\n' +
+        '> **`2️⃣`** الستاف يبدأ في تنفيذ طلبك\n' +
+        '> **`3️⃣`** بعد الانتهاء، يتم إرسال التسليم هنا\n' +
+        '> **`4️⃣`** تأكد من استلام طلبك وقيّم بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**⚠️ ملاحظات مهمة:**\n' +
+        '## ⚠️ ملاحظات مهمة\n\n' +
         '> • تأكد من فصل التسليم في التذكرة\n' +
         '> • للتعديل، افتح تذكرة دعم فني جديدة\n' +
         '> • لا تشارك معلومات التسليم مع أحد\n\n' +
@@ -737,13 +745,14 @@ async function cmdSetup(interaction) {
     await staffChatCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 💼 شات الستاف ━━━━━━━━')
       .setDescription(
-        '**محادثة الستاف الداخلية** 🔒\n\n' +
+        '# 💼 شات الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## محادثة الستاف الداخلية 🔒\n\n' +
         '> 👥 **للستاف فقط** — هذه القناة مقيدة للأعضاء المصرح لهم\n' +
         '> 📋 **تنسيق الطلبات** — ناقش الطلبات الجديدة والمعلقة\n' +
         '> 💡 **مشاركة الأفكار** — اقترح تحسينات للخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📌 إرشادات:**\n' +
+        '## 📌 إرشادات\n\n' +
         '> • احترم زملاءك في الستاف\n' +
         '> • لا تشارك معلومات العملاء علنياً\n' +
         '> • وثّق أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
@@ -761,13 +770,14 @@ async function cmdSetup(interaction) {
     await staffNotesCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📋 ملاحظات الستاف ━━━━━━━━')
       .setDescription(
-        '**توثيق الملاحظات والتقارير** 📝\n\n' +
+        '# 📋 ملاحظات الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## توثيق الملاحظات والتقارير 📝\n\n' +
         '> 📊 **تقارير يومية** — سجّل ملخص الطلبات والتسليمات\n' +
         '> ⚠️ **ملاحظات مهمة** — وثّق أي مشاكل أو ملاحظات\n' +
         '> 💡 **اقتراحات** — اقترح تحسينات للخدمة أو السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📌 كيفية التوثيق:**\n' +
+        '## 📌 كيفية التوثيق\n\n' +
         '> • ابدأ بعنوان واضح للملاحظة\n' +
         '> • أضف التاريخ والوقت\n' +
         '> • اذكر الأعضاء المعنيين إن وجدوا\n\n' +
@@ -784,15 +794,16 @@ async function cmdSetup(interaction) {
     await logsCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📝 السجلات ━━━━━━━━')
       .setDescription(
-        '**سجلات البوت التلقائية** 🔒\n\n' +
+        '# 📝 السجلات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## سجلات البوت التلقائية 🔒\n\n' +
         '> 👋 **الترحيب والوداع** — تسجيل دخول وخروج الأعضاء\n' +
         '> 🛠️ **الدعم الفني** — فتح وإغلاق التذاكر\n' +
         '> 🛒 **الطلبات** — الطلبات الجديدة والتسليمات\n' +
         '> ⚠️ **الحماية** — محاولات السبام والكلمات الممنوعة\n' +
         '> 🛡️ **الإدارة** — التحذيرات والكتم والطرد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🔒 هذه القناة مقيدة للستاف والمالك فقط**\n\n' +
+        '## 🔒 هذه القناة مقيدة للستاف والمالك فقط\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x7D8590)
@@ -807,13 +818,14 @@ async function cmdSetup(interaction) {
     await adminPanelCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 🔧 لوحة التحكم ━━━━━━━━')
       .setDescription(
-        '**لوحة تحكم البوت الإدارية** 🔒\n\n' +
+        '# 🔧 لوحة التحكم\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🔗 روابط مهمة:**\n\n' +
+        '## لوحة تحكم البوت الإدارية 🔒\n\n' +
+        '## 🔗 روابط مهمة\n\n' +
         '> 🖥️ [**الداشبورد**](https://ai-shop-bot-production.up.railway.app/dashboard)\n' +
         '> 🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**📋 أوامر الإدارة:**\n\n' +
+        '## 📋 أوامر الإدارة\n\n' +
         '> `/setup` — إعداد السيرفر بالكامل\n' +
         '> `/add-service` — إضافة خدمة جديدة\n' +
         '> `/edit-service` — تعديل خدمة\n' +
@@ -825,7 +837,7 @@ async function cmdSetup(interaction) {
         '> `/set-logs` — ضبط قناة السجلات\n' +
         '> `/automod` — إعداد الحماية\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '**🔒 هذه القناة مقيدة للمالك والادمن فقط**\n\n' +
+        '## 🔒 هذه القناة مقيدة للمالك والادمن فقط\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xE74C3C)
@@ -942,7 +954,25 @@ async function cmdSupport(interaction) {
   orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
   save('orders.json', orders);
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-  await channel.send({ embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n💬 **اكتب مشكلتك هنا**\n━━━━━━━━━━━━━━━━━━━━━`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+  await channel.send({ embeds: [new EmbedBuilder()
+    .setTitle(`🛠️ تذكرة دعم #${orderId}`)
+    .setDescription(
+      `# مرحباً بك في تذكرتك!\n\n` +
+      `**المستخدم:** ${interaction.user}\n` +
+      `**رقم التذكرة:** \`${orderId}\`\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `## 💬 اكتب مشكلتك هنا\n\n` +
+      `> وصف مشكلتك بالتفصيل عشان نقدر نساعدك بسرعة\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+    )
+    .setColor(0x3498DB)
+    .setTimestamp()
+    .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
+    components: [new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+    )]
+  });
   await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**المستخدم:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
 }
@@ -1137,17 +1167,23 @@ async function cmdEndGiveaway(interaction) {
 async function cmdStats(interaction) {
   const orders = getOrders(), reviews = getReviews(), services = getServices();
   const completed = orders.filter(o => o.status === 'completed').length;
-  const pending = orders.filter(o => o.status === 'pending' || o.status === 'open' || o.status === 'progress').length;
+  const pending = orders.filter(o => o.status === 'pending' || o.status === 'open').length;
+  const inProgress = orders.filter(o => o.status === 'progress').length;
+  const closed = orders.filter(o => o.status === 'closed').length;
+  const avgRating = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : '0';
   const embed = new EmbedBuilder()
     .setTitle('📊 إحصائيات البوت')
+    .setDescription('**إحصائيات شاملة للبوت والطلبات**')
     .addFields(
-      { name: '🎫 الطلبات', value: `**إجمالي:** ${orders.length}\n**مكتملة:** ${completed}\n**قيد التنفيذ:** ${pending}`, inline: true },
-      { name: '⭐ التقييمات', value: `**إجمالي:** ${reviews.length}`, inline: true },
+      { name: '🎫 الطلبات', value: `**إجمالي:** ${orders.length}\n**مكتملة (مسلّمة):** ✅ ${completed}\n**قيد التنفيذ:** 🔄 ${inProgress}\n**بانتظار القبول:** ⏳ ${pending}\n**مغلقة:** 🔒 ${closed}`, inline: true },
+      { name: '⭐ التقييمات', value: `**إجمالي:** ${reviews.length}\n**متوسط التقييم:** ⭐ ${avgRating}/5`, inline: true },
       { name: '🛒 الخدمات', value: `**إجمالي:** ${services.length}`, inline: true },
-      { name: '👥 الأعضاء', value: `**${interaction.guild.memberCount}**`, inline: true },
-      { name: '🎫 السحبيات', value: `**${getGiveaways().length}**`, inline: true },
+      { name: '👥 الأعضاء', value: `**${interaction.guild.memberCount}** عضو`, inline: true },
+      { name: '🎫 السحبيات', value: `**${getGiveaways().length}** سحبية`, inline: true },
+      { name: '📈 معدل التسليم', value: orders.length ? `**${((completed / orders.length) * 100).toFixed(0)}%**` : '**0%**', inline: true },
     )
-    .setColor(0x3498DB).setTimestamp();
+    .setColor(0x3498DB).setTimestamp()
+    .setFooter({ text: `📊 ${interaction.guild.name}`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
   await interaction.reply({ embeds: [embed] });
 }
 
@@ -1155,9 +1191,21 @@ async function cmdTicketStats(interaction) {
   const orders = getOrders();
   const byStatus = {};
   for (const o of orders) { const s = o.status || 'unknown'; byStatus[s] = (byStatus[s] || 0) + 1; }
-  const statusNames = { pending: '⏳ بانتظار القبول', open: '📂 مفتوحة', progress: '🔄 قيد التنفيذ', completed: '✅ مكتملة', closed: '🔒 مغلقة' };
+  const statusNames = { pending: '⏳ بانتظار القبول', open: '📂 مفتوحة', progress: '🔄 قيد التنفيذ', completed: '✅ مسلّمة', closed: '🔒 مغلقة' };
+  const total = orders.length;
+  const completed = byStatus.completed || 0;
+  const deliveryRate = total ? ((completed / total) * 100).toFixed(0) : 0;
   const desc = Object.entries(byStatus).map(([s, c]) => `${statusNames[s] || s}: **${c}**`).join('\n');
-  const embed = new EmbedBuilder().setTitle('🎫 إحصائيات التذاكر').setDescription(desc || 'لا توجد تذاكر').setColor(0x9B59B6).setTimestamp();
+  const embed = new EmbedBuilder()
+    .setTitle('🎫 إحصائيات التذاكر')
+    .setDescription(desc || 'لا توجد تذاكر')
+    .addFields(
+      { name: '📈 الإجمالي', value: `**${total}** تذكرة`, inline: true },
+      { name: '✅ مسلّمة', value: `**${completed}** تذكرة`, inline: true },
+      { name: '📊 معدل التسليم', value: `**${deliveryRate}%**`, inline: true },
+    )
+    .setColor(0x9B59B6).setTimestamp()
+    .setFooter({ text: `🎫 ${interaction.guild.name}`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
   await interaction.reply({ embeds: [embed] });
 }
 
@@ -1309,20 +1357,29 @@ client.on('interactionCreate', async (interaction) => {
         const e = new EmbedBuilder()
           .setTitle(`🛒 طلب خدمة — ${svc.emoji || '🛒'} ${svc.name}`)
           .setDescription(
+            `# طلب خدمة جديد\n\n` +
             `**العميل:** ${interaction.user}\n` +
-            `**الخدمة:** ${svc.emoji || '🛒'} ${svc.name}\n` +
+            `**الخدمة:** ${svc.emoji || '🛒'} **${svc.name}**\n` +
             `**السعر:** \`${fmt(svc.price)} كريديت\`\n` +
             `**رقم الطلب:** \`${orderId}\`\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `**📝 وصف الخدمة:**\n${svc.description || 'لا يوجد وصف'}\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `**💬 اكتب تفاصيل طلبك هنا** و الستاف هيساعدك إن شاء الله`
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 📝 وصف الخدمة\n\n` +
+            `${svc.description || 'لا يوجد وصف'}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 💬 اكتب تفاصيل طلبك هنا\n\n` +
+            `> الستاف هيساعدك إن شاء الله`
           )
           .setColor(0x2ECC71)
           .setTimestamp()
-          .setFooter({ text: `🛒 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) });
+          .setFooter({ text: `🛒 ${g.name} — الطلبات`, iconURL: g.iconURL({ dynamic: true }) });
 
-        await channel.send({ embeds: [e], content: `${interaction.user} ${staffRole ? `— ${staffRole}` : ''}` });
+        await channel.send({ embeds: [e], content: `${interaction.user} ${staffRole ? `— ${staffRole}` : ''}`,
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('🔄 قبول الطلب').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger),
+          )]
+        });
         await interaction.editReply(`✅ تم فتح تذكرة طلبك: ${channel}`);
         sendLog(g, `🛒 طلب خدمة جديد — ${svc.name} — ${interaction.user.tag}`);
         return;
@@ -1343,7 +1400,25 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n💬 **اكتب مشكلتك هنا**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ embeds: [new EmbedBuilder()
+          .setTitle(`🛠️ تذكرة دعم #${orderId}`)
+          .setDescription(
+            `# مرحباً بك في تذكرتك!\n\n` +
+            `**المستخدم:** ${interaction.user}\n` +
+            `**رقم التذكرة:** \`${orderId}\`\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 💬 اكتب مشكلتك هنا\n\n` +
+            `> وصف مشكلتك بالتفصيل عشان نقدر نساعدك بسرعة\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0x3498DB)
+          .setTimestamp()
+          .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+          )]
+        });
         await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
         return;
       }
@@ -1367,6 +1442,37 @@ client.on('interactionCreate', async (interaction) => {
         save('orders.json', orders);
         await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — مكتمل`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم الإتمام!**\n<@${order.userId}> استخدم \`/review\` لتقييم الخدمة`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلم! استخدم \`/review\` لتقييم الخدمة`).catch(() => {}); } catch {}
+        return;
+      }
+
+      if (cid.startsWith('ticket_complete_')) {
+        const orderId = parseInt(cid.replace('ticket_complete_', ''));
+        const orders = getOrders(), order = orders.find(o => o.id === orderId);
+        if (!order) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
+        if (order.status === 'completed') return interaction.reply({ content: '✅ تم التسليم بالفعل', ephemeral: true });
+        order.status = 'completed'; order.completedAt = Date.now(); order.completedBy = interaction.user.id;
+        save('orders.json', orders);
+        await interaction.update({ embeds: [new EmbedBuilder()
+          .setTitle(`✅ تم التسليم — تذكرة #${orderId}`)
+          .setDescription(
+            `# تم التسليم بنجاح!\n\n` +
+            `**العميل:** <@${order.userId}>\n` +
+            `**الخدمة:** ${order.serviceEmoji || '🛒'} ${order.serviceName}\n` +
+            `**الستاف:** ${interaction.user}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## ✅ تم التسليم!\n\n` +
+            `> <@${order.userId}> استخدم \`/review\` لتقييم الخدمة\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0x2ECC71)
+          .setTimestamp()
+          .setFooter({ text: `✅ ${g.name} — التسليمات`, iconURL: g.iconURL({ dynamic: true }) })],
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+          )]
+        });
+        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ تم تسليم طلبك **#${orderId}** (${order.serviceName})! استخدم \`/review\` لتقييم الخدمة`).catch(() => {}); } catch {}
+        await sendLog(interaction.guild, new EmbedBuilder().setTitle('✅ تم التسليم').setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceName}\n**الستاف:** ${interaction.user}`).setColor(0x2ECC71).setTimestamp());
         return;
       }
 
