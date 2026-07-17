@@ -1195,6 +1195,23 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true });
     }
 
+    // ── PUT: Update category ──
+    if (req.method === 'PUT' && p.match(/^\/api\/categories\/.+$/)) {
+      const id = decodeURIComponent(p.split('/').pop());
+      const cats = getCategories();
+      const cat = cats.find(c => c.id === id);
+      if (!cat) return jsonRes(res, 404, { error: 'Not found' });
+      const d = await parseBody(req);
+      Object.assign(cat, d, { id: cat.id });
+      saveCategories(cats);
+      if (d.id && d.id !== id) {
+        const services = getServices();
+        services.forEach(s => { if (s.category === id) s.category = d.id; });
+        save('services.json', services);
+      }
+      return jsonRes(res, 200, { ok: true });
+    }
+
     // ── DELETE: Remove category ──
     if (req.method === 'DELETE' && p.match(/^\/api\/categories\/.+$/)) {
       const id = decodeURIComponent(p.split('/').pop());

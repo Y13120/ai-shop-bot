@@ -149,6 +149,15 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px}
           <label>الوصف</label><textarea id="svcDesc"></textarea>
           <div class="actions"><button class="btn btn-green" onclick="addService()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addServiceForm').style.display='none'">إلغاء</button></div>
         </div>
+        <div class="card" id="editServiceForm" style="display:none">
+          <h3>✏️ تعديل الخدمة</h3>
+          <input type="hidden" id="editSvcId" />
+          <div class="form-row"><div><label>الاسم</label><input id="editSvcName" /></div><div><label>السعر</label><input id="editSvcPrice" type="number" /></div></div>
+          <div class="form-row"><div><label>التصنيف (ID)</label><input id="editSvcCategory" placeholder="chatgpt, photoshop..." /></div><div><label>الإيموجي</label><input id="editSvcEmoji" /></div></div>
+          <label>الوصف</label><textarea id="editSvcDesc"></textarea>
+          <div class="form-row"><div><label>الحالة</label><select id="editSvcActive"><option value="true">نشط</option><option value="false">معطّل</option></select></div></div>
+          <div class="actions"><button class="btn btn-blue" onclick="updateService()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editServiceForm').style.display='none'">إلغاء</button></div>
+        </div>
       </div>
       <!-- CATEGORIES -->
       <div class="page" id="page-categories">
@@ -164,6 +173,13 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px}
           <div class="form-row"><div><label>المعرف (إنجليزي)</label><input id="catId" placeholder="montage" /></div><div><label>الاسم بالعربي</label><input id="catName" placeholder="🎬 مونتاج" /></div></div>
           <div class="form-row"><div><label>الإيموجي</label><input id="catEmoji" value="📁" /></div></div>
           <div class="actions"><button class="btn btn-green" onclick="addCategory()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addCategoryForm').style.display='none'">إلغاء</button></div>
+        </div>
+        <div class="card" id="editCategoryForm" style="display:none">
+          <h3>✏️ تعديل التصنيف</h3>
+          <input type="hidden" id="editCatOrigId" />
+          <div class="form-row"><div><label>المعرف (إنجليزي)</label><input id="editCatId" /></div><div><label>الاسم بالعربي</label><input id="editCatName" /></div></div>
+          <div class="form-row"><div><label>الإيموجي</label><input id="editCatEmoji" /></div></div>
+          <div class="actions"><button class="btn btn-blue" onclick="updateCategory()">💾 حفظ التعديلات</button><button class="btn btn-red" onclick="document.getElementById('editCategoryForm').style.display='none'">إلغاء</button></div>
         </div>
       </div>
       <!-- MEMBERS -->
@@ -334,7 +350,7 @@ async function loadServices(){
   const services=await api('api/services');
   const cats=await api('api/categories');
   const catMap={};if(Array.isArray(cats))cats.forEach(c=>catMap[c.id]=c);
-  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
+  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-blue btn-sm" onclick='editService(${JSON.stringify(s).replace(/'/g,"&#39;")})'>✏️</button> <button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
 }
 function showAddService(){document.getElementById('addServiceForm').style.display='block';}
 async function addService(){
@@ -351,12 +367,32 @@ async function removeService(id){
   toast('✅ تم الحذف');
   loadServices();
 }
+function editService(s){
+  document.getElementById('editServiceForm').style.display='block';
+  document.getElementById('addServiceForm').style.display='none';
+  document.getElementById('editSvcId').value=s.id;
+  document.getElementById('editSvcName').value=s.name||'';
+  document.getElementById('editSvcPrice').value=s.price||0;
+  document.getElementById('editSvcCategory').value=s.category||'';
+  document.getElementById('editSvcEmoji').value=s.emoji||'🛒';
+  document.getElementById('editSvcDesc').value=s.description||'';
+  document.getElementById('editSvcActive').value=s.active?'true':'false';
+}
+async function updateService(){
+  const id=document.getElementById('editSvcId').value;
+  const d={name:document.getElementById('editSvcName').value,price:parseFloat(document.getElementById('editSvcPrice').value),category:document.getElementById('editSvcCategory').value,emoji:document.getElementById('editSvcEmoji').value,description:document.getElementById('editSvcDesc').value,active:document.getElementById('editSvcActive').value==='true'};
+  if(!d.name||!d.price||!d.category)return toast('❌ اكمل كل الحقول');
+  await api(`api/services/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  document.getElementById('editServiceForm').style.display='none';
+  toast('✅ تم تعديل الخدمة');
+  loadServices();
+}
 
 // ── CATEGORIES ──
 async function loadCategories(){
   const cats=await api('api/categories');
   const services=await api('api/services');
-  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
+  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-blue btn-sm" onclick='editCategory(${JSON.stringify(c).replace(/'/g,"&#39;")})'>✏️</button> <button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
 }
 function showAddCategory(){document.getElementById('addCategoryForm').style.display='block';}
 async function addCategory(){
@@ -372,6 +408,24 @@ async function removeCategory(id){
   const r=await api(`api/categories/${encodeURIComponent(id)}`,{method:'DELETE'});
   if(r.error)return toast('❌ '+r.error);
   toast('✅ تم الحذف');
+  loadCategories();
+}
+function editCategory(c){
+  document.getElementById('editCategoryForm').style.display='block';
+  document.getElementById('addCategoryForm').style.display='none';
+  document.getElementById('editCatOrigId').value=c.id;
+  document.getElementById('editCatId').value=c.id;
+  document.getElementById('editCatName').value=c.name||'';
+  document.getElementById('editCatEmoji').value=c.emoji||'📁';
+}
+async function updateCategory(){
+  const origId=document.getElementById('editCatOrigId').value;
+  const d={id:document.getElementById('editCatId').value,name:document.getElementById('editCatName').value,emoji:document.getElementById('editCatEmoji').value};
+  if(!d.id||!d.name)return toast('❌ اكمل كل الحقول');
+  const r=await api(`api/categories/${encodeURIComponent(origId)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  if(r.error)return toast('❌ '+r.error);
+  document.getElementById('editCategoryForm').style.display='none';
+  toast('✅ تم تعديل التصنيف');
   loadCategories();
 }
 
