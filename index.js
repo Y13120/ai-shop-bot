@@ -490,8 +490,9 @@ function getTicketOverwrites(g, userId) {
 }
 
 async function cmdOrder(interaction) {
+  await interaction.deferReply({ ephemeral: true });
   const id = parseInt(interaction.options.getString('service')), services = getServices(), svc = services.find(s => s.id === id);
-  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة. استخدم `/services`', ephemeral: true });
+  if (!svc) return interaction.editReply('❌ خدمة غير موجودة. استخدم `/services`');
   const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
   const channel = await g.channels.create({ name: `ticket-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
   const order = { id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() };
@@ -499,28 +500,30 @@ async function cmdOrder(interaction) {
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
   const embed = new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n**الوصف:** ${svc.description || '—'}\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp();
   await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-  await interaction.reply({ content: `✅ تم فتح التذكرة: ${channel}`, ephemeral: true });
+  await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
 
   await sendLog(g, new EmbedBuilder().setTitle('🎫 تذكرة جديدة').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
 }
 
 async function cmdSupport(interaction) {
+  await interaction.deferReply({ ephemeral: true });
   const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
   const channel = await g.channels.create({ name: `support-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
   orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
   save('orders.json', orders);
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-  await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n💬 **اكتب مشكلتك هنا**\n━━━━━━━━━━━━━━━━━━━━━`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-  await interaction.reply({ content: `✅ تم فتح تذكرة الدعم: ${channel}`, ephemeral: true });
+  await channel.send({ embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n💬 **اكتب مشكلتك هنا**\n━━━━━━━━━━━━━━━━━━━━━`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+  await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**المستخدم:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
 }
 
 async function cmdClose(interaction) {
+  await interaction.deferReply({ ephemeral: true });
   const orders = getOrders(), order = orders.find(o => o.channelId === interaction.channel.id);
-  if (!order) return interaction.reply({ content: '❌ هذا ليس تذكرة', ephemeral: true });
+  if (!order) return interaction.editReply('❌ هذا ليس تذكرة');
   order.status = 'closed'; order.closedAt = Date.now(); order.closedBy = interaction.user.id;
   save('orders.json', orders);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
+  await interaction.editReply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}\n**التذكرة:** #${order.id}`).setColor(0xE74C3C).setTimestamp());
   await sleep(3000); try { await interaction.channel.delete(); } catch {}
 }
