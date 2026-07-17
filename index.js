@@ -28,57 +28,55 @@ if (!CFG.autoRoles) CFG.autoRoles = [];
 if (!CFG.logsChannel) CFG.logsChannel = '';
 if (!CFG.automod) CFG.automod = { antispam: true, badwords: true, badwordsList: ['كسم', 'نكت', 'xnxx', 'porn', 'sex', 'incest'], antispamLimit: 5, antispamTime: 10 };
 if (!CFG.welcomeChannel) CFG.welcomeChannel = '';
+if (!CFG.primaryCurrency) CFG.primaryCurrency = 'usd';
+if (!CFG.welcomeMessage) CFG.welcomeMessage = 'مرحباً بك {user} في السيرفر! 👋';
 save('config.json', CFG);
 
 const getCategories = () => load('categories.json', DEFAULT_CATEGORIES);
 const saveCategories = (cats) => save('categories.json', cats);
 const DEFAULT_SERVICES = [
-  { id: 1, name: 'ChatGPT Plus 4o', description: 'وصول ChatGPT Plus 4o لمدة شهر', price: 22500000, category: 'chatgpt', emoji: '🤖', active: true },
-  { id: 2, name: 'ChatGPT Plus + DALL-E', description: 'ChatGPT Plus مع DALL-E', price: 27000000, category: 'chatgpt', emoji: '🎨', active: true },
-  { id: 3, name: 'شات Claude Pro', description: 'وصول Claude Pro لمدة شهر', price: 19800000, category: 'chatgpt', emoji: '🧠', active: true },
-  { id: 4, name: 'شات Gemini Advanced', description: 'وصول Gemini Advanced', price: 18000000, category: 'chatgpt', emoji: '💎', active: true },
-  { id: 5, name: 'Midjourney Pro', description: 'اشتراك Midjourney Pro', price: 25200000, category: 'chatgpt', emoji: '🖼️', active: true },
-  { id: 6, name: 'تطبيق موبايل', description: 'تطوير تطبيق موبايل بالذكاء الاصطناعي', price: 27000000, category: 'chatgpt', emoji: '📱', active: true },
-  { id: 7, name: 'تطوير موقع كامل', description: 'تصميم وتطوير موقع احترافي', price: 24300000, category: 'chatgpt', emoji: '🌐', active: true },
-  { id: 8, name: 'إنشاء فيديو AI', description: 'إنشاء فيديوهات بالذكاء الاصطناعي', price: 18000000, category: 'chatgpt', emoji: '🎬', active: true },
-  { id: 9, name: 'إنشاء بوت Discord', description: 'إنشاء بوت Discord مخصص', price: 13500000, category: 'chatgpt', emoji: '🤖', active: true },
-  { id: 10, name: 'تحليل بيانات', description: 'تحليل بيانات وتقارير', price: 10800000, category: 'chatgpt', emoji: '📊', active: true },
-  { id: 11, name: 'مساعدة برمجية', description: 'مساعدة في البرمجة', price: 8500000, category: 'chatgpt', emoji: '💻', active: true },
-  { id: 12, name: 'تصميم لوجو AI', description: 'تصميم لوجو بالذكاء الاصطناعي', price: 8500000, category: 'chatgpt', emoji: '✏️', active: true },
-  { id: 13, name: 'كتابة مقالات ونصوص', description: 'كتابة مقالات ونصوص', price: 8500000, category: 'chatgpt', emoji: '📝', active: true },
-  { id: 14, name: 'إعداد سيرفر Discord', description: 'إعداد سيرفر Discord كامل', price: 8500000, category: 'chatgpt', emoji: '🎮', active: true },
-  { id: 15, name: 'ترجمة احترافية', description: 'ترجمة نصوص بأكثر من لغة', price: 8500000, category: 'chatgpt', emoji: '🌐', active: true },
-  { id: 16, name: 'صوت AI — نص لكلام', description: 'تحويل النص إلى صوت', price: 8500000, category: 'chatgpt', emoji: '🔊', active: true },
-  { id: 17, name: 'صوت AI — كلام لنص', description: 'تحويل الصوت إلى نص', price: 8500000, category: 'chatgpt', emoji: '🎙️', active: true },
-  { id: 18, name: 'توليد صور AI', description: 'توليد صور بالذكاء الاصطناعي', price: 8500000, category: 'chatgpt', emoji: '📸', active: true },
-  { id: 19, name: 'retouch صور', description: 'retouch احترافي — تنعيم — إزالة عيouns — تحسين ألوان', price: 8500000, category: 'photoshop', emoji: '🖌️', active: true },
-  { id: 20, name: 'تصميم بوستر', description: 'تصميم بوستر إعلاني أو ترويجي', price: 8500000, category: 'photoshop', emoji: '🖼️', active: true },
-  { id: 21, name: 'تصميم بانر', description: 'تصميم بانر لسوشيال ميديا أو ويب', price: 8500000, category: 'photoshop', emoji: '🎨', active: true },
-  { id: 22, name: 'تصميم UI/UX', description: 'تصميم واجهة مستخدم احترافية', price: 21600000, category: 'photoshop', emoji: '📱', active: true },
-  { id: 23, name: 'إزالة الخلفية', description: 'إزالة خلفية الصورة بدقة', price: 3000000, category: 'photoshop', emoji: '✂️', active: true },
-  { id: 24, name: 'Photo Manipulation', description: 'تلاعب فني بالصور — دمج — تأثيرات', price: 9600000, category: 'photoshop', emoji: '🎭', active: true },
-  { id: 25, name: 'تصميم هوية بصرية', description: 'تصميم هوية بصرية كاملة', price: 26400000, category: 'photoshop', emoji: '💼', active: true },
-  { id: 26, name: 'مونتاج فيديو', description: 'مونتاج فيديو احترافي — قص + ترتيب + انتقالات', price: 10200000, category: 'montage', emoji: '🎬', active: true },
-  { id: 27, name: 'تصميم إنтро/أوترو', description: 'تصميم مقدمة ونهاية للفيديوهات', price: 7200000, category: 'montage', emoji: '✨', active: true },
-  { id: 28, name: 'تصحيح ألوان', description: 'تصحيح وضبط ألوان الفيديو', price: 5400000, category: 'montage', emoji: '🎨', active: true },
-  { id: 29, name: 'موشن جرافيك', description: 'تصميم موشن جرافيك — أنيميشن — إعلانات متحركة', price: 26400000, category: 'montage', emoji: '🎭', active: true },
-  { id: 30, name: 'ترجمة فيديو', description: 'إضافة ترجمة للفيديو — جميع اللغات', price: 4800000, category: 'montage', emoji: '📝', active: true },
-  { id: 31, name: 'مونتاج يوتيوب', description: 'مونتاج فيديو يوتيوب كامل', price: 14400000, category: 'montage', emoji: '📺', active: true },
-  { id: 32, name: 'Reels / تيك توك', description: 'مونتاج ريلز أو تيك توك', price: 6000000, category: 'montage', emoji: '📱', active: true },
-  { id: 33, name: 'تطوير موقع كامل (برمجة)', description: 'تطوير موقع ويب كامل — تصميم + كود', price: 33600000, category: 'code', emoji: '🌐', active: true },
-  { id: 34, name: 'Landing Page', description: 'تصميم صفحة هبوط احترافية', price: 16800000, category: 'code', emoji: '📄', active: true },
-  { id: 35, name: 'بوت Discord مخصص', description: 'إنشاء بوت Discord مخصص — أوامر + أتمتة', price: 19200000, category: 'code', emoji: '🤖', active: true },
-  { id: 36, name: 'سكربت / بوت أتمتة', description: 'كتابة سكربت أو بوت لأتمتة أي مهمة', price: 10800000, category: 'code', emoji: '⚙️', active: true },
-  { id: 37, name: 'إعداد WordPress', description: 'إعداد و تخصيص موقع WordPress', price: 24000000, category: 'code', emoji: '🔧', active: true },
-  { id: 38, name: 'ربط API', description: 'ربط أي API مع مشروعك', price: 18000000, category: 'code', emoji: '🔗', active: true },
-  { id: 39, name: 'إصلاح مشكلة برمجية', description: 'إصلاح أي bug أو مشكلة في الكود', price: 6600000, category: 'code', emoji: '🐛', active: true },
-  { id: 40, name: 'تطبيق ويب كامل', description: 'تطوير تطبيق ويب كامل — Frontend + Backend', price: 42000000, category: 'code', emoji: '💻', active: true },
+  { id: 1, name: 'تطبيق موبايل', nameEn: 'Mobile App', description: 'تطوير تطبيق موبايل كامل — Android أو iOS — تصميم + كود + ربط', descriptionEn: 'Full mobile app development — Android or iOS — Design + Code + Integration', price: 140000000, category: 'chatgpt', emoji: '📱', active: true },
+  { id: 2, name: 'تطوير موقع كامل', nameEn: 'Full Website', description: 'تطوير موقع ويب كامل — تصميم + كود + ربط + استضافة', descriptionEn: 'Complete website development — Design + Code + Integration + Hosting', price: 105000000, category: 'chatgpt', emoji: '🌐', active: true },
+  { id: 3, name: 'إنشاء فيديو AI', nameEn: 'AI Video Creation', description: 'إنشاء فيديو بالذكاء الاصطناعي — كرتوني أو واقعي — جودة HD', descriptionEn: 'AI-powered video creation — Script + Voiceover + Editing — HD Quality', price: 35000000, category: 'chatgpt', emoji: '🎬', active: true },
+  { id: 4, name: 'إنشاء بوت Discord', nameEn: 'Discord Bot', description: 'إنشاء بوت Discord مخصص — أوامر + تذاكر + ترحيب + إدارة', descriptionEn: 'Custom Discord bot — Commands + Database + Dashboard + Support', price: 56000000, category: 'chatgpt', emoji: '🤖', active: true },
+  { id: 5, name: 'تحليل بيانات', nameEn: 'Data Analysis', description: 'تحليل أي مجموعة بيانات — رسوم بيانية + تقارير + CSV/Excel', descriptionEn: 'Professional data analysis — Charts + Reports + CSV/Excel', price: 21000000, category: 'chatgpt', emoji: '📊', active: true },
+  { id: 6, name: 'مساعدة برمجية', nameEn: 'Programming Tutoring', description: 'مساعدة في أي لغة برمجة — Python, JS, C++, Java, PHP', descriptionEn: 'One-on-one programming tutoring — Python, JS, C++, Java, PHP', price: 14000000, category: 'chatgpt', emoji: '💻', active: true },
+  { id: 7, name: 'تصميم لوجو AI', nameEn: 'AI Logo Design', description: 'تصميم لوجو احترافي بالذكاء الاصطناعي — أحجام متعددة + شفاف', descriptionEn: 'Professional AI logo design — Unique + Creative + High Quality', price: 16800000, category: 'chatgpt', emoji: '✏️', active: true },
+  { id: 8, name: 'كتابة مقالات ونصوص', nameEn: 'Academic Proofreading', description: 'كتابة أي نوع من المقالات — أكاديمي، تسويقي، تقني، إبداعي', descriptionEn: 'Academic paper proofreading — Grammar + Style + Citations', price: 11200000, category: 'chatgpt', emoji: '📝', active: true },
+  { id: 9, name: 'إعداد سيرفر Discord', nameEn: 'Discord Server Setup', description: 'إعداد سيرفر كامل — رولات + قنوات + صلاحيات + بوتات + ترحيب', descriptionEn: 'Full Discord server setup — Roles + Channels + Bots + Rules + Template', price: 14000000, category: 'chatgpt', emoji: '🎮', active: true },
+  { id: 10, name: 'ترجمة احترافية', nameEn: 'Translation', description: 'ترجمة أي نص — بدقة عالية + سياق طبيعي + مراجعة', descriptionEn: 'Professional translation — Arabic ↔ English + Any language', price: 11200000, category: 'chatgpt', emoji: '🌐', active: true },
+  { id: 11, name: 'صوت AI — نص لكلام', nameEn: 'AI Voice — Text to Speech', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', descriptionEn: 'Convert text to natural AI voice — Multiple languages + Emotions', price: 11200000, category: 'chatgpt', emoji: '🔊', active: true },
+  { id: 12, name: 'صوت AI — كلام لنص', nameEn: 'AI Voice — Speech to Text', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', descriptionEn: 'Convert audio/speech to written text — Accurate + Fast + Multiple formats', price: 11200000, category: 'chatgpt', emoji: '🎙️', active: true },
+  { id: 13, name: 'توليد صور AI', nameEn: 'AI Image Generation', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', descriptionEn: 'AI image generation — DALL-E 3 — 3 images', price: 7000000, category: 'chatgpt', emoji: '📸', active: true },
+  { id: 14, name: 'retouch صور', nameEn: 'Photo Retouching', description: 'retouch احترافي للصور — تنعيم البشرة — إزالة العيouns — تحسين الألوان', descriptionEn: 'Professional photo retouching — Skin smoothing + Color correction + Background removal', price: 14000000, category: 'photoshop', emoji: '🖌️', active: true },
+  { id: 15, name: 'تصميم بوستر', nameEn: 'Poster Design', description: 'تصميم بوستر إعلاني أو ترويجي — جودة عالية + تعديلات', descriptionEn: 'Professional poster design for any purpose — Print + Digital', price: 21000000, category: 'photoshop', emoji: '🖼️', active: true },
+  { id: 16, name: 'تصميم بانر', nameEn: 'Banner Design', description: 'تصميم بانر لسوشيال ميديا أو ويب — جميع الأحجام', descriptionEn: 'Professional banner design — Social media + YouTube + Twitch', price: 14000000, category: 'photoshop', emoji: '🎨', active: true },
+  { id: 17, name: 'تصميم UI/UX', nameEn: 'UI/UX Design', description: 'تصميم واجهة مستخدم احترافية — Mockups + Prototypes', descriptionEn: 'Modern UI/UX design — Mockups + Prototypes', price: 70000000, category: 'photoshop', emoji: '📱', active: true },
+  { id: 18, name: 'إزالة الخلفية', nameEn: 'Background Removal', description: 'إزالة خلفية الصورة بدقة — استبدال أو شفاف', descriptionEn: 'Professional background removal — Clean + High quality', price: 7000000, category: 'photoshop', emoji: '✂️', active: true },
+  { id: 19, name: 'Photo Manipulation', nameEn: 'Photo Manipulation', description: 'تلاعب فني بالصور — دمج — تأثيرات — فن رقمي', descriptionEn: 'Creative photo manipulation — Effects + Compositing + Artwork', price: 28000000, category: 'photoshop', emoji: '🎭', active: true },
+  { id: 20, name: 'تصميم هوية بصرية', nameEn: 'Brand Identity Design', description: 'تصميم هوية بصرية كاملة — لوجو + ألوان + خطوط + بطاقات', descriptionEn: 'Complete brand identity — Logo + Colors + Typography + Guidelines', price: 84000000, category: 'photoshop', emoji: '💼', active: true },
+  { id: 21, name: 'مونتاج فيديو', nameEn: 'Video Editing', description: 'مونتاج فيديو احترافي — قص + ترتيب + انتقالات + موسيقى', descriptionEn: 'Professional video editing — Cuts + Transitions + Effects', price: 56000000, category: 'montage', emoji: '🎬', active: true },
+  { id: 22, name: 'تصميم إنтро/أوترو', nameEn: 'Intro/Outro Design', description: 'تصميم مقدمة ونهاية للفيديوهات — أنيميشن + لوجو', descriptionEn: 'Professional intro/outro for YouTube — Animation + Sound', price: 21000000, category: 'montage', emoji: '✨', active: true },
+  { id: 23, name: 'تصحيح ألوان', nameEn: 'Color Correction', description: 'تصحيح وضبط ألوان الفيديو — سينمائي أو واقعي', descriptionEn: 'Professional color grading — Cinematic + Vibrant', price: 14000000, category: 'montage', emoji: '🎨', active: true },
+  { id: 24, name: 'موشن جرافيك', nameEn: 'Motion Graphics', description: 'تصميم موشن جرافيك — أنيميشن — شرح — إعلانات متحركة', descriptionEn: 'Professional motion graphics — Animation + Effects + Typography', price: 84000000, category: 'montage', emoji: '🎭', active: true },
+  { id: 25, name: 'ترجمة وترجمات', nameEn: 'Subtitle Translation', description: 'إضافة ترجمة للفيديو — سoubtires — جميع اللغات', descriptionEn: 'Video subtitle translation — Accurate + Timed — Multiple formats', price: 11200000, category: 'montage', emoji: '📝', active: true },
+  { id: 26, name: 'مونتاج يوتيوب', nameEn: 'YouTube Editing', description: 'مونتاج فيديو يوتيوب كامل — قص + موسيقى + تأثيرات + سoubtires', descriptionEn: 'Professional YouTube video editing — Cuts + Thumbnails + Effects', price: 84000000, category: 'montage', emoji: '📺', active: true },
+  { id: 27, name: 'Reels / تيك توك', nameEn: 'Reels / TikTok', description: 'مونتاج ريلز أو تيك توك — سرعة + تأثيرات + موسيقى ترند', descriptionEn: 'Short-form video editing — Reels + TikTok + Viral effects', price: 28000000, category: 'montage', emoji: '📱', active: true },
+  { id: 28, name: 'تطوير موقع كامل', nameEn: 'Full Website Development', description: 'تطوير موقع ويب كامل — تصميم + كود + ربط + استضافة', descriptionEn: 'Complete website development — Design + Code + Integration + Hosting', price: 105000000, category: 'code', emoji: '🌐', active: true },
+  { id: 29, name: 'Landing Page', nameEn: 'Landing Page', description: 'تصميم صفحة هبوط احترافية — متجاوبة + سريعة + تحويل عالي', descriptionEn: 'High-converting landing page — Responsive + Fast + SEO', price: 42000000, category: 'code', emoji: '📄', active: true },
+  { id: 30, name: 'بوت Discord مخصص', nameEn: 'Custom Discord Bot', description: 'إنشاء بوت Discord مخصص — أوامر + تذاكر + أتمتة + إدارة', descriptionEn: 'Custom Discord bot — Commands + Database + Dashboard + Support', price: 56000000, category: 'code', emoji: '🤖', active: true },
+  { id: 31, name: 'سكربت / بوت أتمتة', nameEn: 'Automation Script', description: 'كتابة سكربت أو بوت لأتمتة أي مهمة — Python, JS', descriptionEn: 'Automation scripts for any task — Python, JS', price: 21000000, category: 'code', emoji: '⚙️', active: true },
+  { id: 32, name: 'إعداد WordPress', nameEn: 'WordPress Setup', description: 'إعداد و تخصيص موقع WordPress — ثيم + بلاغينات + إعداد', descriptionEn: 'Full WordPress website — Theme + Plugins + Content', price: 35000000, category: 'code', emoji: '🔧', active: true },
+  { id: 33, name: 'ربط API', nameEn: 'API Integration', description: 'ربط أي API مع مشروعك — REST + JSON + أمان', descriptionEn: 'Connect any API to your app — REST + JSON + Auth', price: 28000000, category: 'code', emoji: '🔗', active: true },
+  { id: 34, name: 'إصلاح مشكلة برمجية', nameEn: 'Bug Fix', description: 'إصلاح أي bug أو مشكلة في كودك — أي لغة برمجة', descriptionEn: 'Fix any bug or issue in your code — Fast + Reliable', price: 21000000, category: 'code', emoji: '🐛', active: true },
+  { id: 35, name: 'تطبيق ويب كامل', nameEn: 'Full Stack App', description: 'تطوير تطبيق ويب كامل — Frontend + Backend + قاعدة بيانات', descriptionEn: 'Complete full stack application — Frontend + Backend + Database', price: 140000000, category: 'code', emoji: '💻', active: true },
+  { id: 36, name: 'سيستم متجر', nameEn: 'Store System', description: 'نظام متجر إلكتروني كامل مع سلة مشتريات ودفع إلكتروني', descriptionEn: 'Complete e-commerce system — Cart + Payment + Inventory', price: 116200000, category: 'code', emoji: '🛒', active: true },
 ];
 const DEFAULT_CATEGORIES = [
-  { id: 'chatgpt', name: 'ChatGPT & AI', emoji: '🤖' },
-  { id: 'photoshop', name: 'فوتوشوب', emoji: '🖌️' },
-  { id: 'montage', name: 'مونتاج', emoji: '🎬' },
-  { id: 'code', name: 'برمجة', emoji: '💻' },
+  { id: 'chatgpt', name: 'ChatGPT & AI', nameEn: 'ChatGPT & AI', emoji: '🤖' },
+  { id: 'photoshop', name: 'فوتوشوب', nameEn: 'Design & Photoshop', emoji: '🖌️' },
+  { id: 'montage', name: 'مونتاج', nameEn: 'Video Editing', emoji: '🎬' },
+  { id: 'code', name: 'برمجة', nameEn: 'Programming', emoji: '💻' },
 ];
 
 const getServices  = () => load('services.json', DEFAULT_SERVICES);
@@ -363,9 +361,13 @@ async function cmdSetup(interaction) {
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
   if (logsCh) { CFG.logsChannel = logsCh.id; save('config.json', CFG); }
 
-  const defaultServices = DEFAULT_SERVICES.map(s => ({ ...s, createdAt: Date.now() }));
-  save('services.json', defaultServices);
-  saveCategories(DEFAULT_CATEGORIES);
+  if (!fs.existsSync(path.join(DATA, 'services.json'))) {
+    const defaultServices = DEFAULT_SERVICES.map(s => ({ ...s, createdAt: Date.now() }));
+    save('services.json', defaultServices);
+  }
+  if (!fs.existsSync(path.join(DATA, 'categories.json'))) {
+    saveCategories(DEFAULT_CATEGORIES);
+  }
 
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
@@ -1018,7 +1020,7 @@ const apiServer = http.createServer(async (req, res) => {
     if (req.method === 'GET' && p === '/api/reviews') return jsonRes(res, 200, getReviews());
     if (req.method === 'GET' && p === '/api/warnings') return jsonRes(res, 200, getWarnings());
     if (req.method === 'GET' && p === '/api/giveaways') return jsonRes(res, 200, getGiveaways());
-    if (req.method === 'GET' && p === '/api/config') return jsonRes(res, 200, { autoRoles: CFG.autoRoles, logsChannel: CFG.logsChannel, automod: CFG.automod });
+    if (req.method === 'GET' && p === '/api/config') return jsonRes(res, 200, { autoRoles: CFG.autoRoles, logsChannel: CFG.logsChannel, automod: CFG.automod, primaryCurrency: CFG.primaryCurrency || 'usd', welcomeMessage: CFG.welcomeMessage || '', welcomeChannel: CFG.welcomeChannel || '' });
     if (req.method === 'GET' && p === '/api/channels') {
       const channels = [];
       for (const [, c] of guild.channels.cache) channels.push({ id: c.id, name: c.name, type: c.type });
@@ -1187,6 +1189,9 @@ const apiServer = http.createServer(async (req, res) => {
       if (d.autoRoles !== undefined) CFG.autoRoles = d.autoRoles;
       if (d.logsChannel !== undefined) CFG.logsChannel = d.logsChannel;
       if (d.automod !== undefined) CFG.automod = { ...CFG.automod, ...d.automod };
+      if (d.primaryCurrency !== undefined) CFG.primaryCurrency = d.primaryCurrency;
+      if (d.welcomeMessage !== undefined) CFG.welcomeMessage = d.welcomeMessage;
+      if (d.welcomeChannel !== undefined) CFG.welcomeChannel = d.welcomeChannel;
       save('config.json', CFG);
       return jsonRes(res, 200, { ok: true });
     }

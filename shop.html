@@ -337,6 +337,7 @@ let allServices=[],allCategories=[],selectedService=null;
 const API=location.origin+'/';
 const CREDITS_TO_EGP=0.6/1000000;
 const EGP_TO_USD=1/50.5;
+let primaryCurrency='usd';
 
 async function api(u,opts={}){
   try{const r=await fetch(API+u,opts);return await r.json()}catch{return null}
@@ -352,12 +353,19 @@ function fmtCredits(n){return compactNum(n||0)}
 function fmtEGP(n){return compactNum(Math.round(n*CREDITS_TO_EGP))+(lang==='ar'?' ج.م':' EGP')}
 function fmtUSD(n){return '$'+(n*CREDITS_TO_EGP*EGP_TO_USD).toFixed(1)}
 function fmtPriceAll(credits){
-  return `<span class="price-usd">${fmtUSD(credits)}</span><span class="price-egp">${fmtEGP(credits)}</span><span class="price-credits">${fmtCredits(credits)} ${lang==='ar'?'كريديت':'credits'}</span>`;
+  const usd=fmtUSD(credits);
+  const egp=fmtEGP(credits);
+  const cr=fmtCredits(credits)+' '+(lang==='ar'?'كريديت':'credits');
+  if(primaryCurrency==='egp')return`<span class="price-usd" style="color:var(--green)">${egp}</span><span class="price-egp">${usd}</span><span class="price-credits">${cr}</span>`;
+  if(primaryCurrency==='credits')return`<span class="price-usd" style="color:var(--purple)">${cr}</span><span class="price-egp">${usd}</span><span class="price-credits">${egp}</span>`;
+  return`<span class="price-usd">${usd}</span><span class="price-egp">${egp}</span><span class="price-credits">${cr}</span>`;
 }
 
 async function init(){
   allServices=await api('api/services');
   allCategories=await api('api/categories');
+  const cfg=await api('api/config');
+  if(cfg&&cfg.primaryCurrency)primaryCurrency=cfg.primaryCurrency;
   if(!Array.isArray(allServices))allServices=[];
   if(!Array.isArray(allCategories))allCategories=[];
   const active=allServices.filter(s=>s.active);

@@ -154,7 +154,13 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px}
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <h3>🛒 الخدمات</h3>
-            <button class="btn btn-green" onclick="showAddService()">+ إضافة خدمة</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="serviceSearch" placeholder="🔍 بحث عن خدمة..." oninput="filterServices()" style="width:220px;margin:0" />
+              <select id="serviceFilterCat" onchange="filterServices()" style="width:150px;margin:0">
+                <option value="all">كل التصنيفات</option>
+              </select>
+              <button class="btn btn-green" onclick="showAddService()">+ إضافة خدمة</button>
+            </div>
           </div>
           <div id="servicesList"><div class="empty">جاري التحميل...</div></div>
         </div>
@@ -243,6 +249,8 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px}
         <div class="card"><h3>🛡️ الحماية التلقائية</h3><div id="automodSettings"><div class="empty">جاري التحميل...</div></div></div>
         <div class="card"><h3>🎭 الرولات التلقائية</h3><div id="autoRolesSettings"><div class="empty">جاري التحميل...</div></div></div>
         <div class="card"><h3>📝 قناة السجلات</h3><select id="logsChannelSelect"></select><br><br><button class="btn btn-blue" onclick="saveLogsChannel()">💾 حفظ</button></div>
+        <div class="card"><h3>💱 العملة الأساسية</h3><div id="currencySettings"><div class="empty">جاري التحميل...</div></div></div>
+        <div class="card"><h3>👋 رسالة الترحيب</h3><div id="welcomeSettings"><div class="empty">جاري التحميل...</div></div></div>
       </div>
     </div>
   </div>
@@ -406,8 +414,23 @@ async function loadServices(){
   const services=await api('api/services');
   window._allServices=Array.isArray(services)?services:[];
   const cats=await api('api/categories');
+  window._allCats2=Array.isArray(cats)?cats:[];
   const catMap={};if(Array.isArray(cats))cats.forEach(c=>catMap[c.id]=c);
-  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-blue btn-sm" onclick="editServiceById(${s.id})">✏️</button> <button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد خدمات</div>';
+  const sel=document.getElementById('serviceFilterCat');
+  sel.innerHTML='<option value="all">كل التصنيفات</option>'+window._allCats2.map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+  renderServicesTable(window._allServices,catMap);
+}
+function renderServicesTable(services,catMap){
+  if(!catMap){const cats=window._allCats2||[];catMap={};cats.forEach(c=>catMap[c.id]=c);}
+  document.getElementById('servicesList').innerHTML=Array.isArray(services)&&services.length?`<table><tr><th>🆔</th><th>الخدمة</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr>${services.map(s=>`<tr><td>${s.id}</td><td>${s.emoji||'🛒'} ${s.name}</td><td>${catMap[s.category]?.emoji||''} ${catMap[s.category]?.name||s.category}</td><td>${fmt(s.price)}</td><td>${s.active?'<span class="badge badge-green">نشط</span>':'<span class="badge badge-red">معطّل</span>'}</td><td><button class="btn btn-blue btn-sm" onclick="editServiceById(${s.id})">✏️</button> <button class="btn btn-red btn-sm" onclick="removeService(${s.id})">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد نتائج</div>';
+}
+function filterServices(){
+  const q=(document.getElementById('serviceSearch').value||'').toLowerCase();
+  const cat=document.getElementById('serviceFilterCat').value;
+  let list=window._allServices||[];
+  if(cat!=='all')list=list.filter(s=>s.category===cat);
+  if(q)list=list.filter(s=>(s.name||'').toLowerCase().includes(q)||(s.nameEn||'').toLowerCase().includes(q)||(s.description||'').toLowerCase().includes(q)||String(s.id)===q);
+  renderServicesTable(list);
 }
 function showAddService(){document.getElementById('addServiceForm').style.display='block';}
 async function addService(){
@@ -469,7 +492,28 @@ async function loadCategories(){
   const cats=await api('api/categories');
   window._allCats=Array.isArray(cats)?cats:[];
   const services=await api('api/services');
-  document.getElementById('categoriesList').innerHTML=Array.isArray(cats)?`<table><tr><th>التصنيف</th><th>المعرف</th><th>عدد الخدمات</th><th>إجراء</th></tr>${cats.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td><code>${c.id}</code></td><td>${Array.isArray(services)?services.filter(s=>s.category===c.id).length:0}</td><td><button class="btn btn-blue btn-sm" onclick="editCategoryById('${c.id}')">✏️</button> <button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تصنيفات</div>';
+  const catCards=Array.isArray(cats)?cats.map(c=>{
+    const count=Array.isArray(services)?services.filter(s=>s.category===c.id).length:0;
+    return`<div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px;transition:all .3s;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--purple))"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:2em;margin-bottom:8px">${c.emoji}</div>
+          <h3 style="font-size:1.1em;margin:0 0 4px;background:none;-webkit-text-fill-color:var(--text)">${c.name}</h3>
+          <p style="color:var(--dim);font-size:.82em;margin:0"><code style="background:var(--card);padding:2px 8px;border-radius:4px">${c.id}</code></p>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+            <span class="badge badge-blue">${count} خدمة</span>
+            ${c.nameEn?`<span style="color:var(--dim);font-size:.8em">${c.nameEn}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-blue btn-sm" onclick="editCategoryById('${c.id}')">✏️ تعديل</button>
+          <button class="btn btn-red btn-sm" onclick="removeCategory('${c.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">لا توجد تصنيفات</div>';
+  document.getElementById('categoriesList').innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">${catCards}</div>`;
 }
 function showAddCategory(){document.getElementById('addCategoryForm').style.display='block';}
 async function addCategory(){
@@ -509,7 +553,7 @@ async function updateCategory(){
 
 // ── MEMBERS ──
 async function loadMembers(){
-  if(!allMembers.length)allMembers=await api('api/members');
+  allMembers=await api('api/members');
   renderMembers(allMembers);
 }
 function renderMembers(members){
@@ -587,13 +631,57 @@ async function loadSettings(){
       <label class="toggle"><input type="checkbox" ${config.automod?.badwords?'checked':''} onchange="updateAutomod('badwords',this.checked)"><span class="slider"></span></label>
       <span class="badge badge-${config.automod?.badwords?'green':'red'}">${config.automod?.badwords?'مفعّل':'معطّل'}</span>
     </div>
-    <p style="color:var(--dim);font-size:13px;margin-top:8px">الكلمات الممنوعة: ${(config.automod?.badwordsList||[]).map(w=>`<code>${w}</code>`).join(', ')||'—'}</p>
+    <div style="margin-top:12px">
+      <label>الكلمات الممنوعة (فاصلة)</label>
+      <input id="badwordsListInput" value="${(config.automod?.badwordsList||[]).join(', ')}" placeholder="كلمة1, كلمة2, ..." />
+      <button class="btn btn-blue btn-sm" onclick="saveBadWords()" style="margin-top:6px">💾 حفظ الكلمات</button>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px">
+      <div style="flex:1"><label>حد الـ spam (رسائل)</label><input id="antispamLimitInput" type="number" value="${config.automod?.antispamLimit||5}" min="2" max="20" style="width:100%" /></div>
+      <div style="flex:1"><label>الوقت (ثواني)</label><input id="antispamTimeInput" type="number" value="${config.automod?.antispamTime||10}" min="3" max="60" style="width:100%" /></div>
+    </div>
+    <button class="btn btn-blue btn-sm" onclick="saveAutomodLimits()" style="margin-top:8px">💾 حفظ إعدادات الـ Anti-Spam</button>
   `;
+  const allRoles=Array.isArray(allChannels)?[]:[];
+  const rolesData=await api('api/roles');
+  const autoRoleIds=config.autoRoles||[];
   document.getElementById('autoRolesSettings').innerHTML=`
-    <p>${(config.autoRoles||[]).length?config.autoRoles.map(id=>`<span class="badge badge-blue"><@&${id}></span>`).join(' '):'لا توجد رولات تلقائية'}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      ${autoRoleIds.length?autoRoleIds.map(id=>`<span class="badge badge-blue" style="display:flex;align-items:center;gap:6px">R: ${id} <button onclick="removeAutoRole('${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px">✕</button></span>`).join(''):'<span style="color:var(--dim)">لا توجد رولات تلقائية</span>'}
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="addAutoRoleSelect" style="flex:1;margin:0">
+        <option value="">اختر رول...</option>
+        ${(Array.isArray(rolesData)?rolesData:[]).filter(r=>!autoRoleIds.includes(r.id)).map(r=>`<option value="${r.id}">${r.name} (${r.members} عضو)</option>`).join('')}
+      </select>
+      <button class="btn btn-green btn-sm" onclick="addAutoRole()">+ إضافة</button>
+    </div>
   `;
   const channels=Array.isArray(allChannels)?allChannels.filter(c=>c.type===0):[];
   document.getElementById('logsChannelSelect').innerHTML=channels.map(c=>`<option value="${c.id}" ${config.logsChannel===c.id?'selected':''}>${c.name}</option>`).join('');
+  document.getElementById('currencySettings').innerHTML=`
+    <p style="color:var(--dim);font-size:13px;margin-bottom:12px">العملة التي تظهر بشكل أساسي في موقع المتجر</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      ${[['usd','💵 دولار USD'],['egp','🇪🇬 جنيه EGP'],['credits','💎 كريديت']].map(([v,l])=>`<button class="btn btn-sm ${config.primaryCurrency===v?'btn-green':'btn-blue'}" onclick="saveCurrency('${v}')" style="min-width:120px">${l}</button>`).join('')}
+    </div>
+    <div style="padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+      <span style="color:var(--dim);font-size:12px">العملة الحالية: </span>
+      <strong style="color:${config.primaryCurrency==='egp'?'var(--green)':config.primaryCurrency==='credits'?'var(--purple)':'var(--yellow)'}">${config.primaryCurrency==='egp'?'جنيه EGP':config.primaryCurrency==='credits'?'كريديت':'دولار USD'}</strong>
+    </div>
+  `;
+  document.getElementById('welcomeSettings').innerHTML=`
+    <label>قناة الترحيب</label>
+    <select id="welcomeChannelSelect" style="margin-bottom:10px">
+      <option value="">بدون قناة ترحيب</option>
+      ${channels.map(c=>`<option value="${c.id}" ${config.welcomeChannel===c.id?'selected':''}>${c.name}</option>`).join('')}
+    </select>
+    <label>رسالة الترحيب (استخدم {user} لاسم العضو)</label>
+    <textarea id="welcomeMessageInput" style="min-height:60px">${config.welcomeMessage||''}</textarea>
+    <button class="btn btn-green" onclick="saveWelcomeConfig()">💾 حفظ إعدادات الترحيب</button>
+    <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+      <p style="color:var(--dim);font-size:12px;margin:0">مثال: مرحباً {user}! 👋 أهلاً بك في السيرفر</p>
+    </div>
+  `;
 }
 async function changeBotName(){
   const name=document.getElementById('botNewName').value.trim();
@@ -648,6 +736,48 @@ async function saveLogsChannel(){
   const ch=document.getElementById('logsChannelSelect').value;
   await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({logsChannel:ch})});
   toast('✅ تم حفظ قناة السجلات');
+}
+async function saveCurrency(c){
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({primaryCurrency:c})});
+  toast('✅ تم تغيير العملة الأساسية');
+  loadSettings();
+}
+async function saveBadWords(){
+  const list=document.getElementById('badwordsListInput').value.split(',').map(w=>w.trim()).filter(Boolean);
+  const config=await api('api/config');
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({automod:{...config.automod,badwordsList:list}})});
+  toast('✅ تم حفظ الكلمات الممنوعة');
+  loadSettings();
+}
+async function saveAutomodLimits(){
+  const limit=parseInt(document.getElementById('antispamLimitInput').value)||5;
+  const time=parseInt(document.getElementById('antispamTimeInput').value)||10;
+  const config=await api('api/config');
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({automod:{...config.automod,antispamLimit:limit,antispamTime:time}})});
+  toast('✅ تم حفظ إعدادات الـ Anti-Spam');
+}
+async function addAutoRole(){
+  const roleId=document.getElementById('addAutoRoleSelect').value;
+  if(!roleId)return toast('❌ اختر رول');
+  const config=await api('api/config');
+  const roles=[...(config.autoRoles||[])];
+  if(!roles.includes(roleId))roles.push(roleId);
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({autoRoles:roles})});
+  toast('✅ تمت إضافة الرول');
+  loadSettings();
+}
+async function removeAutoRole(roleId){
+  const config=await api('api/config');
+  const roles=(config.autoRoles||[]).filter(id=>id!==roleId);
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({autoRoles:roles})});
+  toast('✅ تمت إزالة الرول');
+  loadSettings();
+}
+async function saveWelcomeConfig(){
+  const ch=document.getElementById('welcomeChannelSelect').value;
+  const msg=document.getElementById('welcomeMessageInput').value;
+  await api('api/config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({welcomeChannel:ch,welcomeMessage:msg})});
+  toast('✅ تم حفظ إعدادات الترحيب');
 }
 
 // Auto-refresh
