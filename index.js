@@ -498,7 +498,7 @@ async function cmdOrder(interaction) {
   orders.push(order); save('orders.json', orders);
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
   const embed = new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n**الوصف:** ${svc.description || '—'}\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp();
-  await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+  await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
   await interaction.reply({ content: `✅ تم فتح التذكرة: ${channel}`, ephemeral: true });
 
   await sendLog(g, new EmbedBuilder().setTitle('🎫 تذكرة جديدة').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
@@ -841,11 +841,9 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
         await sendLog(g, new EmbedBuilder().setTitle('🎫 طلب جديد').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
-        const staffCh = g.channels.cache.find(c => c.name.includes('العامة') && c.isTextBased());
-        if (staffCh) await staffCh.send({ content: `${staffRole || ''} — طلب جديد: **${svc.name}** من ${interaction.user}` }).catch(() => {});
         return;
       }
 
@@ -867,7 +865,7 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n⏳ **في انتظار القبول...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n⏳ **في انتظار القبول...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
         return;
       }
@@ -879,7 +877,7 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n💬 **اكتب مشكلتك هنا**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n💬 **اكتب مشكلتك هنا**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
         return;
       }
@@ -1348,14 +1346,15 @@ const apiServer = http.createServer(async (req, res) => {
           const ow = [{ id: g.id, deny: [PermissionFlagsBits.SendMessages], allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ReadMessageHistory] }];
           if (staffRole) ow.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
           const channel = await g.channels.create({ name: `shop-${orderId}-${d.name}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: ow });
-          order.channelId = channel.id; save('orders.json', orders);
+          const freshOrders = getOrders(); const freshOrder = freshOrders.find(o => o.id === orderId);
+          if (freshOrder) { freshOrder.channelId = channel.id; save('orders.json', freshOrders); }
           const total = svc.price * (parseInt(d.qty) || 1);
           const contactLabels = { discord: 'Discord', whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'بريد إلكتروني' };
           const embed = new EmbedBuilder()
             .setTitle(`🛒 طلب من المتجر #${orderId}`)
             .setDescription(`**العميل:** ${d.name}\n**Discord:** ${d.discord}\n**طريقة التواصل:** ${contactLabels[d.contactType] || d.contactType}: ${d.contact}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**الكمية:** ${parseInt(d.qty) || 1}\n**السعر:** \`${fmt(svc.price)}\` × ${parseInt(d.qty) || 1} = \`${fmt(total)}\`\n**الوصف:** ${svc.description || '—'}\n${d.notes ? `**ملاحظات:** ${d.notes}\n` : ''}━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`)
             .setColor(0xF1C40F).setTimestamp();
-          await channel.send({ content: `${staffRole || ''}`, embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+          await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
           const invite = await channel.createInvite({ maxAge: 86400 * 7, reason: `Shop order #${orderId}` }).catch(() => null);
           const inviteUrl = invite ? `https://discord.gg/${invite.code}` : 'https://discord.gg/a85fhmx4X';
           await channel.send({ content: `👋 **مرحباً ${d.name}!**\n\n🎯 انضم للسيرفر عشان تتابع طلبك:\n${inviteUrl}\n\n💡 اكتب في التذكرة وأي حد من الستاف هيرد عليك` }).catch(() => {});
@@ -1383,6 +1382,24 @@ async function start() {
 
   client.once('clientReady', async () => {
     console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
+
+    // Make logs channel private (staff + owner only)
+    try {
+      if (CFG.logsChannel) {
+        const g = client.guilds.cache.get(CFG.guildId);
+        if (g) {
+          const logsCh = g.channels.cache.get(CFG.logsChannel);
+          if (logsCh) {
+            const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+            const ow = [{ id: g.id, deny: [PermissionFlagsBits.ViewChannel] }];
+            if (staffRole) ow.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ReadMessageHistory] });
+            if (g.ownerId) ow.push({ id: g.ownerId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ReadMessageHistory] });
+            await logsCh.permissionOverwrites.set(ow);
+            console.log('🔒 Logs channel locked to staff + owner');
+          }
+        }
+      }
+    } catch (e) { console.error('Logs channel setup error:', e.message); }
 
     try {
       const url = `https://discord.com/api/v10/applications/${CFG.clientId}/guilds/${CFG.guildId}/commands`;
