@@ -30,6 +30,19 @@ if (!CFG.automod) CFG.automod = { antispam: true, badwords: true, badwordsList: 
 if (!CFG.welcomeChannel) CFG.welcomeChannel = '';
 save('config.json', CFG);
 
+const getCategories = () => load('categories.json', [
+  { id: 'chatgpt', name: '🤖 ChatGPT & AI', emoji: '🤖' },
+  { id: 'image', name: '🎨 صور وتصميم', emoji: '🎨' },
+  { id: 'photoshop', name: '🖌️ فوتوشوب', emoji: '🖌️' },
+  { id: 'montage', name: '🎬 مونتاج', emoji: '🎬' },
+  { id: 'repair', name: '🔧 تصليح وصيانة', emoji: '🔧' },
+  { id: 'voice', name: '🔊 صوت', emoji: '🔊' },
+  { id: 'code', name: '💻 برمجة', emoji: '💻' },
+  { id: 'writing', name: '📝 كتابة', emoji: '📝' },
+  { id: 'data', name: '📊 بيانات', emoji: '📊' },
+  { id: 'other', name: '📦 أخرى', emoji: '📦' },
+]);
+const saveCategories = (cats) => save('categories.json', cats);
 const getServices  = () => load('services.json', []);
 const getReviews   = () => load('reviews.json', []);
 const getOrders    = () => load('orders.json', []);
@@ -145,8 +158,7 @@ const COMMANDS = [
     .addStringOption(o => o.setName('name').setDescription('اسم الخدمة').setRequired(true))
     .addStringOption(o => o.setName('description').setDescription('الوصف').setRequired(true))
     .addNumberOption(o => o.setName('price').setDescription('السعر').setRequired(true))
-    .addStringOption(o => o.setName('category').setDescription('التصنيف').setRequired(true)
-      .addChoices({ name: 'ChatGPT', value: 'chatgpt' }, { name: 'Image', value: 'image' }, { name: 'Voice', value: 'voice' }, { name: 'Code', value: 'code' }, { name: 'Writing', value: 'writing' }, { name: 'Data', value: 'data' }, { name: 'Other', value: 'other' }))
+    .addStringOption(o => o.setName('category').setDescription('معرف التصنيف (اكتب /list-categories)').setRequired(true))
     .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
   new SlashCommandBuilder().setName('remove-service').setDescription('حذف خدمة')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
@@ -184,6 +196,15 @@ const COMMANDS = [
     .addSubcommand(sub => sub.setName('remove-word').setDescription('حذف كلمة ممنوعة')
       .addStringOption(o => o.setName('word').setDescription('الكلمة').setRequired(true)))
     .addSubcommand(sub => sub.setName('list').setDescription('عرض الإعدادات')),
+  new SlashCommandBuilder().setName('add-category').setDescription('إضافة تصنيف جديد')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addStringOption(o => o.setName('id').setDescription('معرف التصنيف (انجليزي)').setRequired(true))
+    .addStringOption(o => o.setName('name').setDescription('اسم التصنيف بالعربي').setRequired(true))
+    .addStringOption(o => o.setName('emoji').setDescription('إيموجي التصنيف')),
+  new SlashCommandBuilder().setName('remove-category').setDescription('حذف تصنيف')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addStringOption(o => o.setName('id').setDescription('معرف التصنيف').setRequired(true)),
+  new SlashCommandBuilder().setName('list-categories').setDescription('عرض التصنيفات'),
 
   // ── Moderation ──
   new SlashCommandBuilder().setName('ban').setDescription('حظر عضو')
@@ -393,22 +414,29 @@ async function cmdSetup(interaction) {
 async function cmdServices(interaction) {
   const services = getServices().filter(s => s.active);
   if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات', ephemeral: true });
-  const cats = {};
-  const catNames = { chatgpt: '🤖 ChatGPT & AI', image: '🎨 صور', voice: '🔊 صوت', code: '💻 برمجة', writing: '📝 كتابة', data: '📊 بيانات', other: '📦 أخرى' };
-  for (const s of services) { const cat = s.category || 'other'; if (!cats[cat]) cats[cat] = []; cats[cat].push(s); }
-  const embed = new EmbedBuilder().setTitle('🛒 الخدمات المتاحة').setDescription('اختر خدمة من القائمة أو تواصل مع الستاف').setColor(0xFF0000).setTimestamp().setFooter({ text: `${services.length} خدمة` });
-  for (const [cat, items] of Object.entries(cats)) { embed.addFields({ name: catNames[cat] || cat, value: items.map(s => `${s.emoji || '🛒'} **${safe(s.name, 40)}** — \`${fmt(s.price)}\``).join('\n') }); }
+  const cats = getCategories();
+  const catMap = {};
+  for (const c of cats) catMap[c.id] = c;
+  const grouped = {};
+  for (const s of services) { const cat = s.category || 'other'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(s); }
+  const embed = new EmbedBuilder().setTitle('🛒 الخدمات المتاحة').setDescription('اختر خدمة من القائمة').setColor(0xFF0000).setTimestamp().setFooter({ text: `${services.length} خدمة` });
+  for (const [catId, items] of Object.entries(grouped)) {
+    const catInfo = catMap[catId] || { name: catId, emoji: '📁' };
+    embed.addFields({ name: `${catInfo.emoji} ${catInfo.name}`, value: items.map(s => `${s.emoji || '🛒'} **${safe(s.name, 40)}** — \`${fmt(s.price)}\``).join('\n') });
+  }
   const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختر خدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} كريديت`.substring(0, 100), value: String(s.id) })));
   await interaction.reply({ embeds: [embed], components: [new ActionRowBuilder().addComponents(select)] });
 }
 
 async function cmdAddService(interaction) {
   const name = interaction.options.getString('name'), desc = interaction.options.getString('description'), price = interaction.options.getNumber('price'), category = interaction.options.getString('category'), emoji = interaction.options.getString('emoji') || '🛒';
+  const cats = getCategories();
+  const catInfo = cats.find(c => c.id === category);
   const services = getServices();
   const id = nextId(services);
   services.push({ id, name, description: desc, price, category, emoji, active: true, createdAt: Date.now() });
   save('services.json', services);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`${emoji} ${name}`).setDescription(desc).addFields({ name: '💰 السعر', value: `\`${fmt(price)}\``, inline: true }, { name: '📂 التصنيف', value: category, inline: true }, { name: '🆔', value: `${id}`, inline: true }).setColor(0x2ECC71).setTimestamp()], ephemeral: true });
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`${emoji} ${name}`).setDescription(desc).addFields({ name: '💰 السعر', value: `\`${fmt(price)}\``, inline: true }, { name: '📂 التصنيف', value: catInfo ? `${catInfo.emoji} ${catInfo.name}` : category, inline: true }, { name: '🆔', value: `${id}`, inline: true }).setColor(0x2ECC71).setTimestamp()], ephemeral: true });
 }
 
 async function cmdEditService(interaction) {
@@ -425,6 +453,42 @@ async function cmdRemoveService(interaction) {
   if (!svc) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
   save('services.json', services.filter(s => s.id !== id));
   await interaction.reply({ content: `✅ تم حذف: ${svc.emoji} ${svc.name}`, ephemeral: true });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HANDLERS: CATEGORIES
+// ══════════════════════════════════════════════════════════════
+async function cmdAddCategory(interaction) {
+  const id = interaction.options.getString('id').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const name = interaction.options.getString('name');
+  const emoji = interaction.options.getString('emoji') || '📁';
+  const cats = getCategories();
+  if (cats.find(c => c.id === id)) return interaction.reply({ content: `❌ التصنيف \`${id}\` موجود أصلاً`, ephemeral: true });
+  cats.push({ id, name, emoji });
+  saveCategories(cats);
+  await interaction.reply({ content: `✅ تمت إضافة التصنيف: ${emoji} ${name} (\`${id}\`)`, ephemeral: true });
+}
+
+async function cmdRemoveCategory(interaction) {
+  const id = interaction.options.getString('id');
+  let cats = getCategories();
+  const cat = cats.find(c => c.id === id);
+  if (!cat) return interaction.reply({ content: `❌ التصنيف \`${id}\` غير موجود`, ephemeral: true });
+  const servicesUsing = getServices().filter(s => s.category === id);
+  if (servicesUsing.length) return interaction.reply({ content: `❌ فيه ${servicesUsing.length} خدمة في هذا التصنيف. احذفها أول`, ephemeral: true });
+  cats = cats.filter(c => c.id !== id);
+  saveCategories(cats);
+  await interaction.reply({ content: `✅ تم حذف التصنيف: ${cat.emoji} ${cat.name}`, ephemeral: true });
+}
+
+async function cmdListCategories(interaction) {
+  const cats = getCategories();
+  const services = getServices();
+  const desc = cats.map(c => {
+    const count = services.filter(s => s.category === c.id).length;
+    return `${c.emoji} **${c.name}** (\`${c.id}\`) — ${count} خدمة`;
+  }).join('\n');
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('📂 التصنيفات').setDescription(desc).setColor(0x3498DB).setTimestamp()], ephemeral: true });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -447,13 +511,10 @@ async function cmdOrder(interaction) {
   orders.push(order); save('orders.json', orders);
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
   const embed = new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n**الوصف:** ${svc.description || '—'}\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp();
-  await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+  await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
   await interaction.reply({ content: `✅ تم فتح التذكرة: ${channel}`, ephemeral: true });
 
   await sendLog(g, new EmbedBuilder().setTitle('🎫 تذكرة جديدة').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
-
-  const staffCh = g.channels.cache.find(c => c.name.includes('العامة') && c.isTextBased());
-  if (staffCh) await staffCh.send({ content: `${staffRole || '@everyone'} — طلب جديد: **${svc.name}** من ${interaction.user}` }).catch(() => {});
 }
 
 async function cmdSupport(interaction) {
@@ -462,9 +523,9 @@ async function cmdSupport(interaction) {
   orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
   save('orders.json', orders);
   const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-  await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n💬 **اكتب مشكلتك هنا**\n━━━━━━━━━━━━━━━━━━━━━`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+  await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n💬 **اكتب مشكلتك هنا**\n━━━━━━━━━━━━━━━━━━━━━`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
   await interaction.reply({ content: `✅ تم فتح تذكرة الدعم: ${channel}`, ephemeral: true });
-  await sendLog(g, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**المستخدم:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
+  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**المستخدم:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
 }
 
 async function cmdClose(interaction) {
@@ -777,7 +838,7 @@ async function cmdUserInfo(interaction) {
 async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
     { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/credits` `/coins` `/review` `/leaderboard` `/leaderboard-coins` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
-    { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/announce` `/auto-role` `/set-logs` `/automod` `/givecoins` `/giveaway` `/end-giveaway`' },
+    { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/givecoins` `/giveaway` `/end-giveaway`' },
     { name: '🔨 moderation', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
   ).setColor(0xFF0000).setTimestamp()], ephemeral: true });
 }
@@ -793,6 +854,7 @@ client.on('interactionCreate', async (interaction) => {
         review: cmdReview, leaderboard: cmdLeaderboard, 'leaderboard-coins': cmdLeaderboardCoins,
         help: cmdHelp, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
         'auto-role': cmdAutoRole, 'set-logs': cmdSetLogs, automod: cmdAutomod, announce: cmdAnnounce,
+        'add-category': cmdAddCategory, 'remove-category': cmdRemoveCategory, 'list-categories': cmdListCategories,
         order: cmdOrder, support: cmdSupport, close: cmdClose,
         ban: cmdBan, kick: cmdKick, mute: cmdMute, unmute: cmdUnmute,
         warn: cmdWarn, warnings: cmdWarnings, 'clear-warnings': cmdClearWarnings, purge: cmdPurge,
@@ -825,11 +887,11 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب جديد #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
         await sendLog(g, new EmbedBuilder().setTitle('🎫 طلب جديد').setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.name}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
         const staffCh = g.channels.cache.find(c => c.name.includes('العامة') && c.isTextBased());
-        if (staffCh) await staffCh.send({ content: `${staffRole || '@everyone'} — طلب جديد: **${svc.name}** من ${interaction.user}` }).catch(() => {});
+        if (staffCh) await staffCh.send({ content: `${staffRole || ''} — طلب جديد: **${svc.name}** من ${interaction.user}` }).catch(() => {});
         return;
       }
 
@@ -851,7 +913,7 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n⏳ **في انتظار القبول...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId}`).setDescription(`**العميل:** ${interaction.user}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**السعر:** \`${fmt(svc.price)}\`\n\n⏳ **في انتظار القبول...**`).setColor(0xF1C40F).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح التذكرة: ${channel}`);
         return;
       }
@@ -863,7 +925,7 @@ client.on('interactionCreate', async (interaction) => {
         orders.push({ id: orderId, type: 'support', serviceName: 'دعم فني', serviceEmoji: '🛠️', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
         save('orders.json', orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
-        await channel.send({ content: `${interaction.user} | ${staffRole || '@everyone'}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n💬 **اكتب مشكلتك هنا**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        await channel.send({ content: `${interaction.user} | ${staffRole || ''}`, embeds: [new EmbedBuilder().setTitle(`🛠️ تذكرة دعم #${orderId}`).setDescription(`**المستخدم:** ${interaction.user}\n\n💬 **اكتب مشكلتك هنا**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
         await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
         return;
       }
