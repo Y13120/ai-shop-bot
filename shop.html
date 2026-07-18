@@ -422,7 +422,7 @@ const T={
   ar:{
     heroBadge:"🔥 AI Shop — متجر الخدمات الرقمية",
     heroTitle:'خدمات <span class="gradient">ذكية واحترافية</span><br>بأسعار مناسبة',
-    heroSub:"نوفر لك كل ما تحتاجه من خدمات الذكاء الاصطناعي، التصميم، البرمجة، والمونتاج — كل ذلك في مكان واحد وبجودة عالية",
+    heroSub:"بنوفرلك كل اللي محتاجه من خدمات الذكاء الاصطناعي، التصميم، البرمجة، والمونتاج — كل ده في مكان واحد وبجودة عالية",
     featFast:"تنفيذ سريع",featQuality:"جودة عالية",featSupport:"دعم مستمر",
     statServices:"خدمة متاحة",statCategories:"تصنيف",
     introChatGpt:"ChatGPT & AI",introChatGptDesc:"اشتراكات ChatGPT Plus و Claude و Gemini — أدوات الذكاء الاصطناعي الأقوى للمحادثات، الكتابة، والتحليل",
@@ -432,11 +432,11 @@ const T={
     navAll:"الكل",navOrders:"📦 طلباتي",
     searchPlaceholder:"ابحث عن خدمة...",
     sortDefault:"ترتيب حسب",sortPriceLow:"السعر: من الأقل للأعلى",sortPriceHigh:"السعر: من الأعلى للأقل",sortName:"الاسم",
-    loading:"جاري تحميل الخدمات...",
-    noServices:"لا توجد خدمات متاحة حالياً",
-    noCategoryServices:"لا توجد خدمات في هذا التصنيف",
+    loading:"الخدمات بتحمّل...",
+    noServices:"مفيش خدمات متاحة دلوقتي",
+    noCategoryServices:"مفيش خدمات في التصنيف ده",
     svcCount:"خدمة",
-    orderBtn:"اطلب الآن",addToCartBtn:"🛒 أضف",
+    orderBtn:"اطلب الآن",    addToCartBtn:"🛒 ضيف",
     modalTitle:"📝 اطلب الخدمة",
     formFullName:"الاسم الكامل *",formFullNamePh:"اسمك هنا",
     formDiscord:"اسم المستخدم في Discord *",formDiscordHelp:"اسم المستخدم بدون # — مثال: ahmed",
@@ -444,21 +444,21 @@ const T={
     formEmail:"بريد إلكتروني",
     formContact:"رقم / يوزر طريقة التواصل *",formContactPh:"رقم الجوال أو يوزر أو إيميل",
     formQty:"الكمية",formNotes:"ملاحظات إضافية",formNotesPh:"أي تفاصيل إضافية عن الطلب...",
-    btnCancel:"إلغاء",btnSubmit:"✅ إرسال الطلب",
+    btnCancel:"إلغاء",    btnSubmit:"✅ ابعت الطلب",
     errName:"اكتب اسمك الكامل",
     errDiscord:"اكتب يوزر Discord صحيح (حرفين على الأقل)",
     errContact:"اكتب رقم أو يوزر طريقة التواصل",
-    sending:"⏳ جاري الإرسال...",
-    orderSuccess:"✅ تم إرسال طلبك بنجاح! سنتواصل معك قريباً",
+    sending:"⏳ بنبعت...",
+    orderSuccess:"✅ طلبك اتبعت بنجاح! هنتواصل معاك قريب",
     footerText:"جميع الخدمات بتقنيات الذكاء الاصطناعي latest",
-    cartTitle:"🛒 سلة المشتريات",cartEmpty:"سلتك فاضية",
-    couponPh:"كود الخصم",couponApply:"تطبيق",couponValid:"✅ تم تطبيق الكود!",couponInvalid:"❌ كود غير صالح",
-    cartCheckout:"✅ إتمام الشراء",cartSubtotal:"المجموع",cartDiscount:"الخصم",cartTotal:"الإجمالي",
-    addedToCart:"✅ تمت الإضافة للسلة!",removedFromCart:"تمت الإزالة من السلة",
-    ordersTitle:"📦 تتبع طلباتك",ordersSubtitle:"أدخل رقم الطلب لمتابعة الحالة",
-    ordersSearchPh:"أدخل رقم الطلب (مثال: ABC123)",ordersTrackBtn:"تتبع",
-    orderNotFound:"❌ الطلب غير موجود",orderFound:"✅ تم العثور على الطلب!",
-    stepOrdered:"تم الطلب",stepAccepted:"تم القبول",stepProgress:"جاري التنفيذ",stepCompleted:"تم التسليم",
+    cartTitle:"🛒 السلة",cartEmpty:"سلتك فاضية",
+    couponPh:"كود الخصم",couponApply:"تطبيق",    couponValid:"✅ الكود اتطبق!",couponInvalid:"❌ كود مش صالح",
+    cartCheckout:"✅ الدفع",cartSubtotal:"المجموع",cartDiscount:"الخصم",cartTotal:"الإجمالي",
+    addedToCart:"✅ اتضاف للسلة!",removedFromCart:"اتشال من السلة",
+    ordersTitle:"📦 تتبع طلباتك",    ordersSubtitle:"اكتب رقم الطلب عشان تعرف حالته",
+    ordersSearchPh:"اكتب رقم الطلب (مثال: ABC123)",ordersTrackBtn:"تتبع",
+    orderNotFound:"❌ الطلب مش موجود",orderFound:"✅ الطلب اتلقي!",
+    stepOrdered:"الطلب اتطلب",stepAccepted:"اتقبل",stepProgress:"قيد التنفيذ",stepCompleted:"اتسلّم",
   }
 };
 let lang=localStorage.getItem('shopLang')||'en';
@@ -755,7 +755,7 @@ async function trackOrder(){
   if(!id)return;
   const t=T[lang];
   const container=document.getElementById('orderResult');
-  container.innerHTML=`<div class="empty"><div class="big-emoji">⏳</div>${lang==='ar'?'جاري البحث...':'Searching...'}</div>`;
+  container.innerHTML=`<div class="empty"><div class="big-emoji">⏳</div>${lang==='ar'?'بدور...':'Searching...'}</div>`;
 
   // Search in local orders from API
   const orders=await api('api/orders');
@@ -765,7 +765,7 @@ async function trackOrder(){
   if(!order){container.innerHTML=`<div class="empty"><div class="big-emoji">🔍</div>${t.orderNotFound}</div>`;return}
 
   const statusMap={pending:'pending',open:'pending',progress:'progress',completed:'completed',closed:'closed'};
-  const statusLabel={pending:lang==='ar'?'⏳ بانتظار القبول':'⏳ Pending',progress:lang==='ar'?'🔄 قيد التنفيذ':'🔄 In Progress',completed:lang==='ar'?'✅ مكتمل':'✅ Completed',closed:lang==='ar'?'🔒 مغلق':'🔒 Closed'};
+  const statusLabel={pending:lang==='ar'?'⏳ مستني القبول':'⏳ Pending',progress:lang==='ar'?'🔄 شغال عليه':'🔄 In Progress',completed:lang==='ar'?'✅ خلص':'✅ Completed',closed:lang==='ar'?'🔒 مقفول':'🔒 Closed'};
   const steps=['pending','progress','completed'];
   const currentStep=order.status==='closed'?-1:steps.indexOf(order.status);
   const serviceName=order.serviceName||'Service';

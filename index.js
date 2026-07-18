@@ -186,63 +186,63 @@ function checkBadWords(text) {
 // ══════════════════════════════════════════════════════════════
 const COMMANDS = [
   // ── Admin ──
-  new SlashCommandBuilder().setName('setup').setDescription('إعداد السيرفر بالكامل')
+  new SlashCommandBuilder().setName('setup').setDescription('جهّز السيرفر كلّه')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  new SlashCommandBuilder().setName('add-service').setDescription('إضافة خدمة جديدة')
+  new SlashCommandBuilder().setName('add-service').setDescription('ضيف خدمة جديدة')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('name').setDescription('اسم الخدمة').setRequired(true))
     .addStringOption(o => o.setName('description').setDescription('الوصف').setRequired(true))
     .addNumberOption(o => o.setName('price').setDescription('السعر').setRequired(true))
     .addStringOption(o => o.setName('category').setDescription('معرف التصنيف (اكتب /list-categories)').setRequired(true))
     .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
-  new SlashCommandBuilder().setName('remove-service').setDescription('حذف خدمة')
+  new SlashCommandBuilder().setName('remove-service').setDescription('امسح خدمة')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('رقم الخدمة').setRequired(true)),
-  new SlashCommandBuilder().setName('edit-service').setDescription('تعديل خدمة')
+  new SlashCommandBuilder().setName('edit-service').setDescription('عدّل خدمة')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('رقم الخدمة').setRequired(true))
     .addStringOption(o => o.setName('name').setDescription('اسم جديد'))
     .addNumberOption(o => o.setName('price').setDescription('سعر جديد'))
     .addStringOption(o => o.setName('description').setDescription('وصف جديد')),
-  new SlashCommandBuilder().setName('announce').setDescription('إرسال إعلان')
+  new SlashCommandBuilder().setName('announce').setDescription('ابعت إعلان')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('title').setDescription('العنوان').setRequired(true))
     .addStringOption(o => o.setName('content').setDescription('المحتوى').setRequired(true))
     .addStringOption(o => o.setName('emoji').setDescription('إيموجي')),
   new SlashCommandBuilder().setName('auto-role').setDescription('إدارة الرولات التلقائية')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addSubcommand(sub => sub.setName('add').setDescription('إضافة رول').addRoleOption(o => o.setName('role').setDescription('الرول').setRequired(true)))
-    .addSubcommand(sub => sub.setName('remove').setDescription('حذف رول').addRoleOption(o => o.setName('role').setDescription('الرول').setRequired(true)))
+    .addSubcommand(sub => sub.setName('add').setDescription('ضيف رول').addRoleOption(o => o.setName('role').setDescription('الرول').setRequired(true)))
+    .addSubcommand(sub => sub.setName('remove').setDescription('امسح رول').addRoleOption(o => o.setName('role').setDescription('الرول').setRequired(true)))
     .addSubcommand(sub => sub.setName('list').setDescription('عرض القائمة'))
     .addSubcommand(sub => sub.setName('clear').setDescription('مسح كل الرولات')),
-  new SlashCommandBuilder().setName('set-logs').setDescription('ضبط قناة السجلات')
+  new SlashCommandBuilder().setName('set-logs').setDescription('حدّد قناة السجلات')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(o => o.setName('channel').setDescription('القناة').setRequired(true)),
   new SlashCommandBuilder().setName('automod').setDescription('إعداد الحماية التلقائية')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addSubcommand(sub => sub.setName('antispam').setDescription('تفعيل/تعطيل منع السبام')
+    .addSubcommand(sub => sub.setName('antispam').setDescription('شغّل/وقف منع السبام')
       .addStringOption(o => o.setName('state').setDescription('on/off').setRequired(true)
-        .addChoices({ name: 'تفعيل', value: 'on' }, { name: 'تعطيل', value: 'off' })))
-    .addSubcommand(sub => sub.setName('badwords').setDescription('تفعيل/تعطيل فلتر الكلمات')
+        .addChoices({ name: 'شغّل', value: 'on' }, { name: 'وقف', value: 'off' })))
+    .addSubcommand(sub => sub.setName('badwords').setDescription('شغّل/وقف فلتر الكلمات')
       .addStringOption(o => o.setName('state').setDescription('on/off').setRequired(true)
-        .addChoices({ name: 'تفعيل', value: 'on' }, { name: 'تعطيل', value: 'off' })))
-    .addSubcommand(sub => sub.setName('add-word').setDescription('إضافة كلمة ممنوعة')
+        .addChoices({ name: 'شغّل', value: 'on' }, { name: 'وقف', value: 'off' })))
+    .addSubcommand(sub => sub.setName('add-word').setDescription('ضيف كلمة ممنوعة')
       .addStringOption(o => o.setName('word').setDescription('الكلمة').setRequired(true)))
-    .addSubcommand(sub => sub.setName('remove-word').setDescription('حذف كلمة ممنوعة')
+    .addSubcommand(sub => sub.setName('remove-word').setDescription('امسح كلمة ممنوعة')
       .addStringOption(o => o.setName('word').setDescription('الكلمة').setRequired(true)))
     .addSubcommand(sub => sub.setName('list').setDescription('عرض الإعدادات')),
-  new SlashCommandBuilder().setName('add-category').setDescription('إضافة تصنيف جديد')
+  new SlashCommandBuilder().setName('add-category').setDescription('ضيف تصنيف جديد')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('معرف التصنيف (انجليزي)').setRequired(true))
     .addStringOption(o => o.setName('name').setDescription('اسم التصنيف بالعربي').setRequired(true))
     .addStringOption(o => o.setName('emoji').setDescription('إيموجي التصنيف')),
-  new SlashCommandBuilder().setName('remove-category').setDescription('حذف تصنيف')
+  new SlashCommandBuilder().setName('remove-category').setDescription('امسح تصنيف')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('id').setDescription('معرف التصنيف').setRequired(true)),
   new SlashCommandBuilder().setName('list-categories').setDescription('عرض التصنيفات'),
 
   // ── Moderation ──
-  new SlashCommandBuilder().setName('ban').setDescription('حظر عضو')
+  new SlashCommandBuilder().setName('ban').setDescription('احظر عضو')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('السبب')),
@@ -255,42 +255,42 @@ const COMMANDS = [
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
     .addNumberOption(o => o.setName('minutes').setDescription('المدة بالدقائق').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('السبب')),
-  new SlashCommandBuilder().setName('unmute').setDescription('إلغاء كتم')
+  new SlashCommandBuilder().setName('unmute').setDescription('فكّ كتم')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true)),
-  new SlashCommandBuilder().setName('warn').setDescription('تحذير عضو')
+  new SlashCommandBuilder().setName('warn').setDescription('حدّر عضو')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('السبب').setRequired(true)),
-  new SlashCommandBuilder().setName('warnings').setDescription('عرض تحذيرات عضو')
+  new SlashCommandBuilder().setName('warnings').setDescription('شوف تحذيرات عضو')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true)),
-  new SlashCommandBuilder().setName('clear-warnings').setDescription('مسح تحذيرات')
+  new SlashCommandBuilder().setName('clear-warnings').setDescription('امسح تحذيرات')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true)),
-  new SlashCommandBuilder().setName('purge').setDescription('مسح رسائل')
+  new SlashCommandBuilder().setName('purge').setDescription('امسح رسائل')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addNumberOption(o => o.setName('amount').setDescription('العدد').setRequired(true)),
 
   // ── Shop ──
-  new SlashCommandBuilder().setName('services').setDescription('عرض الخدمات'),
-  new SlashCommandBuilder().setName('order').setDescription('طلب خدمة')
+  new SlashCommandBuilder().setName('services').setDescription('شوف الخدمات'),
+  new SlashCommandBuilder().setName('order').setDescription('اطلب خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true)),
-  new SlashCommandBuilder().setName('support').setDescription('فتح تذكرة دعم فني'),
-  new SlashCommandBuilder().setName('close').setDescription('إغلاق التذكرة'),
+  new SlashCommandBuilder().setName('support').setDescription('افتح تذكرة دعم فني'),
+  new SlashCommandBuilder().setName('close').setDescription('اقفل التذكرة'),
 
   // ── Giveaway ──
-  new SlashCommandBuilder().setName('giveaway'). setDescription('إنشاء سحبية')
+  new SlashCommandBuilder().setName('giveaway').setDescription('عمل سحبية')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('prize').setDescription('الجائزة').setRequired(true))
     .addNumberOption(o => o.setName('winners').setDescription('عدد الفائزين').setRequired(true))
     .addStringOption(o => o.setName('duration').setDescription('المدة (مثلاً 1h, 30m, 1d)').setRequired(true)),
-  new SlashCommandBuilder().setName('end-giveaway').setDescription('إنهاء السحبية')
+  new SlashCommandBuilder().setName('end-giveaway').setDescription('خلّص السحبية')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('message-id').setDescription('رسالة السحبية').setRequired(true)),
 
   // ── General ──
-  new SlashCommandBuilder().setName('review').setDescription('تقييم خدمة')
+  new SlashCommandBuilder().setName('review').setDescription('قيّم خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
     .addNumberOption(o => o.setName('rating').setDescription('التقييم 1-5').setRequired(true))
     .addStringOption(o => o.setName('comment').setDescription('تعليق')),
@@ -301,7 +301,7 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('stats').setDescription('إحصائيات البوت'),
   new SlashCommandBuilder().setName('ticket-stats').setDescription('إحصائيات التذاكر'),
   new SlashCommandBuilder().setName('top-customers').setDescription('أفضل الزبائن'),
-  new SlashCommandBuilder().setName('help').setDescription('عرض كل الأوامر'),
+  new SlashCommandBuilder().setName('help').setDescription('شوف كل الأوامر'),
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -427,16 +427,16 @@ async function cmdSetup(interaction) {
     const e = new EmbedBuilder()
       .setTitle('━━━━━━━━━━━ 🏪 متجر الذكاء الاصطناعي ━━━━━━━━━━━')
       .setDescription(
-        '# مرحباً بك في أفضل متجر لخدمات الذكاء الاصطناعي 🚀\n\n' +
+        '# أهلاً بيك في أحسن متجر لخدمات الذكاء الاصطناعي 🚀\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 كيف تطلب؟\n\n' +
-        '> **`1️⃣`** اختر الخدمة من القائمة أدناه\n' +
-        '> **`2️⃣`** شوف تفاصيل الخدمة والسعر\n' +
-        '> **`3️⃣`** اضغط زر **🛒 اطلب الآن**\n' +
-        '> **`4️⃣`** هنفتحلك تذكرة وننجز طلبك\n\n' +
+        '## 💡 عايز تطلب إزاي؟\n\n' +
+        '> **`1️⃣`** اختار الخدمة من القائمة اللي تحت\n' +
+        '> **`2️⃣`** شوف التفاصيل والسعر بتاعها\n' +
+        '> **`3️⃣`** اضغط على زر **🛒 اطلب دلوقتي**\n' +
+        '> **`4️⃣`** هنفتحلك تذكرة وننجزلك طلبك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔗 زور متجرنا الإلكتروني\n\n' +
-        '> [🛒 AI Shop — متجرنا](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
+        '## 🔗 زور المتجر بتاعنا أونلاين\n\n' +
+        '> [🛒 AI Shop — المتجر بتاعنا](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xFF0000)
@@ -445,10 +445,10 @@ async function cmdSetup(interaction) {
       .setFooter({ text: `🛍️ ${g.name} — متجر الذكاء الاصطناعي`, iconURL: g.iconURL({ dynamic: true }) });
     const select = new StringSelectMenuBuilder()
       .setCustomId('services_menu')
-      .setPlaceholder('🛒 اختر الخدمة التي تريد...')
+      .setPlaceholder('🛒 اختار الخدمة اللي عايزها...')
       .addOptions(getServices().filter(s => s.active).slice(0, 25).map(s => ({
         label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
-        description: `${fmt(s.price)} كريديت — ${s.category}`.substring(0, 100),
+        description: `${fmt(s.price)} ج.م — ${s.category}`.substring(0, 100),
         value: String(s.id),
       })));
     const row1 = new ActionRowBuilder().addComponents(select);
@@ -467,18 +467,18 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📝 دليل طلب الخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## اتبع الخطوات التالية:\n\n' +
-        '> **`1️⃣`** 🛒 اختر الخدمة من قناة **🛒・الخدمات**\n\n' +
-        '> **`2️⃣`** 📋 راجع تفاصيل الخدمة والسعر\n\n' +
-        '> **`3️⃣`** 💬 اضغط زر **🛒 اطلب الآن** لفتح تذكرة\n\n' +
-        '> **`4️⃣`** 💰 ادفع بالطريقة المناسبة\n\n' +
+        '## اتبع الخطوات دي:\n\n' +
+        '> **`1️⃣`** 🛒 اختار الخدمة من قناة **🛒・الخدمات**\n\n' +
+        '> **`2️⃣`** 📋 شوف التفاصيل والسعر بتاعها\n\n' +
+        '> **`3️⃣`** 💬 اضغط زر **🛒 اطلب دلوقتي** عشان تفتح تذكرة\n\n' +
+        '> **`4️⃣`** 💰 ادفع بالطريقة اللي تناسبك\n\n' +
         '> **`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
         '> **`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 نصائح مهمة\n\n' +
-        '> • تأكد من اختيار الخدمة الصحيحة قبل الطلب\n' +
-        '> • احتفظ بـ إيصال الدفع\n' +
-        '> • للأسئلة، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
+        '## 💡 نصايح مهمة\n\n' +
+        '> • تأكد إنك اختارت الخدمة الصح قبل ما تطلب\n' +
+        '> • احتفظ بإيصال الدفع\n' +
+        '> • لو عندك سؤال، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x2ECC71)
@@ -495,14 +495,14 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# ⭐ تقييمات العملاء\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## كيف تقيّم؟\n\n' +
-        '> استخدم أمر `/review` مع رقم الخدمة والتقييم\n\n' +
+        '## هتقيّم إزاي؟\n\n' +
+        '> استخدم الأمر `/review` مع رقم الخدمة والتقييم بتاعك\n\n' +
         '## مثال\n\n' +
-        '> `/review service:1 rating:5 comment:خدمة ممتازة!`\n\n' +
+        '> `/review service:1 rating:5 comment:خدمة تحفة!`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📊 رصد التقييمات\n\n' +
-        '> استخدم `/leaderboard` لرؤية أفضل الزبائن\n' +
-        '> استخدم `/stats` لرؤية إحصائيات البوت\n\n' +
+        '## 📊 شوف التقييمات\n\n' +
+        '> استخدم `/leaderboard` عشان تعرف أحسن الزبائن\n' +
+        '> استخدم `/stats` عشان تشوف إحصائيات البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xF1C40F)
@@ -511,7 +511,7 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 💬 التواصل مع الستاف — جديد ──
+  // ── 💬 التواصل مع الستاف ──
   const contactCh = g.channels.cache.find(c => c.name.includes('التواصل-مع-الستاف') && c.isTextBased());
   if (contactCh) {
     await contactCh.send({ embeds: [new EmbedBuilder()
@@ -520,15 +520,15 @@ async function cmdSetup(interaction) {
         '# 💬 التواصل مع الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 🎫 فتح تذكرة\n' +
-        '> اذهب إلى قناة **🎫・فتح-تذكرة** واضغط زر الدعم الفني\n\n' +
+        '> روح قناة **🎫・فتح-تذكرة** واضغط على زر الدعم الفني\n\n' +
         '## 🛒 طلب خدمة\n' +
-        '> اذهب إلى قناة **🛒・الخدمات** واختر الخدمة المطلوبة\n\n' +
+        '> روح قناة **🛒・الخدمات** واختار الخدمة اللي عايزها\n\n' +
         '## 💬 الشات العام\n' +
-        '> يمكنك كتابة أي سؤال في قناة **💬・العامة**\n\n' +
+        '> تقدر تكتب أي سؤال في قناة **💬・العامة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## ⏰ أوقات الاستجابة\n\n' +
-        '> **الدعم الفني:** خلال 5-15 دقيقة\n' +
-        '> **الطلبات:** خلال 5-30 دقيقة\n' +
+        '> **الدعم الفني:** من 5 لـ 15 دقيقة\n' +
+        '> **الطلبات:** من 5 لـ 30 دقيقة\n' +
         '> **الاستفسارات:** خلال ساعة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
@@ -546,9 +546,9 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📣 الإعلانات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## تابع آخر الإعلانات والأخبار هنا\n\n' +
-        '> 🔔 فعّل الإشعارات عشان ما تفوتك أي حاجة\n' +
-        '> 📢 الإعلانات تشمل العروض والخدمات الجديدة\n' +
+        '## شوف آخر الأخبار والإعلانات هنا\n\n' +
+        '> 🔔 شغّل الإشعارات عشان متفوتكش أي حاجة\n' +
+        '> 📢 الإعلانات فيها العروض والخدمات الجديدة\n' +
         '> 🎉 مسابقات وسحبية أحياناً\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
@@ -558,7 +558,7 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 📋 القواعد — محسّنة ومحترمة ──
+  // ── 📋 القواعد ──
   const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
   if (rulesCh) {
     await rulesCh.send({ embeds: [new EmbedBuilder()
@@ -567,20 +567,20 @@ async function cmdSetup(interaction) {
         '# 📋 قواعد السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 📌 القسم الأول — السلوك العام\n\n' +
-        '> **1.** 🤝 **الاحترام المتبادل** — يُمنع الإهانة أو السخرية من أي عضو\n' +
-        '> **2.** 🚫 **لا محتوى مخالف** — يُمنع أي محتوى خارج أو عنصري\n' +
-        '> **3.** 🗣️ **اللغة العربية** — يُفضل التواصل بالعربية\n' +
-        '> **4.** 🔞 **لا محتوى 18+** — يُمنع أي محتوى للبالغين\n\n' +
+        '> **1.** 🤝 **الاحترام المتبادل** — ممنوع الإهانة أو السخرية من أي حد\n' +
+        '> **2.** 🚫 **ممنوع المحتوى المخالف** — أي محتوى خارج أو عنصري ممنوع\n' +
+        '> **3.** 🗣️ **اللغة العربية** — الأفضل تتكلم عربي\n' +
+        '> **4.** 🔞 **ممنوع محتوى 18+** — أي محتوى للبالغين ممنوع\n\n' +
         '## 📌 القسم الثاني — الطلبات والخدمات\n\n' +
-        '> **5.** 💰 **الدفع مقدماً** — لا يُنفّذ أي طلب بدون دفع\n' +
-        '> **6.** 📋 **التفاصيل الصحيحة** — تأكد من صحة بياناتك\n' +
-        '> **7.** ⏳ **الانتظار** — الستاف ينجزوا بالترتيب\n\n' +
+        '> **5.** 💰 **الدفع مقدم** — مفيش طلب يتنفذ من غير دفع\n' +
+        '> **6.** 📋 **التفاصيل الصح** — تأكد إن البيانات بتاعتك صحيحة\n' +
+        '> **7.** ⏳ **الانتظار** — الستاف بيشتغلوا بالترتيب\n\n' +
         '## 📌 القسم الثالث — الحماية والخصوصية\n\n' +
-        '> **8.** 🔒 **لا تشارك حساباتك** — يُمنع مشاركة بياناتك\n' +
-        '> **9.** 🛡️ **لا سبام** — يُمنع إرسال الرسائل المتكررة\n\n' +
+        '> **8.** 🔒 **ممنوع تشارك حساباتك** — ممنوع حد يشارك بياناتك\n' +
+        '> **9.** 🛡️ **ممنوع السبام** — ممنوع إرسال رسائل متكررة\n\n' +
         '## 📌 القسم الرابع — القيادة\n\n' +
-        '> **10.** 👑 **اتبع الستاف** — أوامر الستاف نهائية\n' +
-        '> **11.** 📢 **لا سبام أوامر** — لا تكرر الاستفسارات\n\n' +
+        '> **10.** 👑 **-slotted ا服从 الستاف** — أوامر الستاف نهائية\n' +
+        '> **11.** 📢 **ممنوع سبام الأوامر** — ممنوع تكرر الاستفسارات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## ⚠️ عقوبات المخالفات\n\n' +
         '> **مخالفة أولى:** تحذير شفهي\n' +
@@ -588,7 +588,7 @@ async function cmdSetup(interaction) {
         '> **مخالفة ثالثة:** طرد من السيرفر\n' +
         '> **مخالفة رابعة:** حظر دائم\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📝 بالدخول للسيرفر، أنت توافق على هذه القواعد'
+        '## 📝 لماتدخل السيرفر، أنت موافق على القواعد دي'
       )
       .setColor(0xE67E22)
       .setTimestamp()
@@ -604,13 +604,13 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 💬 الشات العام\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## مرحباً بك! 🎉\n\n' +
-        '> 💬 تواصل مع الأعضاء وشارك أفكارك\n' +
-        '> 🤝 تعرّف على أعضاء السيرفر الجدد\n' +
+        '## أهلاً بيك! 🎉\n\n' +
+        '> 💬 تكلّم مع الأعضاء وشارك أفكارك\n' +
+        '> 🤝 تعرّف على الأعضاء الجدد\n' +
         '> ❓ اسأل أي سؤال عن الخدمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 تذكّر\n\n' +
-        '> احترم الجميع · لا سبام · لا محتوى مخالف\n\n' +
+        '## 📌 خلّي بالك\n\n' +
+        '> احترم الكل · ممنوع السبام · ممنوع المحتوى المخالف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x58A6FF)
@@ -628,20 +628,20 @@ async function cmdSetup(interaction) {
         '# 🤖 أوامر البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 🛒 المتجر والطلبات\n' +
-        '> `/services` — عرض قائمة الخدمات\n' +
-        '> `/order service:رقم` — طلب خدمة\n' +
-        '> `/support` — فتح تذكرة دعم فني\n' +
-        '> `/close` — إغلاق التذكرة الحالية\n\n' +
+        '> `/services` — شوف قائمة الخدمات\n' +
+        '> `/order service:رقم` — اطلب خدمة\n' +
+        '> `/support` — افتح تذكرة دعم فني\n' +
+        '> `/close` — اقفل التذكرة اللي مفتوحة\n\n' +
         '## ⭐ التقييمات\n' +
-        '> `/review service:رقم rating:1-5` — تقييم خدمة\n' +
+        '> `/review service:رقم rating:1-5` — قيّم خدمة\n' +
         '> `/leaderboard` — ترتيب الزبائن\n' +
-        '> `/top-customers` — أفضل الزبائن\n\n' +
-        '## 🛡️ الإدارة (للستاف فقط)\n' +
-        '> `/ban` — حظر عضو\n' +
-        '> `/kick` — طرد عضو\n' +
+        '> `/top-customers` — أحسن الزبائن\n\n' +
+        '## 🛡️ الإدارة (للستاف بس)\n' +
+        '> `/ban` — احظر عضو\n' +
+        '> `/kick` — اطرد عضو\n' +
         '> `/mute` — كتم عضو\n' +
-        '> `/warn` — تحذير عضو\n' +
-        '> `/purge` — مسح رسائل\n\n' +
+        '> `/warn` — حدّر عضو\n' +
+        '> `/purge` — امسح رسائل\n\n' +
         '## 📌 معلومات\n' +
         '> `/server-info` — معلومات السيرفر\n' +
         '> `/user-info` — معلومات عضو\n' +
@@ -668,9 +668,9 @@ async function cmdSetup(interaction) {
         `> 👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
         `> 📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
         `> 🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
-        `> 🎫 **التذاكر النشطة:** يتم تحديثها تلقائياً\n\n` +
+        `> 🎫 **التذاكر النشطة:** بتتحدث تلقائياً\n\n` +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '> 🔄 هذه القناة تتحدث تلقائياً كل فترة\n\n' +
+        '> 🔄 القناة دي بتتحدث تلقائياً كل فترة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x9B59B6)
@@ -683,13 +683,13 @@ async function cmdSetup(interaction) {
   const welcomeCh = g.channels.cache.find(c => c.name.includes('الترحيب') && c.isTextBased());
   if (welcomeCh) {
     await welcomeCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 👋 مرحباً بك ━━━━━━━━')
+      .setTitle('━━━━━━━━ 👋 أهلاً بيك ━━━━━━━━')
       .setDescription(
-        '# 👋 مرحباً بك\n\n' +
+        '# 👋 أهلاً بيك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## هنا هتستقبل ترحيب كل عضو جديد!\n\n' +
-        '> 🎉 **الترحيب التلقائي** — كل عضو جديد هيستقبل رسالة ترحيب\n' +
-        '> 🤖 **الرول التلقائي** — يتم إعطاء الأعضاء الجدد رول تلقائياً\n' +
+        '> 🎉 **الترحيب التلقائي** — كل عضو جديد هياخد رسالة ترحيب\n' +
+        '> 🤖 **الرول التلقائي** — الأعضاء الجدد ياخدوا رول أوتوماتيك\n' +
         '> 📢 **معلومات السيرفر** — روابط مهمة للأعضاء الجدد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 🔗 روابط مهمة\n\n' +
@@ -710,22 +710,22 @@ async function cmdSetup(interaction) {
     const btn2 = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
     const btnShop = new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop');
     await ticketCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━━━ 🎫 فتح تذكرة ━━━━━━━━━━')
+      .setTitle('━━━━━━━━━━ 🎫 افتح تذكرة ━━━━━━━━━━')
       .setDescription(
-        '# 🎫 فتح تذكرة\n\n' +
+        '# 🎫 افتح تذكرة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## تحتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
+        '## محتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
         '## 🛠️ الدعم الفني\n' +
         '> • للمساعدة في الطلبات\n' +
-        '> • للاستفسارات عن الخدمات\n' +
+        '> • للأسئلة عن الخدمات\n' +
         '> • للشكاوى والاقتراحات\n\n' +
         '## ⏰ وقت الاستجابة\n' +
-        '> **5-15 دقيقة**\n\n' +
+        '> **من 5 لـ 15 دقيقة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 نصيحة\n\n' +
-        '> قبل فتح تذكرة، تأكد أن الإجابة موجودة في:\n' +
-        '> • قناة **📝・كيف-تطلب** — لدليل الطلب\n' +
-        '> • قناة **🤖・اوامر-البوت** — لقائمة الأوامر\n\n' +
+        '> قبل ما تفتح تذكرة، تأكد إن الإجابة موجودة في:\n' +
+        '> • قناة **📝・كيف-تطلب** — عشان تعرف تطلب إزاي\n' +
+        '> • قناة **🤖・اوامر-البوت** — عشان تشوف كل الأوامر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x9B59B6)
@@ -734,7 +734,7 @@ async function cmdSetup(interaction) {
     ], components: [new ActionRowBuilder().addComponents(btn2, btnShop)] }).catch(() => {});
   }
 
-  // ── 📦 التتسليمات — جديد ──
+  // ── 📦 التتسليمات ──
   const deliveryCh = g.channels.cache.find(c => c.name.includes('التسليمات') && c.isTextBased());
   if (deliveryCh) {
     await deliveryCh.send({ embeds: [new EmbedBuilder()
@@ -742,17 +742,17 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📦 التوصيل والتسليمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## تتبع طلباتك وتسليماتك هنا\n\n' +
-        '## 📦 كيف يعمل نظام التوصيل؟\n\n' +
-        '> **`1️⃣`** بعد الدفع، يتم فتح تذكرة خاصة بك\n' +
-        '> **`2️⃣`** الستاف يبدأ في تنفيذ طلبك\n' +
-        '> **`3️⃣`** بعد الانتهاء، يتم إرسال التسليم هنا\n' +
-        '> **`4️⃣`** تأكد من استلام طلبك وقيّم بـ `/review`\n\n' +
+        '## تابع طلبك وتسليماتك هنا\n\n' +
+        '## 📦 إزاي بيشتغل التوصيل؟\n\n' +
+        '> **`1️⃣`** بعد الدفع، هنفتحلك تذكرة خاصة بيك\n' +
+        '> **`2️⃣`** الستاف هيبدأ ينفّذ طلبك\n' +
+        '> **`3️⃣`** بعد ماخلص، هنبعتلك التسليم هنا\n' +
+        '> **`4️⃣`** تأكد إنك استلمت طلبك وقيّم بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## ⚠️ ملاحظات مهمة\n\n' +
-        '> • تأكد من فصل التسليم في التذكرة\n' +
-        '> • للتعديل، افتح تذكرة دعم فني جديدة\n' +
-        '> • لا تشارك معلومات التسليم مع أحد\n\n' +
+        '> • تأكد إن التسليم مفصول في التذكرة\n' +
+        '> • لو عايز تعدّل، افتح تذكرة دعم فني جديدة\n' +
+        '> • ممنوع تشارك معلومات التسليم مع أي حد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x2ECC71)
@@ -761,7 +761,7 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 💼 شات الستاف — جديد ──
+  // ── 💼 شات الستاف ──
   const staffChatCh = g.channels.cache.find(c => c.name.includes('شات-الستاف') && c.isTextBased());
   if (staffChatCh) {
     await staffChatCh.send({ embeds: [new EmbedBuilder()
@@ -769,15 +769,15 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 💼 شات الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## محادثة الستاف الداخلية 🔒\n\n' +
-        '> 👥 **للستاف فقط** — هذه القناة مقيدة للأعضاء المصرح لهم\n' +
+        '## المحادثة الداخلية بتاعة الستاف 🔒\n\n' +
+        '> 👥 **للستاف بس** — القناة دي مقيدة للستاف بس\n' +
         '> 📋 **تنسيق الطلبات** — ناقش الطلبات الجديدة والمعلقة\n' +
         '> 💡 **مشاركة الأفكار** — اقترح تحسينات للخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 📌 إرشادات\n\n' +
-        '> • احترم زملاءك في الستاف\n' +
-        '> • لا تشارك معلومات العملاء علنياً\n' +
-        '> • وثّق أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
+        '> • احترم زمايلك في الستاف\n' +
+        '> • ممنون تشارك معلومات العملاء علني\n' +
+        '> • سجّل أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xE74C3C)
@@ -786,7 +786,7 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 📋 ملاحظات الستاف — جديد ──
+  // ── 📋 ملاحظات الستاف ──
   const staffNotesCh = g.channels.cache.find(c => c.name.includes('ملاحظات-الستاف') && c.isTextBased());
   if (staffNotesCh) {
     await staffNotesCh.send({ embeds: [new EmbedBuilder()
@@ -799,10 +799,10 @@ async function cmdSetup(interaction) {
         '> ⚠️ **ملاحظات مهمة** — وثّق أي مشاكل أو ملاحظات\n' +
         '> 💡 **اقتراحات** — اقترح تحسينات للخدمة أو السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 كيفية التوثيق\n\n' +
+        '## 📌 إزاي توثّق\n\n' +
         '> • ابدأ بعنوان واضح للملاحظة\n' +
-        '> • أضف التاريخ والوقت\n' +
-        '> • اذكر الأعضاء المعنيين إن وجدوا\n\n' +
+        '> • حط التاريخ والوقت\n' +
+        '> • ذكر الأعضاء المعنيين لو فيه حد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xF1C40F)
@@ -818,14 +818,14 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📝 السجلات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## سجلات البوت التلقائية 🔒\n\n' +
+        '## السجلات التلقائية بتاعة البوت 🔒\n\n' +
         '> 👋 **الترحيب والوداع** — تسجيل دخول وخروج الأعضاء\n' +
         '> 🛠️ **الدعم الفني** — فتح وإغلاق التذاكر\n' +
         '> 🛒 **الطلبات** — الطلبات الجديدة والتسليمات\n' +
         '> ⚠️ **الحماية** — محاولات السبام والكلمات الممنوعة\n' +
         '> 🛡️ **الإدارة** — التحذيرات والكتم والطرد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 هذه القناة مقيدة للستاف والمالك فقط\n\n' +
+        '## 🔒 القناة دي مقيدة للستاف والمالك بس\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x7D8590)
@@ -834,7 +834,7 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 🔧 لوحة التحكم — جديد ──
+  // ── 🔧 لوحة التحكم ──
   const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة-التحكم') && c.isTextBased());
   if (adminPanelCh) {
     await adminPanelCh.send({ embeds: [new EmbedBuilder()
@@ -848,18 +848,18 @@ async function cmdSetup(interaction) {
         '> 🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 📋 أوامر الإدارة\n\n' +
-        '> `/setup` — إعداد السيرفر بالكامل\n' +
-        '> `/add-service` — إضافة خدمة جديدة\n' +
-        '> `/edit-service` — تعديل خدمة\n' +
-        '> `/remove-service` — حذف خدمة\n' +
-        '> `/add-category` — إضافة تصنيف\n' +
-        '> `/announce` — إرسال إعلان\n' +
-        '> `/giveaway` — إنشاء سحبية\n' +
-        '> `/auto-role add` — إضافة رول تلقائي\n' +
-        '> `/set-logs` — ضبط قناة السجلات\n' +
-        '> `/automod` — إعداد الحماية\n\n' +
+        '> `/setup` — جهّز السيرفر كلّه\n' +
+        '> `/add-service` —ضيف خدمة جديدة\n' +
+        '> `/edit-service` —عدّل خدمة\n' +
+        '> `/remove-service` — امسح خدمة\n' +
+        '> `/add-category` —ضيف تصنيف\n' +
+        '> `/announce` —ابعت إعلان\n' +
+        '> `/giveaway` —عمل سحبية\n' +
+        '> `/auto-role add` —ضيف رول تلقائي\n' +
+        '> `/set-logs` —حدّد قناة السجلات\n' +
+        '> `/automod` —إعداد الحماية\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 هذه القناة مقيدة للمالك والادمن فقط\n\n' +
+        '## 🔒 القناة دي مقيدة للمالك والادمن بس\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xE74C3C)
@@ -876,18 +876,18 @@ async function cmdSetup(interaction) {
 // ══════════════════════════════════════════════════════════════
 async function cmdServices(interaction) {
   const services = getServices().filter(s => s.active);
-  if (!services.length) return interaction.reply({ content: '📭 لا توجد خدمات', ephemeral: true });
+  if (!services.length) return interaction.reply({ content: '📭 مفيش خدمات حالياً', ephemeral: true });
   const cats = getCategories();
   const catMap = {};
   for (const c of cats) catMap[c.id] = c;
   const grouped = {};
   for (const s of services) { const cat = s.category || 'other'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(s); }
-  const embed = new EmbedBuilder().setTitle('🛒 الخدمات المتاحة').setDescription('اختر خدمة من القائمة').setColor(0xFF0000).setTimestamp().setFooter({ text: `${services.length} خدمة` });
+  const embed = new EmbedBuilder().setTitle('🛒 الخدمات المتاحة').setDescription('اختار خدمة من القائمة').setColor(0xFF0000).setTimestamp().setFooter({ text: `${services.length} خدمة` });
   for (const [catId, items] of Object.entries(grouped)) {
     const catInfo = catMap[catId] || { name: catId, emoji: '📁' };
     embed.addFields({ name: `${catInfo.emoji} ${catInfo.name}`, value: items.map(s => `${s.emoji || '🛒'} **${safe(s.name, 40)}** — \`${fmt(s.price)}\``).join('\n') });
   }
-  const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختر خدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} كريديت`.substring(0, 100), value: String(s.id) })));
+  const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختار خدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} ج.م`.substring(0, 100), value: String(s.id) })));
   await interaction.reply({ embeds: [embed], components: [new ActionRowBuilder().addComponents(select)] });
 }
 
@@ -904,18 +904,18 @@ async function cmdAddService(interaction) {
 
 async function cmdEditService(interaction) {
   const id = parseInt(interaction.options.getString('id')), services = getServices(), svc = services.find(s => s.id === id);
-  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
+  if (!svc) return interaction.reply({ content: '❌ الخدمة مش موجودة', ephemeral: true });
   const name = interaction.options.getString('name'), price = interaction.options.getNumber('price'), desc = interaction.options.getString('description');
   if (name) svc.name = name; if (price) svc.price = price; if (desc) svc.description = desc;
   save('services.json', services);
-  await interaction.reply({ content: `✅ تم تعديل: ${svc.emoji} ${svc.name} — \`${fmt(svc.price)}\``, ephemeral: true });
+  await interaction.reply({ content: `✅ تم التعديل: ${svc.emoji} ${svc.name} — \`${fmt(svc.price)}\``, ephemeral: true });
 }
 
 async function cmdRemoveService(interaction) {
   const id = parseInt(interaction.options.getString('id')), services = getServices(), svc = services.find(s => s.id === id);
-  if (!svc) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
+  if (!svc) return interaction.reply({ content: '❌ مش موجودة', ephemeral: true });
   save('services.json', services.filter(s => s.id !== id));
-  await interaction.reply({ content: `✅ تم حذف: ${svc.emoji} ${svc.name}`, ephemeral: true });
+  await interaction.reply({ content: `✅ تم المسح: ${svc.emoji} ${svc.name}`, ephemeral: true });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -929,7 +929,7 @@ async function cmdAddCategory(interaction) {
   if (cats.find(c => c.id === id)) return interaction.reply({ content: `❌ التصنيف \`${id}\` موجود أصلاً`, ephemeral: true });
   cats.push({ id, name, emoji });
   saveCategories(cats);
-  await interaction.reply({ content: `✅ تمت إضافة التصنيف: ${emoji} ${name} (\`${id}\`)`, ephemeral: true });
+  await interaction.reply({ content: `✅ تم إضافة التصنيف: ${emoji} ${name} (\`${id}\`)`, ephemeral: true });
 }
 
 async function cmdRemoveCategory(interaction) {
@@ -938,7 +938,7 @@ async function cmdRemoveCategory(interaction) {
   const cat = cats.find(c => c.id === id);
   if (!cat) return interaction.reply({ content: `❌ التصنيف \`${id}\` غير موجود`, ephemeral: true });
   const servicesUsing = getServices().filter(s => s.category === id);
-  if (servicesUsing.length) return interaction.reply({ content: `❌ فيه ${servicesUsing.length} خدمة في هذا التصنيف. احذفها أول`, ephemeral: true });
+  if (servicesUsing.length) return interaction.reply({ content: `❌ فيه ${servicesUsing.length} خدمة في التصنيف ده. امسحها الأول`, ephemeral: true });
   cats = cats.filter(c => c.id !== id);
   saveCategories(cats);
   await interaction.reply({ content: `✅ تم حذف التصنيف: ${cat.emoji} ${cat.name}`, ephemeral: true });
@@ -966,7 +966,7 @@ function getTicketOverwrites(g, userId) {
 }
 
 async function cmdOrder(interaction) {
-  await interaction.reply({ content: '🛒 **اطلب من المتجر:**\nhttps://ai-shop-bot-production.up.railway.app/shop\n\nهناك تقدر تشوف كل الخدمات بالأسعار وتعمل طلب مباشر.', ephemeral: true });
+  await interaction.reply({ content: '🛒 **اطلب من المتجر:**\nhttps://ai-shop-bot-production.up.railway.app/shop\n\nمن هناك تقدر تشوف كل الخدمات بالأسعار وتعمل طلب مباشر.', ephemeral: true });
 }
 
 async function cmdSupport(interaction) {
@@ -979,8 +979,8 @@ async function cmdSupport(interaction) {
   await channel.send({ embeds: [new EmbedBuilder()
     .setTitle(`🛠️ تذكرة دعم #${orderId}`)
     .setDescription(
-      `# مرحباً بك في تذكرتك!\n\n` +
-      `**المستخدم:** ${interaction.user}\n` +
+      `# أهلاً بيك في التذكرة بتاعتك!\n\n` +
+      `**العميل:** ${interaction.user}\n` +
       `**رقم التذكرة:** \`${orderId}\`\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `## 💬 اكتب مشكلتك هنا\n\n` +
@@ -992,21 +992,21 @@ async function cmdSupport(interaction) {
     .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
     components: [new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
     )]
   });
   await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
-  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**المستخدم:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
+  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🛠️ تذكرة دعم جديدة').setDescription(`**العميل:** ${interaction.user}\n**القناة:** ${channel}`).setColor(0x3498DB).setTimestamp());
 }
 
 async function cmdClose(interaction) {
   await interaction.deferReply({ ephemeral: true });
   const orders = getOrders(), order = orders.find(o => o.channelId === interaction.channel.id);
-  if (!order) return interaction.editReply('❌ هذا ليس تذكرة');
+  if (!order) return interaction.editReply('❌ ده مش تذكرة');
   order.status = 'closed'; order.closedAt = Date.now(); order.closedBy = interaction.user.id;
   save('orders.json', orders);
-  await interaction.editReply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
-  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}\n**التذكرة:** #${order.id}`).setColor(0xE74C3C).setTimestamp());
+  await interaction.editReply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة اتقفلت').setDescription(`**اقفلها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
+  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔒 تذكرة اتقفلت').setDescription(`**اقفلها:** ${interaction.user}\n**التذكرة:** #${order.id}`).setColor(0xE74C3C).setTimestamp());
   await sleep(3000); try { await interaction.channel.delete(); } catch {}
 }
 
@@ -1014,30 +1014,30 @@ async function cmdClose(interaction) {
 //  HANDLERS: MODERATION
 // ══════════════════════════════════════════════════════════════
 async function cmdBan(interaction) {
-  const user = interaction.options.getUser('user'), reason = interaction.options.getString('reason') || 'بدون سبب';
+  const user = interaction.options.getUser('user'), reason = interaction.options.getString('reason') || 'من غير سبب';
   const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-  if (!member) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
-  if (!member.bannable) return interaction.reply({ content: '❌ لا أقدر أحظره', ephemeral: true });
+  if (!member) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
+  if (!member.bannable) return interaction.reply({ content: '❌ مقدرش أحظره', ephemeral: true });
   await member.ban({ reason });
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔨 تم الحظر').setDescription(`**العضو:** ${user}\n**بواسطة:** ${interaction.user}\n**السبب:** ${reason}`).setColor(0xE74C3C).setTimestamp()] });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔨 عضو محظور').setDescription(`**العضو:** ${user.tag} (${user.id})\n**بواسطة:** ${interaction.user}\n**السبب:** ${reason}`).setColor(0xE74C3C).setTimestamp());
 }
 
 async function cmdKick(interaction) {
-  const user = interaction.options.getUser('user'), reason = interaction.options.getString('reason') || 'بدون سبب';
+  const user = interaction.options.getUser('user'), reason = interaction.options.getString('reason') || 'من غير سبب';
   const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-  if (!member) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
-  if (!member.kickable) return interaction.reply({ content: '❌ لا أقدر أطرده', ephemeral: true });
+  if (!member) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
+  if (!member.kickable) return interaction.reply({ content: '❌ مقدرش أطرده', ephemeral: true });
   await member.kick(reason);
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🚪 تم الطرد').setDescription(`**العضو:** ${user}\n**بواسطة:** ${interaction.user}\n**السبب:** ${reason}`).setColor(0xF39C12).setTimestamp()] });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🚪 عضو مطرود').setDescription(`**العضو:** ${user.tag} (${user.id})\n**بواسطة:** ${interaction.user}\n**السبب:** ${reason}`).setColor(0xF39C12).setTimestamp());
 }
 
 async function cmdMute(interaction) {
-  const user = interaction.options.getUser('user'), minutes = interaction.options.getNumber('minutes'), reason = interaction.options.getString('reason') || 'بدون سبب';
+  const user = interaction.options.getUser('user'), minutes = interaction.options.getNumber('minutes'), reason = interaction.options.getString('reason') || 'من غير سبب';
   const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-  if (!member) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
-  if (!member.moderatable) return interaction.reply({ content: '❌ لا أقدر أكتمه', ephemeral: true });
+  if (!member) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
+  if (!member.moderatable) return interaction.reply({ content: '❌ مقدرش أكتمه', ephemeral: true });
   await member.timeout(minutes * 60 * 1000, reason);
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔇 تم الكتم').setDescription(`**العضو:** ${user}\n**المدة:** ${minutes} دقيقة\n**السبب:** ${reason}`).setColor(0x9B59B6).setTimestamp()] });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔇 عضو مكتوم').setDescription(`**العضو:** ${user.tag}\n**المدة:** ${minutes} دقيقة\n**بواسطة:** ${interaction.user}`).setColor(0x9B59B6).setTimestamp());
@@ -1046,10 +1046,10 @@ async function cmdMute(interaction) {
 async function cmdUnmute(interaction) {
   const user = interaction.options.getUser('user');
   const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-  if (!member) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
+  if (!member) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
   await member.timeout(null);
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔊 إلغاء الكتم').setDescription(`**العضو:** ${user}`).setColor(0x2ECC71).setTimestamp()] });
-  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔊 إلغاء كتم').setDescription(`**العضو:** ${user.tag}\n**بواسطة:** ${interaction.user}`).setColor(0x2ECC71).setTimestamp());
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔊 فكّ الكتم').setDescription(`**العضو:** ${user}`).setColor(0x2ECC71).setTimestamp()] });
+  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🔊 فكّ كتم').setDescription(`**العضو:** ${user.tag}\n**بواسطة:** ${interaction.user}`).setColor(0x2ECC71).setTimestamp());
 }
 
 async function cmdWarn(interaction) {
@@ -1060,12 +1060,12 @@ async function cmdWarn(interaction) {
   const count = warnings.filter(w => w.userId === user.id).length;
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚠️ تحذير').setDescription(`**العضو:** ${user}\n**السبب:** ${reason}\n**التحذيرات:** ${count}`).setColor(0xF1C40F).setTimestamp()] });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('⚠️ تحذير جديد').setDescription(`**العضو:** ${user.tag}\n**السبب:** ${reason}\n**بواسطة:** ${interaction.user}\n**الإجمالي:** ${count}`).setColor(0xF1C40F).setTimestamp());
-  if (count >= 3) { try { await user.send(`⚠️ وصلت ${count} تحذيرات في ${interaction.guild.name}. قد يتم حظرك.`); } catch {} }
+  if (count >= 3) { try { await user.send(`⚠️ وصلت ${count} تحذيرات في ${interaction.guild.name}. ممكن يتم حظرك.`); } catch {} }
 }
 
 async function cmdWarnings(interaction) {
   const user = interaction.options.getUser('user'), warnings = getWarnings().filter(w => w.userId === user.id);
-  if (!warnings.length) return interaction.reply({ content: `✅ ${user} بدون تحذيرات`, ephemeral: true });
+  if (!warnings.length) return interaction.reply({ content: `✅ ${user} مفيهوش تحذيرات`, ephemeral: true });
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`⚠️ تحذيرات ${user.username}`).setDescription(warnings.map((w, i) => `**${i + 1}.** ${w.reason} — بواسطة ${w.issuedByName} <t:${Math.floor(w.createdAt / 1000)}:R>`).join('\n')).setColor(0xF1C40F).setTimestamp()], ephemeral: true });
 }
 
@@ -1073,12 +1073,12 @@ async function cmdClearWarnings(interaction) {
   const user = interaction.options.getUser('user');
   let warnings = getWarnings(); const before = warnings.filter(w => w.userId === user.id).length;
   warnings = warnings.filter(w => w.userId !== user.id); save('warnings.json', warnings);
-  await interaction.reply({ content: `✅ مسح ${before} تحذيرات من ${user}`, ephemeral: true });
+  await interaction.reply({ content: `✅ تم مسح ${before} تحذيرات من ${user}`, ephemeral: true });
 }
 
 async function cmdPurge(interaction) {
   const amount = interaction.options.getNumber('amount');
-  if (amount < 1 || amount > 100) return interaction.reply({ content: '❌ من 1 لـ 100', ephemeral: true });
+  if (amount < 1 || amount > 100) return interaction.reply({ content: '❌ العدد من 1 لـ 100', ephemeral: true });
   const deleted = await interaction.channel.bulkDelete(amount, true);
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🗑️ مسح الرسائل').setDescription(`تم مسح ${deleted.size} رسالة`).setColor(0xE74C3C).setTimestamp()], ephemeral: true });
   await sendLog(interaction.guild, new EmbedBuilder().setTitle('🗑️ مسح رسائل').setDescription(`**بواسطة:** ${interaction.user}\n**القناة:** ${interaction.channel}\n**العدد:** ${deleted.size}`).setColor(0xE74C3C).setTimestamp());
@@ -1091,7 +1091,7 @@ async function cmdPurge(interaction) {
 async function cmdReview(interaction) {
   const id = parseInt(interaction.options.getString('service')), rating = interaction.options.getNumber('rating'), comment = interaction.options.getString('comment') || '';
   const services = getServices(), svc = services.find(s => s.id === id);
-  if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
+  if (!svc) return interaction.reply({ content: '❌ الخدمة مش موجودة', ephemeral: true });
   if (rating < 1 || rating > 5) return interaction.reply({ content: '❌ التقييم من 1 لـ 5', ephemeral: true });
   const reviews = getReviews();
   reviews.push({ id: nextId(reviews), serviceId: id, serviceName: svc.name, userId: interaction.user.id, username: interaction.user.username, rating, comment, createdAt: Date.now() });
@@ -1101,7 +1101,7 @@ async function cmdReview(interaction) {
 
 async function cmdLeaderboard(interaction) {
   const reviews = getReviews();
-  if (!reviews.length) return interaction.reply({ content: '📭 لا توجد تقييمات', ephemeral: true });
+  if (!reviews.length) return interaction.reply({ content: '📭 مفيش تقييمات', ephemeral: true });
   const stats = {};
   for (const r of reviews) { const n = r.username || 'unknown'; if (!stats[n]) stats[n] = { total: 0, count: 0 }; stats[n].total += Number(r.rating) || 0; stats[n].count++; }
   const entries = Object.entries(stats).map(([name, s]) => ({ name, avg: s.total / s.count, count: s.count })).sort((a, b) => b.avg - a.avg || b.count - a.count).slice(0, 10);
@@ -1126,7 +1126,7 @@ function parseDuration(str) {
 async function cmdGiveaway(interaction) {
   const prize = interaction.options.getString('prize'), winners = interaction.options.getNumber('winners'), durationStr = interaction.options.getString('duration');
   const duration = parseDuration(durationStr);
-  if (!duration) return interaction.reply({ content: '❌ صيغة المدة خاطئة. استخدم مثل: `1h`, `30m`, `1d`', ephemeral: true });
+  if (!duration) return interaction.reply({ content: '❌ صيغة الوقت غلط. استخدم مثلاً: `1h`, `30m`, `1d`', ephemeral: true });
 
   const endAt = Date.now() + duration;
   const embed = new EmbedBuilder()
@@ -1149,14 +1149,14 @@ async function cmdGiveaway(interaction) {
     save('giveaways.json', g);
 
     if (!gw.participants.length) {
-      try { await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية منتهية').setDescription(`**الجائزة:** ${prize}\n\n❌ لا يوجد مشاركين`).setColor(0x808080).setTimestamp()], components: [] }); } catch {}
+      try { await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية خلصت').setDescription(`**الجائزة:** ${prize}\n\n❌ لا يوجد مشاركين`).setColor(0x808080).setTimestamp()], components: [] }); } catch {}
       return;
     }
 
     const shuffled = gw.participants.sort(() => 0.5 - Math.random());
     const win = shuffled.slice(0, winners);
-    try { await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية منتهية!').setDescription(`**الجائزة:** ${prize}\n**الفائزون:** ${win.map(id => `<@${id}>`).join(', ')}\n\n!هنيئاً`).setColor(0x2ECC71).setTimestamp()], components: [] }); } catch {}
-    try { await interaction.channel.send(`🎉 مبروك ${win.map(id => `<@${id}>`).join(' ')}! فازوا بـ **${prize}**!`); } catch {}
+    try { await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية خلصت!').setDescription(`**الجائزة:** ${prize}\n**الفائزون:** ${win.map(id => `<@${id}>`).join(', ')}\n\n!مبروك`).setColor(0x2ECC71).setTimestamp()], components: [] }); } catch {}
+    try { await interaction.channel.send(`🎉 مبروك لـ ${win.map(id => `<@${id}>`).join(' ')}! كسبوا بـ **${prize}**!`); } catch {}
   }, duration);
 }
 
@@ -1164,12 +1164,12 @@ async function cmdEndGiveaway(interaction) {
   const messageId = interaction.options.getString('message-id');
   const giveaways = getGiveaways();
   const gw = giveaways.find(g => g.id === messageId);
-  if (!gw) return interaction.reply({ content: '❌ سحبية غير موجودة', ephemeral: true });
+  if (!gw) return interaction.reply({ content: '❌ السحبية مش موجودة', ephemeral: true });
   if (gw.ended) return interaction.reply({ content: '❌ السحبية خلصت أصلاً', ephemeral: true });
   gw.ended = true; save('giveaways.json', giveaways);
   if (!gw.participants.length) {
     const ch = interaction.guild.channels.cache.get(gw.channelId);
-    if (ch) { const msg = await ch.messages.fetch(messageId).catch(() => null); if (msg) await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية منتهية').setDescription(`**الجائزة:** ${gw.prize}\n\n❌ لا يوجد مشاركين`).setColor(0x808080).setTimestamp()], components: [] }).catch(() => {}); }
+    if (ch) { const msg = await ch.messages.fetch(messageId).catch(() => null); if (msg) await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية خلصت').setDescription(`**الجائزة:** ${gw.prize}\n\n❌ لا يوجد مشاركين`).setColor(0x808080).setTimestamp()], components: [] }).catch(() => {}); }
     return interaction.reply({ content: '✅ تم إنهاء السحبية', ephemeral: true });
   }
   const shuffled = gw.participants.sort(() => 0.5 - Math.random());
@@ -1177,8 +1177,8 @@ async function cmdEndGiveaway(interaction) {
   const ch = interaction.guild.channels.cache.get(gw.channelId);
   if (ch) {
     const msg = await ch.messages.fetch(messageId).catch(() => null);
-    if (msg) await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية منتهية!').setDescription(`**الجائزة:** ${gw.prize}\n**الفائزون:** ${win.map(id => `<@${id}>`).join(', ')}`).setColor(0x2ECC71).setTimestamp()], components: [] }).catch(() => {});
-    await ch.send(`🎉 مبروك ${win.map(id => `<@${id}>`).join(' ')}! فازوا بـ **${gw.prize}**!`).catch(() => {});
+    if (msg) await msg.edit({ embeds: [new EmbedBuilder().setTitle('🎉 سحبية خلصت!').setDescription(`**الجائزة:** ${gw.prize}\n**الفائزون:** ${win.map(id => `<@${id}>`).join(', ')}`).setColor(0x2ECC71).setTimestamp()], components: [] }).catch(() => {});
+    await ch.send(`🎉 مبروك لـ ${win.map(id => `<@${id}>`).join(' ')}! كسبوا بـ **${gw.prize}**!`).catch(() => {});
   }
   await interaction.reply({ content: '✅ تم إنهاء السحبية', ephemeral: true });
 }
@@ -1213,17 +1213,17 @@ async function cmdTicketStats(interaction) {
   const orders = getOrders();
   const byStatus = {};
   for (const o of orders) { const s = o.status || 'unknown'; byStatus[s] = (byStatus[s] || 0) + 1; }
-  const statusNames = { pending: '⏳ بانتظار القبول', open: '📂 مفتوحة', progress: '🔄 قيد التنفيذ', completed: '✅ مسلّمة', closed: '🔒 مغلقة' };
+  const statusNames = { pending: '⏳ مستنية قبول', open: '📂 مفتوحة', progress: '🔄 بيتنفذ', completed: '✅ اتسلّمت', closed: '🔒 اتقفلت' };
   const total = orders.length;
   const completed = byStatus.completed || 0;
   const deliveryRate = total ? ((completed / total) * 100).toFixed(0) : 0;
   const desc = Object.entries(byStatus).map(([s, c]) => `${statusNames[s] || s}: **${c}**`).join('\n');
   const embed = new EmbedBuilder()
     .setTitle('🎫 إحصائيات التذاكر')
-    .setDescription(desc || 'لا توجد تذاكر')
+    .setDescription(desc || 'مفيش تذاكر')
     .addFields(
       { name: '📈 الإجمالي', value: `**${total}** تذكرة`, inline: true },
-      { name: '✅ مسلّمة', value: `**${completed}** تذكرة`, inline: true },
+      { name: '✅ اتسلّمت', value: `**${completed}** تذكرة`, inline: true },
       { name: '📊 معدل التسليم', value: `**${deliveryRate}%**`, inline: true },
     )
     .setColor(0x9B59B6).setTimestamp()
@@ -1233,12 +1233,12 @@ async function cmdTicketStats(interaction) {
 
 async function cmdTopCustomers(interaction) {
   const orders = getOrders().filter(o => o.status === 'completed');
-  if (!orders.length) return interaction.reply({ content: '📭 لا توجد طلبات مكتملة', ephemeral: true });
+  if (!orders.length) return interaction.reply({ content: '📭 مفيش طلبات اتسلّمت', ephemeral: true });
   const cust = {};
   for (const o of orders) { const u = o.username || o.userId; if (!cust[u]) cust[u] = { userId: o.userId, count: 0 }; cust[u].count++; }
   const entries = Object.values(cust).sort((a, b) => b.count - a.count).slice(0, 10);
   const medals = ['🥇', '🥈', '🥉'];
-  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('👑 أفضل الزبائن').setDescription(entries.map((e, i) => `${medals[i] || `**${i + 1}.**`} <@${e.userId}> — **${e.count}** طلبات`).join('\n')).setColor(0xFFD700).setTimestamp()] });
+  await interaction.reply({ embeds: [new EmbedBuilder().setTitle('👑 أفضل الزبائن').setDescription(entries.map((e, i) => `${medals[i] || `**${i + 1}.**`} <@${e.userId}> — **${e.count}** طلب`).join('\n')).setColor(0xFFD700).setTimestamp()] });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1246,7 +1246,7 @@ async function cmdTopCustomers(interaction) {
 // ══════════════════════════════════════════════════════════════
 async function cmdAutoRole(interaction) {
   const sub = interaction.options.getSubcommand();
-  if (sub === 'add') { const role = interaction.options.getRole('role'); if (CFG.autoRoles.includes(role.id)) return interaction.reply({ content: '❌ مضاف أصلاً', ephemeral: true }); CFG.autoRoles.push(role.id); save('config.json', CFG); return interaction.reply({ content: `✅ الرول <@&${role.id}> تلقائي`, ephemeral: true }); }
+  if (sub === 'add') { const role = interaction.options.getRole('role'); if (CFG.autoRoles.includes(role.id)) return interaction.reply({ content: '❌ موجود أصلاً', ephemeral: true }); CFG.autoRoles.push(role.id); save('config.json', CFG); return interaction.reply({ content: `✅ الرول <@&${role.id}> تلقائي`, ephemeral: true }); }
   if (sub === 'remove') { const role = interaction.options.getRole('role'); CFG.autoRoles = CFG.autoRoles.filter(id => id !== role.id); save('config.json', CFG); return interaction.reply({ content: '✅ تم الحذف', ephemeral: true }); }
   if (sub === 'list') { if (!CFG.autoRoles.length) return interaction.reply({ content: '📭 فاضية', ephemeral: true }); return interaction.reply({ embeds: [new EmbedBuilder().setTitle('🎭 رولات تلقائية').setDescription(CFG.autoRoles.map(id => `• <@&${id}>`).join('\n')).setColor(0x3498DB)], ephemeral: true }); }
   if (sub === 'clear') { CFG.autoRoles = []; save('config.json', CFG); return interaction.reply({ content: '✅ تم المسح', ephemeral: true }); }
@@ -1260,12 +1260,12 @@ async function cmdSetLogs(interaction) {
 
 async function cmdAutomod(interaction) {
   const sub = interaction.options.getSubcommand();
-  if (sub === 'antispam') { const state = interaction.options.getString('state') === 'on'; CFG.automod.antispam = state; save('config.json', CFG); return interaction.reply({ content: `✅ منع السبام: ${state ? 'مفعّل' : 'معطّل'}`, ephemeral: true }); }
-  if (sub === 'badwords') { const state = interaction.options.getString('state') === 'on'; CFG.automod.badwords = state; save('config.json', CFG); return interaction.reply({ content: `✅ فلتر الكلمات: ${state ? 'مفعّل' : 'معطّل'}`, ephemeral: true }); }
-  if (sub === 'add-word') { const word = interaction.options.getString('word'); if (!CFG.automod.badwordsList.includes(word)) { CFG.automod.badwordsList.push(word); save('config.json', CFG); } return interaction.reply({ content: `✅ تمت إضافة: \`${word}\``, ephemeral: true }); }
-  if (sub === 'remove-word') { const word = interaction.options.getString('word'); CFG.automod.badwordsList = CFG.automod.badwordsList.filter(w => w !== word); save('config.json', CFG); return interaction.reply({ content: `✅ تمت إزالة: \`${word}\``, ephemeral: true }); }
+  if (sub === 'antispam') { const state = interaction.options.getString('state') === 'on'; CFG.automod.antispam = state; save('config.json', CFG); return interaction.reply({ content: `✅ منع السبام: ${state ? 'شغّل' : 'وقف'}`, ephemeral: true }); }
+  if (sub === 'badwords') { const state = interaction.options.getString('state') === 'on'; CFG.automod.badwords = state; save('config.json', CFG); return interaction.reply({ content: `✅ فلتر الكلمات: ${state ? 'شغّل' : 'وقف'}`, ephemeral: true }); }
+  if (sub === 'add-word') { const word = interaction.options.getString('word'); if (!CFG.automod.badwordsList.includes(word)) { CFG.automod.badwordsList.push(word); save('config.json', CFG); } return interaction.reply({ content: `✅ تم الإضافة: \`${word}\``, ephemeral: true }); }
+  if (sub === 'remove-word') { const word = interaction.options.getString('word'); CFG.automod.badwordsList = CFG.automod.badwordsList.filter(w => w !== word); save('config.json', CFG); return interaction.reply({ content: `✅ تم الإزالة: \`${word}\``, ephemeral: true }); }
   if (sub === 'list') {
-    return interaction.reply({ embeds: [new EmbedBuilder().setTitle('🛡️ إعدادات الحماية').addFields({ name: '🚫 Anti-Spam', value: CFG.automod.antispam ? `✅ مفعّل (${CFG.automod.antispamLimit} رسائل / ${CFG.automod.antispamTime} ثانية)` : '❌ معطّل' }, { name: '🔤 Bad Words', value: CFG.automod.badwords ? `✅ مفعّل (${CFG.automod.badwordsList.length} كلمة)` : '❌ معطّل', }, { name: '📝 الكلمات الممنوعة', value: CFG.automod.badwordsList.map(w => `\`${w}\``).join(', ') || '—' }).setColor(0x3498DB).setTimestamp()], ephemeral: true });
+    return interaction.reply({ embeds: [new EmbedBuilder().setTitle('🛡️ إعدادات الحماية').addFields({ name: '🚫 Anti-Spam', value: CFG.automod.antispam ? `✅ شغّل (${CFG.automod.antispamLimit} رسائل / ${CFG.automod.antispamTime} ثانية)` : '❌ وقف' }, { name: '🔤 Bad Words', value: CFG.automod.badwords ? `✅ شغّل (${CFG.automod.badwordsList.length} كلمة)` : '❌ وقف', }, { name: '📝 الكلمات الممنوعة', value: CFG.automod.badwordsList.map(w => `\`${w}\``).join(', ') || '—' }).setColor(0x3498DB).setTimestamp()], ephemeral: true });
   }
 }
 
@@ -1273,7 +1273,7 @@ async function cmdAnnounce(interaction) {
   await interaction.deferReply({ ephemeral: true });
   const title = interaction.options.getString('title'), content = interaction.options.getString('content'), emoji = interaction.options.getString('emoji') || '📣';
   const ch = interaction.guild.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
-  if (!ch) return interaction.editReply('❌ قناة الإعلانات غير موجودة');
+  if (!ch) return interaction.editReply('❌ قناة الإعلانات مش موجودة');
   await ch.send({ embeds: [new EmbedBuilder().setTitle(`${emoji} ${safe(title, 200)}`).setDescription(safe(content, 4000)).setColor(0xFF0000).setTimestamp().setFooter({ text: `📢 ${interaction.user.username}` })] });
   await interaction.editReply(`✅ تم الإرسال في ${ch}`);
 }
@@ -1324,18 +1324,18 @@ client.on('interactionCreate', async (interaction) => {
 
     if (interaction.isStringSelectMenu() && interaction.customId === 'services_menu') {
       const id = parseInt(interaction.values[0]), services = getServices(), svc = services.find(s => s.id === id);
-      if (!svc) return interaction.reply({ content: '❌ خدمة غير موجودة', ephemeral: true });
+      if (!svc) return interaction.reply({ content: '❌ الخدمة مش موجودة', ephemeral: true });
       const embed = new EmbedBuilder()
         .setTitle(`${svc.emoji || '🛒'} ${svc.name}`)
-        .setDescription(svc.description || 'لا يوجد وصف')
+        .setDescription(svc.description || 'مفيش وصف')
         .addFields(
-          { name: '💰 السعر', value: `\`${fmt(svc.price)} كريديت\``, inline: true },
-          { name: '📂 التصنيف', value: svc.category || 'غير محدد', inline: true },
+          { name: '💰 السعر', value: `\`${fmt(svc.price)} ج.م\``, inline: true },
+          { name: '📂 التصنيف', value: svc.category || 'مش محدد', inline: true },
           { name: '🌐 اطلب من المتجر', value: `[🛒 AI Shop](https://ai-shop-bot-production.up.railway.app/shop)`, inline: true },
         )
         .setColor(0x3498DB)
         .setTimestamp()
-        .setFooter({ text: '🛍️ اضغط الزر أدناه لطلب هذه الخدمة' });
+        .setFooter({ text: '🛍️ اضغط الزر تحت عشان تطلب الخدمة دي' });
       const orderBtn = new ButtonBuilder()
         .setCustomId(`svc_order_${svc.id}`)
         .setLabel(`🛒 اطلب — ${svc.name}`)
@@ -1357,7 +1357,7 @@ client.on('interactionCreate', async (interaction) => {
         const svcId = parseInt(cid.replace('svc_order_', ''));
         const services = getServices();
         const svc = services.find(s => s.id === svcId);
-        if (!svc) return interaction.editReply('❌ خدمة غير موجودة');
+        if (!svc) return interaction.editReply('❌ الخدمة مش موجودة');
 
         const g = interaction.guild;
         const orderId = Date.now().toString(36).toUpperCase();
@@ -1382,11 +1382,11 @@ client.on('interactionCreate', async (interaction) => {
             `# طلب خدمة جديد\n\n` +
             `**العميل:** ${interaction.user}\n` +
             `**الخدمة:** ${svc.emoji || '🛒'} **${svc.name}**\n` +
-            `**السعر:** \`${fmt(svc.price)} كريديت\`\n` +
+            `**السعر:** \`${fmt(svc.price)} ج.م\`\n` +
             `**رقم الطلب:** \`${orderId}\`\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `## 📝 وصف الخدمة\n\n` +
-            `${svc.description || 'لا يوجد وصف'}\n\n` +
+            `${svc.description || 'مفيش وصف'}\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `## 💬 اكتب تفاصيل طلبك هنا\n\n` +
             `> الستاف هيساعدك إن شاء الله`
@@ -1399,7 +1399,7 @@ client.on('interactionCreate', async (interaction) => {
           components: [new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('🔄 قبول الطلب').setStyle(ButtonStyle.Primary),
             new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ اقفل').setStyle(ButtonStyle.Danger),
           )]
         });
         await interaction.editReply(`✅ تم فتح تذكرة طلبك: ${channel}`);
@@ -1425,8 +1425,8 @@ client.on('interactionCreate', async (interaction) => {
         await channel.send({ embeds: [new EmbedBuilder()
           .setTitle(`🛠️ تذكرة دعم #${orderId}`)
           .setDescription(
-            `# مرحباً بك في تذكرتك!\n\n` +
-            `**المستخدم:** ${interaction.user}\n` +
+            `# أهلاً بيك في التذكرة بتاعتك!\n\n` +
+            `**العميل:** ${interaction.user}\n` +
             `**رقم التذكرة:** \`${orderId}\`\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `## 💬 اكتب مشكلتك هنا\n\n` +
@@ -1438,7 +1438,7 @@ client.on('interactionCreate', async (interaction) => {
           .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
           components: [new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
           )]
         });
         await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
@@ -1447,53 +1447,53 @@ client.on('interactionCreate', async (interaction) => {
 
       if (cid.startsWith('order_accept_')) {
         const orderId = parseInt(cid.replace('order_accept_', '')), orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
-        if (order.status !== 'pending') return interaction.reply({ content: '❌ تم التعامل معه', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
+        if (order.status !== 'pending') return interaction.reply({ content: '❌ تم التعامل معاه', ephemeral: true });
         order.status = 'progress'; order.acceptedBy = interaction.user.id; order.acceptedAt = Date.now();
         save('orders.json', orders);
-        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId} — قيد التنفيذ`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**السعر:** \`${fmt(order.servicePrice || 0)}\`\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n🔄 **جاري التنفيذ...**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`🔄 طلبك **#${orderId}** (${order.serviceName}) قيد التنفيذ!`).catch(() => {}); } catch {}
+        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`🎫 طلب #${orderId} — بيتتنفيذ`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**السعر:** \`${fmt(order.servicePrice || 0)}\`\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n🔄 **جاري التنفيذ...**`).setColor(0x3498DB).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_complete_${orderId}`).setLabel('🏁 إتمام').setStyle(ButtonStyle.Primary), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`🔄 طلبك **#${orderId}** (${order.serviceName}) بيتنفذ!`).catch(() => {}); } catch {}
         return;
       }
 
       if (cid.startsWith('order_complete_')) {
         const orderId = parseInt(cid.replace('order_complete_', '')), orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.reply({ content: '❌ غير موجود', ephemeral: true });
-        if (order.status !== 'progress') return interaction.reply({ content: '❌ لا يمكن الإتمام', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ مش موجود', ephemeral: true });
+        if (order.status !== 'progress') return interaction.reply({ content: '❌ مينفعش يتنفّذ', ephemeral: true });
         order.status = 'completed'; order.completedAt = Date.now(); order.completedBy = interaction.user.id;
         save('orders.json', orders);
-        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — مكتمل`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم الإتمام!**\n<@${order.userId}> استخدم \`/review\` لتقييم الخدمة`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
-        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلم! استخدم \`/review\` لتقييم الخدمة`).catch(() => {}); } catch {}
+        await interaction.update({ embeds: [new EmbedBuilder().setTitle(`✅ طلب #${orderId} — اتسلّم`).setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceEmoji} ${order.serviceName}\n**الستاف:** ${interaction.user}\n\n━━━━━━━━━━━━━━━━━━━━━\n✅ **تم التسليم!**\n<@${order.userId}> استخدم \`/review\` عشان تقيّم الخدمة`).setColor(0x2ECC71).setTimestamp()], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلّم! استخدم \`/review\` عشان تقيّم الخدمة`).catch(() => {}); } catch {}
         return;
       }
 
       if (cid.startsWith('ticket_complete_')) {
         const orderId = parseInt(cid.replace('ticket_complete_', ''));
         const orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
-        if (order.status === 'completed') return interaction.reply({ content: '✅ تم التسليم بالفعل', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ مش موجودة', ephemeral: true });
+        if (order.status === 'completed') return interaction.reply({ content: '✅ اتسلّم أصلاً', ephemeral: true });
         order.status = 'completed'; order.completedAt = Date.now(); order.completedBy = interaction.user.id;
         save('orders.json', orders);
         await interaction.update({ embeds: [new EmbedBuilder()
           .setTitle(`✅ تم التسليم — تذكرة #${orderId}`)
           .setDescription(
-            `# تم التسليم بنجاح!\n\n` +
+            `# اتسلّم بنجاح!\n\n` +
             `**العميل:** <@${order.userId}>\n` +
             `**الخدمة:** ${order.serviceEmoji || '🛒'} ${order.serviceName}\n` +
             `**الستاف:** ${interaction.user}\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `## ✅ تم التسليم!\n\n` +
-            `> <@${order.userId}> استخدم \`/review\` لتقييم الخدمة\n\n` +
+            `## ✅ اتسلّم بنجاح!\n\n` +
+            `> <@${order.userId}> استخدم \`/review\` عشان تقيّم الخدمة\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
           )
           .setColor(0x2ECC71)
           .setTimestamp()
           .setFooter({ text: `✅ ${g.name} — التسليمات`, iconURL: g.iconURL({ dynamic: true }) })],
           components: [new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ إغلاق التذكرة').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
           )]
         });
-        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ تم تسليم طلبك **#${orderId}** (${order.serviceName})! استخدم \`/review\` لتقييم الخدمة`).catch(() => {}); } catch {}
+        try { const u = await interaction.guild.members.fetch(order.userId); await u.send(`✅ طلبك **#${orderId}** (${order.serviceName}) اتسلّم! استخدم \`/review\` عشان تقيّم الخدمة`).catch(() => {}); } catch {}
         await sendLog(interaction.guild, new EmbedBuilder().setTitle('✅ تم التسليم').setDescription(`**العميل:** <@${order.userId}>\n**الخدمة:** ${order.serviceName}\n**الستاف:** ${interaction.user}`).setColor(0x2ECC71).setTimestamp());
         return;
       }
@@ -1501,10 +1501,10 @@ client.on('interactionCreate', async (interaction) => {
       if (cid.startsWith('order_close_') || cid.startsWith('ticket_close_')) {
         const orderId = parseInt(cid.replace('order_close_', '').replace('ticket_close_', ''));
         const orders = getOrders(), order = orders.find(o => o.id === orderId);
-        if (!order) return interaction.reply({ content: '❌ غير موجودة', ephemeral: true });
+        if (!order) return interaction.reply({ content: '❌ مش موجودة', ephemeral: true });
         order.status = 'closed'; order.closedAt = Date.now(); order.closedBy = interaction.user.id;
         save('orders.json', orders);
-        await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة مغلقة').setDescription(`**أغلقها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
+        await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🔒 تذكرة اتقفلت').setDescription(`**اقفلها:** ${interaction.user}`).setColor(0xE74C3C).setTimestamp()] });
         await sleep(3000); try { await interaction.channel.delete(); } catch {}
         return;
       }
@@ -1561,7 +1561,7 @@ client.on('guildMemberAdd', async (member) => {
   if (raidData[guildId].joins.length >= 10) {
     try {
       const ch = member.guild.systemChannel || member.guild.channels.cache.find(c => c.isTextBased());
-      if (ch) await ch.send({ embeds: [new EmbedBuilder().setTitle('🚨 تنبيه: هجوم محتمل!').setDescription(`**${raidData[guildId].joins.length}** أعضاء دخلوا في دقيقة واحدة! قد يكون raid.`).setColor(0xFF0000).setTimestamp()] });
+      if (ch) await ch.send({ embeds: [new EmbedBuilder().setTitle('🚨 تنبيه: هجوم محتمل!').setDescription(`**${raidData[guildId].joins.length}** أعضاء دخلوا في دقيقة واحدة! ممكن يكون هجوم.`).setColor(0xFF0000).setTimestamp()] });
     } catch {}
     await sendLog(member.guild, new EmbedBuilder().setTitle('🚨 RAID DETECTED').setDescription(`${raidData[guildId].joins.length} joins in 1 minute!`).setColor(0xFF0000).setTimestamp());
   }
@@ -1572,8 +1572,8 @@ client.on('guildMemberAdd', async (member) => {
     const ch = g.channels.cache.find(c => c.name.includes('الترحيب') && c.isTextBased());
     if (!ch) return;
     const embed = new EmbedBuilder()
-      .setTitle(`مرحباً ${member.user.username}! 🎉`)
-      .setDescription(`━━━━━━━━━━━━━━━━━━━━━\n\n**اهلاً وسهلاً بك في ${g.name}!** 🚀\n\nأنت العضو رقم **${g.memberCount}**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**📦 ابدأ هنا:**\n> 🛒 اختر خدمة من القائمة\n> ⭐ قيّم بـ \`/review\`\n\n━━━━━━━━━━━━━━━━━━━━━`)
+      .setTitle(`أهلاً ${member.user.username}! 🎉`)
+      .setDescription(`━━━━━━━━━━━━━━━━━━━━━\n\n**أهلاً وسهلاً بيك في ${g.name}!** 🚀\n\nأنت العضو رقم **${g.memberCount}**\n\n━━━━━━━━━━━━━━━━━━━━━\n\n**📦 ابدأ هنا:**\n> 🛒 اختار خدمة من القائمة\n> ⭐ قيّم بـ \`/review\`\n\n━━━━━━━━━━━━━━━━━━━━━`)
       .setColor(0x2ECC71).setTimestamp().setFooter({ text: `${g.name} • ${g.memberCount} عضو` });
     try { const av = member.user.displayAvatarURL({ dynamic: true, size: 256 }); if (av) embed.setThumbnail(av); } catch {}
     await ch.send({ content: `${member}`, embeds: [embed] }).catch(() => {});
@@ -1581,7 +1581,7 @@ client.on('guildMemberAdd', async (member) => {
 });
 
 client.on('guildMemberRemove', async (member) => {
-  await sendLog(member.guild, new EmbedBuilder().setTitle('👋 عضو غادر').setDescription(`**${member.user.tag}** (${member.user.id})`).setColor(0xF39C12).setTimestamp());
+  await sendLog(member.guild, new EmbedBuilder().setTitle('👋 عضو مشي').setDescription(`**${member.user.tag}** (${member.user.id})`).setColor(0xF39C12).setTimestamp());
 });
 
 client.on('messageCreate', async (message) => {
@@ -1593,7 +1593,7 @@ client.on('messageCreate', async (message) => {
     const member = await message.guild.members.fetch(message.author.id).catch(() => null);
     if (member?.moderatable) {
       await member.timeout(60000, 'Spam');
-      await message.channel.send({ content: `🔇 ${message.author} تم كتمه لمدة دقيقة (سبام)` }).catch(() => {});
+      await message.channel.send({ content: `🔇 ${message.author} اتكتم لمدة دقيقة (سبام)` }).catch(() => {});
       await sendLog(message.guild, new EmbedBuilder().setTitle('🔇 Auto-Mute: Spam').setDescription(`**العضو:** ${message.author}\n**القناة:** ${message.channel}`).setColor(0x9B59B6).setTimestamp());
     }
     return;
@@ -1602,20 +1602,20 @@ client.on('messageCreate', async (message) => {
   // Bad words
   if (checkBadWords(message.content)) {
     try { await message.delete(); } catch {}
-    await message.channel.send({ content: `🚫 ${message.author} الرسالة تحتوي على كلمة ممنوعة` }).catch(() => {});
+    await message.channel.send({ content: `🚫 ${message.author} الرسالة فيها كلمة ممنوعة` }).catch(() => {});
     await sendLog(message.guild, new EmbedBuilder().setTitle('🚫 Bad Word Detected').setDescription(`**العضو:** ${message.author}\n**القناة:** ${message.channel}\n**المحتوى:** ${safe(message.content, 200)}`).setColor(0xE74C3C).setTimestamp());
   }
 });
 
 client.on('messageDelete', async (message) => {
   if (message.author?.bot || !message.guild) return;
-  await sendLog(message.guild, new EmbedBuilder().setTitle('🗑️ رسالة محذوفة').setDescription(`**الكاتب:** ${message.author}\n**القناة:** ${message.channel}\n**المحتوى:** ${safe(message.content, 500)}`).setColor(0xF39C12).setTimestamp());
+  await sendLog(message.guild, new EmbedBuilder().setTitle('🗑️ رسالة اتمسحت').setDescription(`**الكاتب:** ${message.author}\n**القناة:** ${message.channel}\n**المحتوى:** ${safe(message.content, 500)}`).setColor(0xF39C12).setTimestamp());
 });
 
 client.on('messageUpdate', async (old, newMsg) => {
   if (old.author?.bot || !old.guild || !old.content) return;
   if (old.content === newMsg.content) return;
-  await sendLog(old.guild, new EmbedBuilder().setTitle('✏️ رسالة عُدّلت').setDescription(`**الكاتب:** ${old.author}\n**القناة:** ${old.channel}\n**قبل:** ${safe(old.content, 300)}\n**بعد:** ${safe(newMsg.content, 300)}`).setColor(0x3498DB).setTimestamp());
+  await sendLog(old.guild, new EmbedBuilder().setTitle('✏️ رسالة اتغيّرت').setDescription(`**الكاتب:** ${old.author}\n**القناة:** ${old.channel}\n**قبل:** ${safe(old.content, 300)}\n**بعد:** ${safe(newMsg.content, 300)}`).setColor(0x3498DB).setTimestamp());
 });
 
 client.on('guildBanAdd', async (ban) => {
@@ -2048,15 +2048,15 @@ const apiServer = http.createServer(async (req, res) => {
           const freshOrders = getOrders(); const freshOrder = freshOrders.find(o => o.id === orderId);
           if (freshOrder) { freshOrder.channelId = channel.id; save('orders.json', freshOrders); }
           const total = svc.price * (parseInt(d.qty) || 1);
-          const contactLabels = { discord: 'Discord', whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'بريد إلكتروني' };
+          const contactLabels = { discord: 'Discord', whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'إيميل' };
           const embed = new EmbedBuilder()
             .setTitle(`🛒 طلب من المتجر #${orderId}`)
-            .setDescription(`**العميل:** ${d.name}\n**Discord:** ${d.discord}\n**طريقة التواصل:** ${contactLabels[d.contactType] || d.contactType}: ${d.contact}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**الكمية:** ${parseInt(d.qty) || 1}\n**السعر:** \`${fmt(svc.price)}\` × ${parseInt(d.qty) || 1} = \`${fmt(total)}\`\n**الوصف:** ${svc.description || '—'}\n${d.notes ? `**ملاحظات:** ${d.notes}\n` : ''}━━━━━━━━━━━━━━━━━━━━━\n⏳ **في انتظار قبول الستاف...**`)
+            .setDescription(`**العميل:** ${d.name}\n**Discord:** ${d.discord}\n**التواصل:** ${contactLabels[d.contactType] || d.contactType}: ${d.contact}\n**الخدمة:** ${svc.emoji} ${svc.name}\n**الكمية:** ${parseInt(d.qty) || 1}\n**السعر:** \`${fmt(svc.price)}\` × ${parseInt(d.qty) || 1} = \`${fmt(total)}\`\n**الوصف:** ${svc.description || '—'}\n${d.notes ? `**ملاحظات:** ${d.notes}\n` : ''}━━━━━━━━━━━━━━━━━━━━━\n⏳ **مستنية قبول الستاف...**`)
             .setColor(0xF1C40F).setTimestamp();
-          await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ إغلاق').setStyle(ButtonStyle.Danger))] });
+          await channel.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`order_accept_${orderId}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId(`order_close_${orderId}`).setLabel('🗑️ اقفل').setStyle(ButtonStyle.Danger))] });
           const invite = await channel.createInvite({ maxAge: 86400 * 7, reason: `Shop order #${orderId}` }).catch(() => null);
           const inviteUrl = invite ? `https://discord.gg/${invite.code}` : 'https://discord.gg/a85fhmx4X';
-          await channel.send({ content: `👋 **مرحباً ${d.name}!**\n\n🎯 انضم للسيرفر عشان تتابع طلبك:\n${inviteUrl}\n\n💡 اكتب في التذكرة وأي حد من الستاف هيرد عليك` }).catch(() => {});
+          await channel.send({ content: `👋 **أهلاً ${d.name}!**\n\n🎯 انضم للسيرفر عشان تتابع طلبك:\n${inviteUrl}\n\n💡 اكتب في التذكرة وأي حد من الستاف هيرد عليك` }).catch(() => {});
           await sendLog(g, new EmbedBuilder().setTitle('🛒 طلب من المتجر').setDescription(`**العميل:** ${d.name} (${d.discord})\n**الخدمة:** ${svc.name}\n**المبلغ:** ${fmt(total)}\n**القناة:** ${channel}`).setColor(0xF1C40F).setTimestamp());
         } catch (e) { console.error('Shop order background error:', e.message); }
       })();
