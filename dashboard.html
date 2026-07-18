@@ -379,7 +379,7 @@ async function loadAll(){
   const reviews=await api('api/reviews');
   if(Array.isArray(reviews)){
     const recent=reviews.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
-    document.getElementById('recentReviews').innerHTML=recent.length?`<table><tr><th>الخدمة</th><th>المستخدم</th><th>التقييم</th><th>التعليق</th></tr>${recent.map(r=>`<tr><td>${r.serviceName}</td><td>${r.username}</td><td>${'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)}</td><td>${r.comment||'—'}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تقييمات</div>';
+    document.getElementById('recentReviews').innerHTML=recent.length?`<table><tr><th>الخدمة</th><th>المستخدم</th><th>التقييم</th><th>التعليق</th><th>الصور</th></tr>${recent.map(r=>`<tr><td>${r.serviceEmoji||'⭐'} ${r.serviceName}</td><td>${r.username}</td><td style="color:#f1c40f;font-weight:700">${'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)}</td><td>${r.comment||'—'}</td><td>${r.images&&r.images.length?`<div style="display:flex;gap:4px;flex-wrap:wrap">${r.images.map(img=>`<img src="${img}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border);cursor:pointer" onclick="window.open('${img}','_blank')">`).join('')}</div>`:'<span style="color:var(--dim)">—</span>'}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تقييمات</div>';
   }
   [allChannels,allMembers]=await Promise.all([api('api/channels'),api('api/members')]);
   const chSelect=document.getElementById('sendChannel');
@@ -441,7 +441,7 @@ async function loadShopOrders(){
 }
 async function updateOrderStatus(id,status){
   const labels={accepted:'قبول',completed:'إنهاء',closed:'إغلاق',cancelled:'إلغاء'};
-  if(!confirm(`تأكيد ${labels[action||status]} الطلب؟`))return;
+  if(!confirm(`تأكيد ${labels[status]} الطلب؟`))return;
   await api(`api/shop-orders/${id}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
   toast('✅ تم تحديث الطلب');
   loadShopOrders();
