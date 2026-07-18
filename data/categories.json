@@ -1,6 +1,9 @@
 [
-  { "id": "chatgpt", "name": "ChatGPT & AI", "nameEn": "ChatGPT & AI", "emoji": "🤖" },
-  { "id": "photoshop", "name": "فوتوشوب", "nameEn": "Design & Photoshop", "emoji": "🖌️" },
-  { "id": "montage", "name": "مونتاج", "nameEn": "Video Editing", "emoji": "🎬" },
-  { "id": "code", "name": "برمجة", "nameEn": "Programming", "emoji": "💻" }
+  { "id": "ai", "name": "أدوات الذكاء الاصطناعي", "nameEn": "AI Tools", "emoji": "🤖" },
+  { "id": "subscriptions", "name": "اشتراكات البث", "nameEn": "Streaming Subscriptions", "emoji": "📺" },
+  { "id": "design", "name": "التصميم", "nameEn": "Design", "emoji": "🎨" },
+  { "id": "montage", "name": "المونتاج", "nameEn": "Video Editing", "emoji": "🎬" },
+  { "id": "dev", "name": "البرمجة والتطوير", "nameEn": "Development", "emoji": "💻" },
+  { "id": "academic", "name": "الخدمات الأكاديمية", "nameEn": "Academic Services", "emoji": "📚" },
+  { "id": "general", "name": "خدمات عامة", "nameEn": "General Services", "emoji": "⚡" }
 ]
