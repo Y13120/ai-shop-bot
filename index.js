@@ -97,7 +97,7 @@ const DEFAULT_SERVICES = [
   { id: 52, name: 'بروجيكت تصميم بالطلب', nameEn: 'Custom Design Project', description: 'أي تصميم بالطلب — لوجو — بوستر — هوية بصرية — وصف متطلباتك', descriptionEn: 'Any custom design project — Logo — Poster — Brand identity', price: 250000000, category: 'projects', emoji: '🎨', active: true },
   { id: 53, name: 'بروجيكت مونتاج بالطلب', nameEn: 'Custom Video Project', description: 'أي فيديو أو مونتاج بالطلب — ريلز — يوتيوب — إعلانات — وصف متطلباتك', descriptionEn: 'Any custom video project — Reels — YouTube — Ads', price: 300000000, category: 'projects', emoji: '🎬', active: true },
   { id: 54, name: 'بروجيكت أكاديمي بالطلب', nameEn: 'Custom Academic Project', description: 'أي عمل أكاديمي بالطلب — بحث — تقرير — عرض — وصف متطلباتك', descriptionEn: 'Any custom academic work — Research — Report — Presentation', price: 200000000, category: 'projects', emoji: '📚', active: true },
-  { id: 55, name: 'بروجيكت خاص بأي خدمة', nameEn: 'Any Custom Service', description: 'مش لاقي الخدمة اللي عايزها؟ اطلب أي خدمة خاصة واحنا هننفذهالك', descriptionEn: 'Can'\''t find what you need? Request any custom service', price: 100000000, category: 'projects', emoji: '✨', active: true },
+  { id: 55, name: 'بروجيكت خاص بأي خدمة', nameEn: 'Any Custom Service', description: 'مش لاقي الخدمة اللي عايزها؟ اطلب أي خدمة خاصة واحنا هننفذهالك', descriptionEn: "Can't find what you need? Request any custom service", price: 100000000, category: 'projects', emoji: '✨', active: true },
 ];
 const DEFAULT_CATEGORIES = [
   { id: 'ai', name: 'أدوات الذكاء الاصطناعي', nameEn: 'AI Tools', emoji: '🤖' },
