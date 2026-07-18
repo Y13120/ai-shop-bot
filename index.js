@@ -1576,7 +1576,7 @@ client.on('interactionCreate', async (interaction) => {
       // ── 📝 تقديم للادارة — زر + مودال ──
       if (cid === 'apply_staff') {
         const g = interaction.guild;
-        const member = await g.members.fetch(interaction.user.id).catch(() null);
+        const member = await g.members.fetch(interaction.user.id).catch(() => null);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
         const trialRole = g.roles.cache.find(r => r.name.includes('Trial'));
         if (staffRole && member?.roles.cache.has(staffRole.id)) return interaction.reply({ content: '❌ أنت ستاف أصلاً!', ephemeral: true });
