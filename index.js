@@ -36,16 +36,16 @@ const getCategories = () => load('categories.json', DEFAULT_CATEGORIES);
 const saveCategories = (cats) => save('categories.json', cats);
 const DEFAULT_SERVICES = [
   // 🤖 أدوات الذكاء الاصطناعي
-  { id: 1, name: 'ChatGPT Plus اشتراك شهري', nameEn: 'ChatGPT Plus Monthly', description: 'اشتراك ChatGPT Plus لمدة شهر — GPT-4o — غير محدود', descriptionEn: 'ChatGPT Plus subscription — 1 month — GPT-4o — Unlimited', price: 2500000000, category: 'ai', emoji: '🤖', active: true },
-  { id: 2, name: 'Claude Pro اشتراك شهري', nameEn: 'Claude Pro Monthly', description: 'اشتراك Claude Pro لمدة شهر — Claude 3.5 Sonnet — 5x أكثر', descriptionEn: 'Claude Pro subscription — 1 month — 5x more usage', price: 2500000000, category: 'ai', emoji: '🧠', active: true },
-  { id: 3, name: 'Midjourney اشتراك', nameEn: 'Midjourney Subscription', description: 'اشتراك Midjourney — توليد صور بالذكاء الاصطناعي — 30 ساعة شهرياً', descriptionEn: 'Midjourney subscription — AI image generation — 30 hrs/month', price: 4166667000, category: 'ai', emoji: '🖼️', active: true },
-  { id: 4, name: 'Suno AI توليد موسيقى', nameEn: 'Suno AI Music', description: 'توليد موسيقى بالذكاء الاصطناعي — أي جنس — صوت احترافي', descriptionEn: 'AI music generation — Any genre — Professional quality', price: 1333333000, category: 'ai', emoji: '🎵', active: true },
-  { id: 5, name: 'ElevenLabs صوت AI', nameEn: 'ElevenLabs Voice AI', description: 'تحويل نص لكلام صوتي بالذكاء الاصطناعي — أصوات واقعية — أي لغة', descriptionEn: 'Text to speech AI — Realistic voices — Any language', price: 666667000, category: 'ai', emoji: '🔊', active: true },
-  { id: 6, name: 'CapCut Pro اشتراك', nameEn: 'CapCut Pro Subscription', description: 'اشتراك CapCut Pro — مونتاج بالذكاء الاصطناعي — ميزات متقدمة', descriptionEn: 'CapCut Pro subscription — AI editing — Advanced features', price: 1000000000, category: 'ai', emoji: '✂️', active: true },
-  { id: 7, name: 'توليد صور AI', nameEn: 'AI Image Generation', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', descriptionEn: 'AI image generation — DALL-E 3 — 3 images', price: 416667000, category: 'ai', emoji: '📸', active: true },
-  { id: 8, name: 'صوت AI — نص لكلام', nameEn: 'AI Text to Speech', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', descriptionEn: 'Convert text to natural AI voice — Multiple languages + Emotions', price: 250000000, category: 'ai', emoji: '🎙️', active: true },
-  { id: 9, name: 'صوت AI — كلام لنص', nameEn: 'AI Speech to Text', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', descriptionEn: 'Convert audio/speech to written text — Accurate + Fast', price: 250000000, category: 'ai', emoji: '📝', active: true },
-  { id: 10, name: 'تحليل بيانات AI', nameEn: 'AI Data Analysis', description: 'تحليل أي مجموعة بيانات بالذكاء الاصطناعي — رسوم بيانية + تقارير', descriptionEn: 'Professional data analysis with AI — Charts + Reports + CSV', price: 500000000, category: 'ai', emoji: '📊', active: true },
+  { id: 1, name: 'ChatGPT Plus اشتراك شهري', nameEn: 'ChatGPT Plus Monthly', description: 'اشتراك ChatGPT Plus لمدة شهر — GPT-4o — غير محدود', descriptionEn: 'ChatGPT Plus subscription — 1 month — GPT-4o — Unlimited', price: 250000000, category: 'ai', emoji: '🤖', active: true },
+  { id: 2, name: 'Claude Pro اشتراك شهري', nameEn: 'Claude Pro Monthly', description: 'اشتراك Claude Pro لمدة شهر — Claude 3.5 Sonnet — 5x أكثر', descriptionEn: 'Claude Pro subscription — 1 month — 5x more usage', price: 250000000, category: 'ai', emoji: '🧠', active: true },
+  { id: 3, name: 'Midjourney اشتراك', nameEn: 'Midjourney Subscription', description: 'اشتراك Midjourney — توليد صور بالذكاء الاصطناعي — 30 ساعة شهرياً', descriptionEn: 'Midjourney subscription — AI image generation — 30 hrs/month', price: 416667000, category: 'ai', emoji: '🖼️', active: true },
+  { id: 4, name: 'Suno AI توليد موسيقى', nameEn: 'Suno AI Music', description: 'توليد موسيقى بالذكاء الاصطناعي — أي جنس — صوت احترافي', descriptionEn: 'AI music generation — Any genre — Professional quality', price: 125000000, category: 'ai', emoji: '🎵', active: true },
+  { id: 5, name: 'ElevenLabs صوت AI', nameEn: 'ElevenLabs Voice AI', description: 'تحويل نص لكلام صوتي بالذكاء الاصطناعي — أصوات واقعية — أي لغة', descriptionEn: 'Text to speech AI — Realistic voices — Any language', price: 83333000, category: 'ai', emoji: '🔊', active: true },
+  { id: 6, name: 'CapCut Pro اشتراك', nameEn: 'CapCut Pro Subscription', description: 'اشتراك CapCut Pro — مونتاج بالذكاء الاصطناعي — ميزات متقدمة', descriptionEn: 'CapCut Pro subscription — AI editing — Advanced features', price: 133333000, category: 'ai', emoji: '✂️', active: true },
+  { id: 7, name: 'توليد صور AI', nameEn: 'AI Image Generation', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', descriptionEn: 'AI image generation — DALL-E 3 — 3 images', price: 41667000, category: 'ai', emoji: '📸', active: true },
+  { id: 8, name: 'صوت AI — نص لكلام', nameEn: 'AI Text to Speech', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', descriptionEn: 'Convert text to natural AI voice — Multiple languages + Emotions', price: 25000000, category: 'ai', emoji: '🎙️', active: true },
+  { id: 9, name: 'صوت AI — كلام لنص', nameEn: 'AI Speech to Text', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', descriptionEn: 'Convert audio/speech to written text — Accurate + Fast', price: 25000000, category: 'ai', emoji: '📝', active: true },
+  { id: 10, name: 'تحليل بيانات AI', nameEn: 'AI Data Analysis', description: 'تحليل أي مجموعة بيانات بالذكاء الاصطناعي — رسوم بيانية + تقارير', descriptionEn: 'Professional data analysis with AI — Charts + Reports + CSV', price: 83333000, category: 'ai', emoji: '📊', active: true },
   // 📺 اشتراكات البث
   { id: 11, name: 'Netflix اشتراك شهري', nameEn: 'Netflix Monthly', description: 'اشتراك Netflix لمدة شهر — فردي أو مشترك — 4K', descriptionEn: 'Netflix subscription — 1 month — Individual or Shared — 4K', price: 666667000, category: 'subscriptions', emoji: '🎬', active: true },
   { id: 12, name: 'Spotify Premium', nameEn: 'Spotify Premium', description: 'اشتراك Spotify Premium لمدة شهر — بدون إعلانات — تحميل', descriptionEn: 'Spotify Premium — 1 month — No ads — Offline download', price: 416667000, category: 'subscriptions', emoji: '🎵', active: true },
@@ -90,6 +90,14 @@ const DEFAULT_SERVICES = [
   { id: 46, name: 'كتابة محتوى تسويقي', nameEn: 'Copywriting', description: 'كتابة محتوى تسويقي — إعلانات — وصف منتج — سوشيال ميديا', descriptionEn: 'Marketing copywriting — Ads — Product descriptions — Social media', price: 416667000, category: 'general', emoji: '📢', active: true },
   { id: 47, name: 'إدارة سوشيال ميديا', nameEn: 'Social Media Management', description: 'إدارة حسابات سوشيال ميديا — محتوى + جدولة + تفاعل', descriptionEn: 'Social media management — Content + Scheduling + Engagement', price: 3333333000, category: 'general', emoji: '📱', active: true },
   { id: 48, name: 'إعداد متجر إلكتروني', nameEn: 'E-commerce Store Setup', description: 'إعداد متجر إلكتروني كامل — منتجات + سلة + دفع إلكتروني', descriptionEn: 'Full e-commerce store — Products + Cart + Payment gateway', price: 6666667000, category: 'general', emoji: '🛒', active: true },
+  // 🏗️ بروجيكتات بالطلب
+  { id: 49, name: 'بروجيكت ويب كامل بالطلب', nameEn: 'Custom Web Project', description: 'أي بروجيكت ويب بالطلب — وصف متطلباتك وهننفذهولك', descriptionEn: 'Any custom web project — describe your requirements', price: 500000000, category: 'projects', emoji: '🌐', active: true },
+  { id: 50, name: 'بروجيكت موبايل بالطلب', nameEn: 'Custom Mobile Project', description: 'أي تطبيق موبايل بالطلب — Android أو iOS — وصف متطلباتك', descriptionEn: 'Any custom mobile app — Android or iOS — Describe your needs', price: 500000000, category: 'projects', emoji: '📱', active: true },
+  { id: 51, name: 'بروجيكت برمجي خاص', nameEn: 'Custom Software Project', description: 'أي بروجيكت برمجي بالطلب — سكربتات — أتمتة — أدوات — وصف متطلباتك', descriptionEn: 'Any custom software project — Scripts — Automation — Tools', price: 300000000, category: 'projects', emoji: '⚙️', active: true },
+  { id: 52, name: 'بروجيكت تصميم بالطلب', nameEn: 'Custom Design Project', description: 'أي تصميم بالطلب — لوجو — بوستر — هوية بصرية — وصف متطلباتك', descriptionEn: 'Any custom design project — Logo — Poster — Brand identity', price: 250000000, category: 'projects', emoji: '🎨', active: true },
+  { id: 53, name: 'بروجيكت مونتاج بالطلب', nameEn: 'Custom Video Project', description: 'أي فيديو أو مونتاج بالطلب — ريلز — يوتيوب — إعلانات — وصف متطلباتك', descriptionEn: 'Any custom video project — Reels — YouTube — Ads', price: 300000000, category: 'projects', emoji: '🎬', active: true },
+  { id: 54, name: 'بروجيكت أكاديمي بالطلب', nameEn: 'Custom Academic Project', description: 'أي عمل أكاديمي بالطلب — بحث — تقرير — عرض — وصف متطلباتك', descriptionEn: 'Any custom academic work — Research — Report — Presentation', price: 200000000, category: 'projects', emoji: '📚', active: true },
+  { id: 55, name: 'بروجيكت خاص بأي خدمة', nameEn: 'Any Custom Service', description: 'مش لاقي الخدمة اللي عايزها؟ اطلب أي خدمة خاصة واحنا هننفذهالك', descriptionEn: 'Can'\''t find what you need? Request any custom service', price: 100000000, category: 'projects', emoji: '✨', active: true },
 ];
 const DEFAULT_CATEGORIES = [
   { id: 'ai', name: 'أدوات الذكاء الاصطناعي', nameEn: 'AI Tools', emoji: '🤖' },
@@ -99,6 +107,7 @@ const DEFAULT_CATEGORIES = [
   { id: 'dev', name: 'البرمجة والتطوير', nameEn: 'Development', emoji: '💻' },
   { id: 'academic', name: 'الخدمات الأكاديمية', nameEn: 'Academic Services', emoji: '📚' },
   { id: 'general', name: 'خدمات عامة', nameEn: 'General Services', emoji: '⚡' },
+  { id: 'projects', name: 'بروجيكتات بالطلب', nameEn: 'Custom Projects', emoji: '🏗️' },
 ];
 
 const getServices  = () => load('services.json', DEFAULT_SERVICES);
@@ -162,6 +171,7 @@ const client = new Client({
 //  ANTI-SPAM
 // ══════════════════════════════════════════════════════════════
 const spamTracker = new Map();
+const applyTempData = new Map();
 
 function checkSpam(userId) {
   if (!CFG.automod || !CFG.automod.antispam) return false;
@@ -386,6 +396,7 @@ async function cmdSetup(interaction) {
     { n: '╔════════════ 👔 الستاف ════════════', chs: [
       { n: '💼・شات-الستاف', p: staffOnly },
       { n: '📋・ملاحظات-الستاف', p: staffOnly },
+      { n: '📝・تقديم-للادارة', p: full },
     ]},
     { n: '╔════════════ 🛡️ السجلات ════════════', chs: [
       { n: '📝・السجلات', p: noSend },
@@ -425,18 +436,39 @@ async function cmdSetup(interaction) {
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
     const e = new EmbedBuilder()
-      .setTitle('━━━━━━━━━━━ 🏪 متجر الذكاء الاصطناعي ━━━━━━━━━━━')
+      .setTitle('🔥 متجر الذكاء الاصطناعي 🔥')
       .setDescription(
         '# أهلاً بيك في أحسن متجر لخدمات الذكاء الاصطناعي 🚀\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 عايز تطلب إزاي؟\n\n' +
+        '# 💥 ليه تختارنا؟\n\n' +
+        '> 🔥 **سيرفر خدمات يجمع لك كل شي بمكان واحد**\n' +
+        '> 💬 **دعم فني شغال 24/7 وما نوقف**\n' +
+        '> 🧰 **أدوات وخدمات تساعدك بكل شي تحتاجه**\n' +
+        '> 🤖 **ميكر شغال طول الوقت 24/7**\n' +
+        '> 🎨 **تصاميم حلوة واحترافية على ذوقك**\n' +
+        '> 🎉 **توزيعات وهدايا بشكل مستمر**\n' +
+        '> ⚡ **طلباتك تمشي بسرعة وسهولة**\n' +
+        '> 🛠️ **تقدر تطلب أي خدمة خاصة**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 💡 عايز تطلب إزاي؟\n\n' +
         '> **`1️⃣`** اختار الخدمة من القائمة اللي تحت\n' +
         '> **`2️⃣`** شوف التفاصيل والسعر بتاعها\n' +
         '> **`3️⃣`** اضغط على زر **🛒 اطلب دلوقتي**\n' +
         '> **`4️⃣`** هنفتحلك تذكرة وننجزلك طلبك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔗 زور المتجر بتاعنا أونلاين\n\n' +
-        '> [🛒 AI Shop — المتجر بتاعنا](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
+        '# 🔗 زور المتجر بتاعنا أونلاين\n\n' +
+        '> [🛒 المتجر بتاعنا — اطلب أونلاين](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 💳 طرق الدفع\n\n' +
+        '> 💰 **فودافون كاش** — ابعت على التذكرة\n' +
+        '> 🏦 **تحويل بنكي** — ابعت على التذكرة\n' +
+        '> 📱 **اتصالات كاش** — ابعت على التذكرة\n' +
+        '> 💳 **卡什 كود** — ابعت على التذكرة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 🏗️ بروجيكتات بالطلب\n\n' +
+        '> مش لاقي الخدمة اللي عايزها؟\n' +
+        '> اكتب في التذكرة أي بروجيكت خاص وهننفذهولك!\n' +
+        '> ويب — موبايل — تصميم — مونتاج — أي حاجة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xFF0000)
@@ -448,7 +480,7 @@ async function cmdSetup(interaction) {
       .setPlaceholder('🛒 اختار الخدمة اللي عايزها...')
       .addOptions(getServices().filter(s => s.active).slice(0, 25).map(s => ({
         label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
-        description: `${fmt(s.price)} ج.م — ${s.category}`.substring(0, 100),
+        description: `${fmt(s.price)} كريديت — ${s.category}`.substring(0, 100),
         value: String(s.id),
       })));
     const row1 = new ActionRowBuilder().addComponents(select);
@@ -467,7 +499,7 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📝 دليل طلب الخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## اتبع الخطوات دي:\n\n' +
+        '# اتبع الخطوات دي:\n\n' +
         '> **`1️⃣`** 🛒 اختار الخدمة من قناة **🛒・الخدمات**\n\n' +
         '> **`2️⃣`** 📋 شوف التفاصيل والسعر بتاعها\n\n' +
         '> **`3️⃣`** 💬 اضغط زر **🛒 اطلب دلوقتي** عشان تفتح تذكرة\n\n' +
@@ -475,7 +507,7 @@ async function cmdSetup(interaction) {
         '> **`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
         '> **`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 نصايح مهمة\n\n' +
+        '# 💡 نصايح مهمة\n\n' +
         '> • تأكد إنك اختارت الخدمة الصح قبل ما تطلب\n' +
         '> • احتفظ بإيصال الدفع\n' +
         '> • لو عندك سؤال، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
@@ -495,12 +527,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# ⭐ تقييمات العملاء\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## هتقيّم إزاي؟\n\n' +
+        '# هتقيّم إزاي؟\n\n' +
         '> استخدم الأمر `/review` مع رقم الخدمة والتقييم بتاعك\n\n' +
-        '## مثال\n\n' +
+        '# مثال\n\n' +
         '> `/review service:1 rating:5 comment:خدمة تحفة!`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📊 شوف التقييمات\n\n' +
+        '# 📊 شوف التقييمات\n\n' +
         '> استخدم `/leaderboard` عشان تعرف أحسن الزبائن\n' +
         '> استخدم `/stats` عشان تشوف إحصائيات البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
@@ -519,14 +551,14 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 💬 التواصل مع الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🎫 فتح تذكرة\n' +
+        '# 🎫 فتح تذكرة\n' +
         '> روح قناة **🎫・فتح-تذكرة** واضغط على زر الدعم الفني\n\n' +
-        '## 🛒 طلب خدمة\n' +
+        '# 🛒 طلب خدمة\n' +
         '> روح قناة **🛒・الخدمات** واختار الخدمة اللي عايزها\n\n' +
-        '## 💬 الشات العام\n' +
+        '# 💬 الشات العام\n' +
         '> تقدر تكتب أي سؤال في قناة **💬・العامة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⏰ أوقات الاستجابة\n\n' +
+        '# ⏰ أوقات الاستجابة\n\n' +
         '> **الدعم الفني:** من 5 لـ 15 دقيقة\n' +
         '> **الطلبات:** من 5 لـ 30 دقيقة\n' +
         '> **الاستفسارات:** خلال ساعة\n\n' +
@@ -546,7 +578,7 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📣 الإعلانات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## شوف آخر الأخبار والإعلانات هنا\n\n' +
+        '# شوف آخر الأخبار والإعلانات هنا\n\n' +
         '> 🔔 شغّل الإشعارات عشان متفوتكش أي حاجة\n' +
         '> 📢 الإعلانات فيها العروض والخدمات الجديدة\n' +
         '> 🎉 مسابقات وسحبية أحياناً\n\n' +
@@ -566,29 +598,29 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📋 قواعد السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 القسم الأول — السلوك العام\n\n' +
+        '# 📌 القسم الأول — السلوك العام\n\n' +
         '> **1.** 🤝 **الاحترام المتبادل** — ممنوع الإهانة أو السخرية من أي حد\n' +
         '> **2.** 🚫 **ممنوع المحتوى المخالف** — أي محتوى خارج أو عنصري ممنوع\n' +
         '> **3.** 🗣️ **اللغة العربية** — الأفضل تتكلم عربي\n' +
         '> **4.** 🔞 **ممنوع محتوى 18+** — أي محتوى للبالغين ممنوع\n\n' +
-        '## 📌 القسم الثاني — الطلبات والخدمات\n\n' +
+        '# 📌 القسم الثاني — الطلبات والخدمات\n\n' +
         '> **5.** 💰 **الدفع مقدم** — مفيش طلب يتنفذ من غير دفع\n' +
         '> **6.** 📋 **التفاصيل الصح** — تأكد إن البيانات بتاعتك صحيحة\n' +
         '> **7.** ⏳ **الانتظار** — الستاف بيشتغلوا بالترتيب\n\n' +
-        '## 📌 القسم الثالث — الحماية والخصوصية\n\n' +
+        '# 📌 القسم الثالث — الحماية والخصوصية\n\n' +
         '> **8.** 🔒 **ممنوع تشارك حساباتك** — ممنوع حد يشارك بياناتك\n' +
         '> **9.** 🛡️ **ممنوع السبام** — ممنوع إرسال رسائل متكررة\n\n' +
-        '## 📌 القسم الرابع — القيادة\n\n' +
+        '# 📌 القسم الرابع — القيادة\n\n' +
         '> **10.** 👑 **-slotted ا服从 الستاف** — أوامر الستاف نهائية\n' +
         '> **11.** 📢 **ممنوع سبام الأوامر** — ممنوع تكرر الاستفسارات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⚠️ عقوبات المخالفات\n\n' +
+        '# ⚠️ عقوبات المخالفات\n\n' +
         '> **مخالفة أولى:** تحذير شفهي\n' +
         '> **مخالفة ثانية:** كتم لمدة ساعة\n' +
         '> **مخالفة ثالثة:** طرد من السيرفر\n' +
         '> **مخالفة رابعة:** حظر دائم\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📝 لماتدخل السيرفر، أنت موافق على القواعد دي'
+        '# 📝 لماتدخل السيرفر، أنت موافق على القواعد دي'
       )
       .setColor(0xE67E22)
       .setTimestamp()
@@ -604,12 +636,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 💬 الشات العام\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## أهلاً بيك! 🎉\n\n' +
+        '# أهلاً بيك! 🎉\n\n' +
         '> 💬 تكلّم مع الأعضاء وشارك أفكارك\n' +
         '> 🤝 تعرّف على الأعضاء الجدد\n' +
         '> ❓ اسأل أي سؤال عن الخدمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 خلّي بالك\n\n' +
+        '# 📌 خلّي بالك\n\n' +
         '> احترم الكل · ممنوع السبام · ممنوع المحتوى المخالف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
@@ -627,22 +659,22 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 🤖 أوامر البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🛒 المتجر والطلبات\n' +
+        '# 🛒 المتجر والطلبات\n' +
         '> `/services` — شوف قائمة الخدمات\n' +
         '> `/order service:رقم` — اطلب خدمة\n' +
         '> `/support` — افتح تذكرة دعم فني\n' +
         '> `/close` — اقفل التذكرة اللي مفتوحة\n\n' +
-        '## ⭐ التقييمات\n' +
+        '# ⭐ التقييمات\n' +
         '> `/review service:رقم rating:1-5` — قيّم خدمة\n' +
         '> `/leaderboard` — ترتيب الزبائن\n' +
         '> `/top-customers` — أحسن الزبائن\n\n' +
-        '## 🛡️ الإدارة (للستاف بس)\n' +
+        '# 🛡️ الإدارة (للستاف بس)\n' +
         '> `/ban` — احظر عضو\n' +
         '> `/kick` — اطرد عضو\n' +
         '> `/mute` — كتم عضو\n' +
         '> `/warn` — حدّر عضو\n' +
         '> `/purge` — امسح رسائل\n\n' +
-        '## 📌 معلومات\n' +
+        '# 📌 معلومات\n' +
         '> `/server-info` — معلومات السيرفر\n' +
         '> `/user-info` — معلومات عضو\n' +
         '> `/stats` — إحصائيات البوت\n' +
@@ -664,7 +696,7 @@ async function cmdSetup(interaction) {
       .setDescription(
         `# 📊 حالة السيرفر\n\n` +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        `## إحصائيات السيرفر الحية\n\n` +
+        `# إحصائيات السيرفر الحية\n\n` +
         `> 👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
         `> 📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
         `> 🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
@@ -687,12 +719,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 👋 أهلاً بيك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## هنا هتستقبل ترحيب كل عضو جديد!\n\n' +
+        '# هنا هتستقبل ترحيب كل عضو جديد!\n\n' +
         '> 🎉 **الترحيب التلقائي** — كل عضو جديد هياخد رسالة ترحيب\n' +
         '> 🤖 **الرول التلقائي** — الأعضاء الجدد ياخدوا رول أوتوماتيك\n' +
         '> 📢 **معلومات السيرفر** — روابط مهمة للأعضاء الجدد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔗 روابط مهمة\n\n' +
+        '# 🔗 روابط مهمة\n\n' +
         '> 🛒 [المتجر](https://ai-shop-bot-production.up.railway.app/shop)\n' +
         '> 📋 [القواعد](#)\n' +
         '> 🛠️ [الدعم الفني](#)\n\n' +
@@ -714,15 +746,15 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 🎫 افتح تذكرة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## محتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
-        '## 🛠️ الدعم الفني\n' +
+        '# محتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
+        '# 🛠️ الدعم الفني\n' +
         '> • للمساعدة في الطلبات\n' +
         '> • للأسئلة عن الخدمات\n' +
         '> • للشكاوى والاقتراحات\n\n' +
-        '## ⏰ وقت الاستجابة\n' +
+        '# ⏰ وقت الاستجابة\n' +
         '> **من 5 لـ 15 دقيقة**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 نصيحة\n\n' +
+        '# 💡 نصيحة\n\n' +
         '> قبل ما تفتح تذكرة، تأكد إن الإجابة موجودة في:\n' +
         '> • قناة **📝・كيف-تطلب** — عشان تعرف تطلب إزاي\n' +
         '> • قناة **🤖・اوامر-البوت** — عشان تشوف كل الأوامر\n\n' +
@@ -742,14 +774,14 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📦 التوصيل والتسليمات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## تابع طلبك وتسليماتك هنا\n\n' +
-        '## 📦 إزاي بيشتغل التوصيل؟\n\n' +
+        '# تابع طلبك وتسليماتك هنا\n\n' +
+        '# 📦 إزاي بيشتغل التوصيل؟\n\n' +
         '> **`1️⃣`** بعد الدفع، هنفتحلك تذكرة خاصة بيك\n' +
         '> **`2️⃣`** الستاف هيبدأ ينفّذ طلبك\n' +
         '> **`3️⃣`** بعد ماخلص، هنبعتلك التسليم هنا\n' +
         '> **`4️⃣`** تأكد إنك استلمت طلبك وقيّم بـ `/review`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⚠️ ملاحظات مهمة\n\n' +
+        '# ⚠️ ملاحظات مهمة\n\n' +
         '> • تأكد إن التسليم مفصول في التذكرة\n' +
         '> • لو عايز تعدّل، افتح تذكرة دعم فني جديدة\n' +
         '> • ممنوع تشارك معلومات التسليم مع أي حد\n\n' +
@@ -769,12 +801,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 💼 شات الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## المحادثة الداخلية بتاعة الستاف 🔒\n\n' +
+        '# المحادثة الداخلية بتاعة الستاف 🔒\n\n' +
         '> 👥 **للستاف بس** — القناة دي مقيدة للستاف بس\n' +
         '> 📋 **تنسيق الطلبات** — ناقش الطلبات الجديدة والمعلقة\n' +
         '> 💡 **مشاركة الأفكار** — اقترح تحسينات للخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 إرشادات\n\n' +
+        '# 📌 إرشادات\n\n' +
         '> • احترم زمايلك في الستاف\n' +
         '> • ممنون تشارك معلومات العملاء علني\n' +
         '> • سجّل أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
@@ -794,12 +826,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 📋 ملاحظات الستاف\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## توثيق الملاحظات والتقارير 📝\n\n' +
+        '# توثيق الملاحظات والتقارير 📝\n\n' +
         '> 📊 **تقارير يومية** — سجّل ملخص الطلبات والتسليمات\n' +
         '> ⚠️ **ملاحظات مهمة** — وثّق أي مشاكل أو ملاحظات\n' +
         '> 💡 **اقتراحات** — اقترح تحسينات للخدمة أو السيرفر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 إزاي توثّق\n\n' +
+        '# 📌 إزاي توثّق\n\n' +
         '> • ابدأ بعنوان واضح للملاحظة\n' +
         '> • حط التاريخ والوقت\n' +
         '> • ذكر الأعضاء المعنيين لو فيه حد\n\n' +
@@ -811,21 +843,53 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 📝 السجلات ──
+  // ── 📝 تقديم للادارة ──
+  const applyCh = g.channels.cache.find(c => c.name.includes('تقديم-للادارة') && c.isTextBased());
+  if (applyCh) {
+    await applyCh.send({ embeds: [new EmbedBuilder()
+      .setTitle('🔥 تقديم للادارة 🔥')
+      .setDescription(
+        '# 📝 تقديم للانضمام لفريق الستاف\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 🎯 عايز تكون من الستاف؟\n\n' +
+        '> اضغط الزر اللي تحت واملأ الاستبيان\n' +
+        '> هنراجع طلبك ونتواصل معاك\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 📋 المتطلبات\n\n' +
+        '> ✅ **عمرك فوق 16 سنة**\n' +
+        '> ✅ **بتتكلم عربي كويس**\n' +
+        '> ✅ **بتعرف تشتغل على ديسكورد**\n' +
+        '> ✅ **عندك وقت فاضي تساعد الناس**\n' +
+        '> ✅ **متمرن وصبور ومحترم**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '# 💡 نصايح\n\n' +
+        '> • اكتب إجابات واقعية ومفصّلة\n' +
+        '> • متخليش الإجابات قصيرة\n' +
+        '> • كن صادق في إجاباتك\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+      )
+      .setColor(0xFF6B00)
+      .setTimestamp()
+      .setFooter({ text: `📝 ${g.name} — تقديم للادارة`, iconURL: g.iconURL({ dynamic: true }) })],
+      components: [new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('apply_staff').setLabel('📝 قدّم الآن').setStyle(ButtonStyle.Success),
+      )]
+    }).catch(() => {});
+  }
   if (logsCh) {
     await logsCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📝 السجلات ━━━━━━━━')
       .setDescription(
         '# 📝 السجلات\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## السجلات التلقائية بتاعة البوت 🔒\n\n' +
+        '# السجلات التلقائية بتاعة البوت 🔒\n\n' +
         '> 👋 **الترحيب والوداع** — تسجيل دخول وخروج الأعضاء\n' +
         '> 🛠️ **الدعم الفني** — فتح وإغلاق التذاكر\n' +
         '> 🛒 **الطلبات** — الطلبات الجديدة والتسليمات\n' +
         '> ⚠️ **الحماية** — محاولات السبام والكلمات الممنوعة\n' +
         '> 🛡️ **الإدارة** — التحذيرات والكتم والطرد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 القناة دي مقيدة للستاف والمالك بس\n\n' +
+        '# 🔒 القناة دي مقيدة للستاف والمالك بس\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x7D8590)
@@ -842,12 +906,12 @@ async function cmdSetup(interaction) {
       .setDescription(
         '# 🔧 لوحة التحكم\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## لوحة تحكم البوت الإدارية 🔒\n\n' +
-        '## 🔗 روابط مهمة\n\n' +
+        '# لوحة تحكم البوت الإدارية 🔒\n\n' +
+        '# 🔗 روابط مهمة\n\n' +
         '> 🖥️ [**الداشبورد**](https://ai-shop-bot-production.up.railway.app/dashboard)\n' +
         '> 🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📋 أوامر الإدارة\n\n' +
+        '# 📋 أوامر الإدارة\n\n' +
         '> `/setup` — جهّز السيرفر كلّه\n' +
         '> `/add-service` —ضيف خدمة جديدة\n' +
         '> `/edit-service` —عدّل خدمة\n' +
@@ -859,7 +923,7 @@ async function cmdSetup(interaction) {
         '> `/set-logs` —حدّد قناة السجلات\n' +
         '> `/automod` —إعداد الحماية\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 القناة دي مقيدة للمالك والادمن بس\n\n' +
+        '# 🔒 القناة دي مقيدة للمالك والادمن بس\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0xE74C3C)
@@ -887,7 +951,7 @@ async function cmdServices(interaction) {
     const catInfo = catMap[catId] || { name: catId, emoji: '📁' };
     embed.addFields({ name: `${catInfo.emoji} ${catInfo.name}`, value: items.map(s => `${s.emoji || '🛒'} **${safe(s.name, 40)}** — \`${fmt(s.price)}\``).join('\n') });
   }
-  const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختار خدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} ج.م`.substring(0, 100), value: String(s.id) })));
+  const select = new StringSelectMenuBuilder().setCustomId('services_menu').setPlaceholder('🛒 اختار خدمة...').addOptions(services.slice(0, 25).map(s => ({ label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100), description: `${fmt(s.price)} كريديت`.substring(0, 100), value: String(s.id) })));
   await interaction.reply({ embeds: [embed], components: [new ActionRowBuilder().addComponents(select)] });
 }
 
@@ -1296,7 +1360,7 @@ async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
     { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/review` `/leaderboard` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
     { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/giveaway` `/end-giveaway`' },
-    { name: '🔨 moderation', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
+        { name: '🔨 الإدارة والضبط', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
   ).setColor(0xFF0000).setTimestamp()], ephemeral: true });
 }
 
@@ -1329,9 +1393,9 @@ client.on('interactionCreate', async (interaction) => {
         .setTitle(`${svc.emoji || '🛒'} ${svc.name}`)
         .setDescription(svc.description || 'مفيش وصف')
         .addFields(
-          { name: '💰 السعر', value: `\`${fmt(svc.price)} ج.م\``, inline: true },
+          { name: '💰 السعر', value: `\`${fmt(svc.price)} كريديت\``, inline: true },
           { name: '📂 التصنيف', value: svc.category || 'مش محدد', inline: true },
-          { name: '🌐 اطلب من المتجر', value: `[🛒 AI Shop](https://ai-shop-bot-production.up.railway.app/shop)`, inline: true },
+          { name: '🌐 اطلب من المتجر', value: `[🛒 المتجر الإلكتروني](https://ai-shop-bot-production.up.railway.app/shop)`, inline: true },
         )
         .setColor(0x3498DB)
         .setTimestamp()
@@ -1382,7 +1446,7 @@ client.on('interactionCreate', async (interaction) => {
             `# طلب خدمة جديد\n\n` +
             `**العميل:** ${interaction.user}\n` +
             `**الخدمة:** ${svc.emoji || '🛒'} **${svc.name}**\n` +
-            `**السعر:** \`${fmt(svc.price)} ج.م\`\n` +
+            `**السعر:** \`${fmt(svc.price)} كريديت\`\n` +
             `**رقم الطلب:** \`${orderId}\`\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `## 📝 وصف الخدمة\n\n` +
@@ -1509,6 +1573,31 @@ client.on('interactionCreate', async (interaction) => {
         return;
       }
 
+      // ── 📝 تقديم للادارة — زر + مودال ──
+      if (cid === 'apply_staff') {
+        const g = interaction.guild;
+        const member = await g.members.fetch(interaction.user.id).catch(() null);
+        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+        const trialRole = g.roles.cache.find(r => r.name.includes('Trial'));
+        if (staffRole && member?.roles.cache.has(staffRole.id)) return interaction.reply({ content: '❌ أنت ستاف أصلاً!', ephemeral: true });
+        if (trialRole && member?.roles.cache.has(trialRole.id)) return interaction.reply({ content: '❌ أنت في فترة التجربة أصلاً!', ephemeral: true });
+
+        const modal = new ModalBuilder()
+          .setCustomId('apply_staff_modal_p1')
+          .setTitle('📝 طلب انضمام للادارة — الجزء 1');
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q1_name').setLabel('1. إسمك الكامل').setPlaceholder('اكتب اسمك الكامل').setStyle(TextInputStyle.Short).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q2_age').setLabel('2. عمرك كام سنة؟').setPlaceholder('اكتب عمرك بالعدد').setStyle(TextInputStyle.Short).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q3_username').setLabel('3. اليوزر نيم بتاعك').setPlaceholder('مثال: yassinx').setStyle(TextInputStyle.Short).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q4_experience').setLabel('4. عندك خبرة في الستاف قبل كده؟').setPlaceholder('اكتب خبرتك أو اكتب مفيش').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q5_why').setLabel('5. ليه عايز تنضم للادارة؟').setPlaceholder('اكتب أسبابك باختصار').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+        );
+
+        await interaction.showModal(modal);
+        return;
+      }
+
       if (cid === 'giveaway_join') {
         const giveaways = getGiveaways();
         const gw = giveaways.find(g => g.id === interaction.message.id);
@@ -1518,6 +1607,218 @@ client.on('interactionCreate', async (interaction) => {
         gw.participants.push(interaction.user.id);
         save('giveaways.json', giveaways);
         await interaction.update({ components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('giveaway_join').setLabel(`✅ ت participate (${gw.participants.length})`).setStyle(ButtonStyle.Success))] });
+        return;
+      }
+    }
+
+    // ── 📝 مودال تقديم للادارة ──
+    if (interaction.isModalSubmit()) {
+      if (interaction.customId === 'apply_staff_modal_p1') {
+        const g = interaction.guild;
+        const answers1 = {};
+        for (const ac of interaction.components) {
+          for (const comp of ac.components) {
+            answers1[comp.customId] = comp.value;
+          }
+        }
+        await interaction.deferReply({ ephemeral: true });
+
+        const modal2 = new ModalBuilder()
+          .setCustomId('apply_staff_modal_p2')
+          .setTitle('📝 طلب انضمام للادارة — الجزء 2');
+        modal2.addComponents(
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q6_skills').setLabel('6. إيه المهارات اللي عندك؟').setPlaceholder('مونتاج - تصميم - برمجة - أي حاجة').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q7_available').setLabel('7. أوقات فراغك إيه في اليوم؟').setPlaceholder('من 4 لـ 8 مثلاً').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q8_commitment').setLabel('8. تقدر تلتزم كل يوم في السيرفر؟').setPlaceholder('اكتب اه أو لا ولماذا').setStyle(TextInputStyle.Short).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q9_conflict').setLabel('9. لو عضو بيشتكي منك هتعمل إيه؟').setPlaceholder('اكتب ردة فعلك باختصار').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('q10_extra').setLabel('10. أي حاجة عايز تضيفها؟').setPlaceholder('اكتب أي حاجة إضافية أو اكتب لا').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+        );
+
+        interaction._tempApplyAnswers = answers1;
+        applyTempData.set(interaction.user.id, answers1);
+        await interaction.showModal(modal2);
+        return;
+      }
+
+      if (interaction.customId === 'apply_staff_modal_p2') {
+        const g = interaction.guild;
+        const answers2 = {};
+        for (const ac of interaction.components) {
+          for (const comp of ac.components) {
+            answers2[comp.customId] = comp.value;
+          }
+        }
+
+        const answers1 = applyTempData.get(interaction.user.id) || {};
+        applyTempData.delete(interaction.user.id);
+        if (!answers1.q1_name) {
+          await interaction.reply({ content: '❌ حصل خطأ، جرب تاني', ephemeral: true });
+          return;
+        }
+
+        // ── حساب نسبة النجاح ──
+        let score = 0;
+        const maxScore = 100;
+        const positives = [];
+        const negatives = [];
+
+        // السؤال 2: العمر (15 نقطة)
+        const age = parseInt(answers1.q2_age) || 0;
+        if (age >= 18) { score += 15; positives.push('✅ عمره فوق 18 — ناضج');
+        } else if (age >= 16) { score += 10; positives.push('⚠️ عمره 16-17 — مقبول');
+        } else { negatives.push('❌ عمره تحت 16 — صغير أوي'); }
+
+        // السؤال 4: الخبرة (20 نقطة)
+        const exp = (answers1.q4_experience || '').toLowerCase();
+        if (exp.includes('خبرة') || exp.includes('عملت') || exp.includes('كنت') || exp.includes('ادارة') || exp.includes('ستاف')) {
+          score += 20; positives.push('✅ عنده خبرة سابقة في الستاف/الإدارة');
+        } else if (exp.includes('مفيش') || exp.includes('لا') || exp.includes('مش')) {
+          score += 8; negatives.push('⚠️ مفيش خبرة سابقة — هيحتاج تدريب');
+        } else { score += 12; positives.push('💡 ذكر خبرة سابقة'); }
+
+        // السؤال 5: الدافع (15 نقطة)
+        const why = (answers1.q5_why || '').toLowerCase();
+        if (why.length > 50) { score += 15; positives.push('✅ الدافع واضح ومفصّل'); }
+        else if (why.length > 20) { score += 10; positives.push('💡 الدافع موجود بس محتاج تفصيل'); }
+        else { score += 5; negatives.push('⚠️ الدافع قصير ومحتاج تفصيل'); }
+
+        // السؤال 6: المهارات (15 نقطة)
+        const skills = (answers2.q6_skills || '').toLowerCase();
+        if (skills.length > 30) { score += 15; positives.push('✅ عنده مهارات متنوعة ومفصّلة'); }
+        else if (skills.length > 10) { score += 10; positives.push('💡 عنده مهارات أساسية'); }
+        else { score += 5; negatives.push('⚠️ المهارات قليلة'); }
+
+        // السؤال 7: الوقت (10 نقطة)
+        const avail = (answers2.q7_available || '').toLowerCase();
+        if (avail.includes('ساع') || avail.includes('من') || avail.length > 10) { score += 10; positives.push('✅ وقته واضح ومتاح'); }
+        else { score += 5; negatives.push('⚠️ الوقت مش واضح'); }
+
+        // السؤال 8: الالتزام (10 نقطة)
+        const commit = (answers2.q8_commitment || '').toLowerCase();
+        if (commit.includes('اه') || commit.includes('اي') || commit.includes('ايوة') || commit.includes('نعم')) { score += 10; positives.push('✅ ملتزم ويقدر يشتغل كل يوم'); }
+        else { score += 3; negatives.push('⚠️ الالتزام مش واضح'); }
+
+        // السؤال 9: التعامل مع المشاكل (15 نقطة)
+        const conflict = (answers2.q9_conflict || '').toLowerCase();
+        if (conflict.includes('هسمع') || conflict.includes('هساعد') || conflict.includes('هحل') || conflict.includes('صبور') || conflict.includes('محترم')) {
+          score += 15; positives.push('✅ بيتعامل بصبر واتزان مع المشاكل');
+        } else if (conflict.includes('هكتمه') || conflict.includes('هطرده') || conflict.includes('هحظره')) {
+          score += 5; negatives.push('⚠️ ردة فعل عنيفة — محتاج يتعلم التعامل');
+        } else { score += 10; positives.push('💡 ردة فعل مقبولة'); }
+
+        const percentage = Math.min(score, maxScore);
+
+        let verdictEmoji, verdictText;
+        if (percentage >= 75) { verdictEmoji = '🟢'; verdictText = 'مقبول — جاهز للانضمام'; }
+        else if (percentage >= 50) { verdictEmoji = '🟡'; verdictText = 'مقبول شرطي — يحتاج مراجعة'; }
+        else { verdictEmoji = '🔴'; verdictText = 'مرفوض — يحتاج تطوير'; }
+
+        // ── إرسال للباتнер (المالك) ──
+        const ownerUser = await client.users.fetch(g.ownerId).catch(() => null);
+        if (ownerUser) {
+          await ownerUser.send({ embeds: [new EmbedBuilder()
+            .setTitle(`📝 طلب انضمام جديد — ${answers1.q1_name}`)
+            .setDescription(
+              `# 📋 بيانات المتقدم\n\n` +
+              `**الاسم:** ${answers1.q1_name}\n` +
+              `**العمر:** ${answers1.q2_age} سنة\n` +
+              `**اليوزر نيم:** ${answers1.q3_username}\n` +
+              `**الديسكورد:** <@${interaction.user.id}>\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `# 📝 إجاباته\n\n` +
+              `**4. الخبرة:**\n${answers1.q4_experience}\n\n` +
+              `**5. ليه عايز ينضم:**\n${answers1.q5_why}\n\n` +
+              `**6. المهارات:**\n${answers2.q6_skills}\n\n` +
+              `**7. أوقات الفراغ:**\n${answers2.q7_available}\n\n` +
+              `**8. الالتزام:**\n${answers2.q8_commitment}\n\n` +
+              `**9. التعامل مع المشاكل:**\n${answers2.q9_conflict}\n\n` +
+              `**10. إضافات:**\n${answers2.q10_extra}\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `# ${verdictEmoji} نتيجة التقييم\n\n` +
+              `**نسبة النجاح:** \`${percentage}%\`\n` +
+              `**النتيجة:** ${verdictText}\n\n` +
+              `# ✅ الإيجابيات\n${positives.join('\n') || 'مفيش'}\n\n` +
+              `# ❌ السلبيات\n${negatives.join('\n') || 'مفيش'}\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `> استخدم زر القبول أو الرفض من لوحة التحكم`
+            )
+            .setColor(percentage >= 75 ? 0x2ECC71 : percentage >= 50 ? 0xF1C40F : 0xE74C3C)
+            .setTimestamp()
+            .setFooter({ text: `📝 تقديم للادارة — ${g.name}` })],
+            components: [new ActionRowBuilder().addComponents(
+              new ButtonBuilder().setCustomId(`apply_accept_${interaction.user.id}`).setLabel('✅ قبول').setStyle(ButtonStyle.Success),
+              new ButtonBuilder().setCustomId(`apply_reject_${interaction.user.id}`).setLabel('❌ رفض').setStyle(ButtonStyle.Danger),
+            )]
+          }).catch(() => {});
+        }
+
+        // ── رد على المتقدم ──
+        await interaction.editReply({ embeds: [new EmbedBuilder()
+          .setTitle('✅ تم إرسال طلبك!')
+          .setDescription(
+            '# شكرًا لتقديمك! 🎉\n\n' +
+            `**النتيجة:** ${verdictEmoji} \`${percentage}%\` — ${verdictText}\n\n` +
+            '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+            '# 📋 إجاباتك\n\n' +
+            `**1. الاسم:** ${answers1.q1_name}\n` +
+            `**2. العمر:** ${answers1.q2_age}\n` +
+            `**3. اليوزر نيم:** ${answers1.q3_username}\n` +
+            `**4. الخبرة:** ${answers1.q4_experience.substring(0, 100)}...\n` +
+            `**5. الدافع:** ${answers1.q5_why.substring(0, 100)}...\n` +
+            `**6. المهارات:** ${answers2.q6_skills.substring(0, 100)}...\n\n` +
+            '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+            '# ✅ الإيجابيات\n' + (positives.join('\n') || 'مفيش') + '\n\n' +
+            '# ❌ الملاحظات\n' + (negatives.join('\n') || 'مفيش') + '\n\n' +
+            '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+            '> هنتواصل معاك في أقرب وقت إن شاء الله!'
+          )
+          .setColor(percentage >= 75 ? 0x2ECC71 : percentage >= 50 ? 0xF1C40F : 0xE74C3C)
+          .setTimestamp()
+          .setFooter({ text: '📝 تقديم للادارة' })
+        ], ephemeral: true });
+
+        // ── إرسال في قناة التقديمات ──
+        const applyCh = g.channels.cache.find(c => c.name.includes('تقديم-للادارة') && c.isTextBased());
+        if (applyCh) {
+          await applyCh.send({ embeds: [new EmbedBuilder()
+            .setTitle(`📝 تقديم جديد — ${answers1.q1_name}`)
+            .setDescription(
+              `**المتقدم:** <@${interaction.user.id}>\n` +
+              `**الاسم:** ${answers1.q1_name}\n` +
+              `**العمر:** ${answers1.q2_age}\n` +
+              `**النتيجة:** ${verdictEmoji} \`${percentage}%\` — ${verdictText}`
+            )
+            .setColor(percentage >= 75 ? 0x2ECC71 : percentage >= 50 ? 0xF1C40F : 0xE74C3C)
+            .setTimestamp()
+          ] });
+        }
+
+        // ── سجل ──
+        const applications = load('applications.json', []);
+        applications.push({ userId: interaction.user.id, name: answers1.q1_name, age: answers1.q2_age, username: answers1.q3_username, score: percentage, verdict: verdictText, answers: { ...answers1, ...answers2 }, positives, negatives, createdAt: Date.now() });
+        save('applications.json', applications);
+        return;
+      }
+
+      // ── قبول/رفض تقديم ──
+      if (interaction.customId.startsWith('apply_accept_') || interaction.customId.startsWith('apply_reject_')) {
+        const targetUserId = interaction.customId.replace('apply_accept_', '').replace('apply_reject_', '');
+        const isAccept = interaction.customId.startsWith('apply_accept_');
+        const g = interaction.guild;
+        const targetMember = await g.members.fetch(targetUserId).catch(() => null);
+        if (!targetMember) return interaction.reply({ content: '❌ العضو مش موجود في السيرفر', ephemeral: true });
+
+        if (isAccept) {
+          const trialRole = g.roles.cache.find(r => r.name.includes('Trial'));
+          if (trialRole) {
+            await targetMember.roles.add(trialRole).catch(() => {});
+          }
+          await interaction.update({ embeds: [new EmbedBuilder().setTitle('✅ تم القبول!').setDescription(`**المتقدم:** <@${targetUserId}>\n**بواسطة:** ${interaction.user}\n\n🎉 **تم قبوله في فترة التجربة!**`).setColor(0x2ECC71).setTimestamp()], components: [] });
+          try { await targetMember.send(`🎉 تم قبولك في فريق الستاف!\n\nأنت الآن في فترة التجربة — حظ سعيد! 🚀`).catch(() => {}); } catch {}
+        } else {
+          await interaction.update({ embeds: [new EmbedBuilder().setTitle('❌ تم الرفض').setDescription(`**المتقدم:** <@${targetUserId}>\n**بواسطة:** ${interaction.user}\n\nمرفوض — يقدر يقدّم تاني بعد أسبوع`).setColor(0xE74C3C).setTimestamp()], components: [] });
+          try { await targetMember.send(`❌ للأسف تم رفض طلبك.\n\nممكن تقدّم تاني بعد أسبوع — استمر! 💪`).catch(() => {}); } catch {}
+        }
         return;
       }
     }
@@ -1538,7 +1839,7 @@ client.on('interactionCreate', async (interaction) => {
 // ══════════════════════════════════════════════════════════════
 client.on('clientReady', () => {
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
-  client.user.setActivity('AI Services Shop', { type: ActivityType.Watching });
+  client.user.setActivity('AI Shop — متجر الذكاء الاصطناعي', { type: ActivityType.Watching });
 });
 
 client.on('guildMemberAdd', async (member) => {
