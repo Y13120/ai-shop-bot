@@ -1637,6 +1637,77 @@ const apiServer = http.createServer(async (req, res) => {
     if (req.method === 'GET' && p === '/api/bot') return jsonRes(res, 200, { id: client.user?.id, username: client.user?.username, avatar: client.user?.displayAvatarURL({ dynamic: true, size: 256 }) });
     if (req.method === 'GET' && p === '/api/guild') return jsonRes(res, 200, { id: guild.id, name: guild.name, icon: guild.iconURL({ dynamic: true, size: 256 }), memberCount: guild.memberCount, ownerId: guild.ownerId, boostCount: guild.premiumSubscriptionCount || 0, createdAt: guild.createdAt?.toISOString() });
     if (req.method === 'GET' && p === '/api/stats') return jsonRes(res, 200, { orders: getOrders().length, completed: getOrders().filter(o => o.status === 'completed').length, reviews: getReviews().length, services: getServices().filter(s => s.active).length, members: guild?.memberCount || 0, giveaways: getGiveaways().length });
+
+    // ── GET: Sales stats for dashboard charts ──
+    if (req.method === 'GET' && p === '/api/sales-stats') {
+      const orders = getOrders();
+      const shopOrders = orders.filter(o => o.source === 'shop');
+      const now = Date.now();
+      const DAY = 86400000;
+
+      // Revenue by day (last 30 days)
+      const dailyRevenue = [];
+      for (let i = 29; i >= 0; i--) {
+        const dayStart = now - (i + 1) * DAY;
+        const dayEnd = now - i * DAY;
+        const dayOrders = shopOrders.filter(o => o.createdAt >= dayStart && o.createdAt < dayEnd && (o.status === 'completed' || o.status === 'accepted'));
+        const revenue = dayOrders.reduce((sum, o) => sum + (o.servicePrice || 0) * (o.qty || 1), 0);
+        const date = new Date(dayEnd);
+        dailyRevenue.push({ date: `${date.getMonth() + 1}/${date.getDate()}`, revenue, count: dayOrders.length });
+      }
+
+      // Revenue by month (last 6 months)
+      const monthlyRevenue = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - i, 1);
+        const monthStart = d.getTime();
+        d.setMonth(d.getMonth() + 1);
+        const monthEnd = d.getTime();
+        const monthOrders = shopOrders.filter(o => o.createdAt >= monthStart && o.createdAt < monthEnd && (o.status === 'completed' || o.status === 'accepted'));
+        const revenue = monthOrders.reduce((sum, o) => sum + (o.servicePrice || 0) * (o.qty || 1), 0);
+        monthlyRevenue.push({ month: d.toLocaleDateString('ar', { month: 'short' }), revenue, count: monthOrders.length });
+      }
+
+      // Orders by status
+      const statusCounts = {};
+      shopOrders.forEach(o => { statusCounts[o.status] = (statusCounts[o.status] || 0) + 1; });
+
+      // Top services by revenue
+      const svcRevenue = {};
+      shopOrders.filter(o => o.status === 'completed' || o.status === 'accepted').forEach(o => {
+        const key = o.serviceName || 'Unknown';
+        if (!svcRevenue[key]) svcRevenue[key] = { name: key, emoji: o.serviceEmoji || '🛒', revenue: 0, count: 0 };
+        svcRevenue[key].revenue += (o.servicePrice || 0) * (o.qty || 1);
+        svcRevenue[key].count++;
+      });
+      const topServices = Object.values(svcRevenue).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+
+      // Total stats
+      const completedOrders = shopOrders.filter(o => o.status === 'completed');
+      const totalRevenue = shopOrders.reduce((sum, o) => sum + (o.servicePrice || 0) * (o.qty || 1), 0);
+      const completedRevenue = completedOrders.reduce((sum, o) => sum + (o.servicePrice || 0) * (o.qty || 1), 0);
+      const avgOrderValue = shopOrders.length ? Math.round(totalRevenue / shopOrders.length) : 0;
+      const todayStart = now - DAY;
+      const todayOrders = shopOrders.filter(o => o.createdAt >= todayStart);
+      const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.servicePrice || 0) * (o.qty || 1), 0);
+
+      return jsonRes(res, 200, {
+        dailyRevenue,
+        monthlyRevenue,
+        statusCounts,
+        topServices,
+        totals: {
+          totalOrders: shopOrders.length,
+          totalRevenue,
+          completedRevenue,
+          avgOrderValue,
+          todayOrders: todayOrders.length,
+          todayRevenue,
+          deliveryRate: shopOrders.length ? Math.round((completedOrders.length / shopOrders.length) * 100) : 0
+        }
+      });
+    }
     if (req.method === 'GET' && p === '/api/services') return jsonRes(res, 200, getServices());
     if (req.method === 'GET' && p === '/api/categories') return jsonRes(res, 200, getCategories());
     if (req.method === 'GET' && p === '/api/tickets') return jsonRes(res, 200, getOrders());

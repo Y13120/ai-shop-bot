@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Shop Bot — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -168,6 +169,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px;font-weigh
       <button onclick="showPage('services')" data-page="services">🛒 الخدمات</button>
       <button onclick="showPage('categories')" data-page="categories">📂 التصنيفات</button>
       <button onclick="showPage('members')" data-page="members">👥 الأعضاء</button>
+      <button onclick="showPage('sales')" data-page="sales">📊 المبيعات</button>
       <button onclick="showPage('announce')" data-page="announce">📢 إعلان</button>
       <button onclick="showPage('giveaways')" data-page="giveaways">🎉 السحبيات</button>
       <button onclick="showPage('settings')" data-page="settings">⚙️ الإعدادات</button>
@@ -178,6 +180,19 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:5px;font-weigh
         <div class="stats-grid" id="statsGrid"></div>
         <div class="card"><h3>🎫 أحدث التذاكر</h3><div id="recentTickets"><div class="empty">جاري التحميل...</div></div></div>
         <div class="card"><h3>⭐ أحدث التقييمات</h3><div id="recentReviews"><div class="empty">جاري التحميل...</div></div></div>
+      </div>
+      <!-- SALES -->
+      <div class="page" id="page-sales">
+        <div class="stats-grid" id="salesStatsGrid"></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="card"><h3>📈 الإيرادات — آخر 30 يوم</h3><div style="height:300px;position:relative"><canvas id="revenueChart"></canvas></div></div>
+          <div class="card"><h3>📋 حالة الطلبات</h3><div style="height:300px;position:relative"><canvas id="statusChart"></canvas></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="card"><h3>🏆 top الخدمات</h3><div style="height:300px;position:relative"><canvas id="topServicesChart"></canvas></div></div>
+          <div class="card"><h3>📅 الإيرادات الشهرية</h3><div style="height:300px;position:relative"><canvas id="monthlyChart"></canvas></div></div>
+        </div>
+        <div class="card"><h3>📦 أحدث طلبات المتجر</h3><div id="salesRecentOrders"><div class="empty">جاري التحميل...</div></div></div>
       </div>
       <!-- TICKETS -->
       <div class="page" id="page-tickets">
@@ -384,6 +399,7 @@ function showPage(name){
   if(name==='members')loadMembers();
   if(name==='giveaways')loadGiveaways();
   if(name==='settings')loadSettings();
+  if(name==='sales')loadSalesCharts();
 }
 
 // ── SHOP ORDERS ──
@@ -851,8 +867,68 @@ async function saveWelcomeConfig(){
   toast('✅ تم حفظ إعدادات الترحيب');
 }
 
+// ── SALES CHARTS ──
+let revenueChartInstance=null,statusChartInstance=null,topServicesChartInstance=null,monthlyChartInstance=null;
+const CREDITS_TO_EGP=0.6/1000000,EGP_TO_USD=1/50.5;
+function fmtCredits(n){return(n*CREDITS_TO_EGP*EGP_TO_USD).toFixed(1)+'$'}
+function fmtCreditsEgp(n){return Math.round(n*CREDITS_TO_EGP).toLocaleString()+' ج.م'}
+const chartDefaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7d8590',font:{size:11},padding:12},position:'bottom'},tooltip:{backgroundColor:'#161b22',titleColor:'#e6edf3',bodyColor:'#7d8590',borderColor:'rgba(88,166,255,.2)',borderWidth:1,cornerRadius:8,padding:10}},scales:{}};
+const axisDefaults={ticks:{color:'#7d8590',font:{size:10}},grid:{color:'rgba(88,166,255,.06)',drawBorder:false}};
+
+async function loadSalesCharts(){
+  const data=await api('api/sales-stats');
+  if(!data||!data.totals)return document.getElementById('salesStatsGrid').innerHTML='<div class="empty">خطأ في تحميل البيانات</div>';
+  const t=data.totals;
+
+  document.getElementById('salesStatsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="num">${fmtCreditsEgp(t.totalRevenue)}</div><div class="label">إجمالي الإيراد</div></div>
+    <div class="stat-card"><div class="stat-icon">📦</div><div class="num">${t.totalOrders}</div><div class="label">إجمالي الطلبات</div></div>
+    <div class="stat-card"><div class="stat-icon">📈</div><div class="num">${t.deliveryRate}%</div><div class="label">نسبة التسليم</div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><div class="num">${fmtCreditsEgp(t.avgOrderValue)}</div><div class="label">متوسط الطلب</div></div>
+    <div class="stat-card"><div class="stat-icon">🕐</div><div class="num">${t.todayOrders}</div><div class="label">طلبات اليوم</div></div>
+    <div class="stat-card"><div class="stat-icon">💵</div><div class="num">${fmtCreditsEgp(t.todayRevenue)}</div><div class="label">إيراد اليوم</div></div>
+  `;
+
+  // Revenue chart (30 days)
+  if(revenueChartInstance)revenueChartInstance.destroy();
+  const rCtx=document.getElementById('revenueChart').getContext('2d');
+  const rLabels=data.dailyRevenue.map(d=>d.date);
+  const rData=data.dailyRevenue.map(d=>d.revenue*CREDITS_TO_EGP*EGP_TO_USD);
+  const rDataEgp=data.dailyRevenue.map(d=>Math.round(d.revenue*CREDITS_TO_EGP));
+  revenueChartInstance=new Chart(rCtx,{type:'line',data:{labels:rLabels,datasets:[{label:'Revenue ($)',data:rData,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.1)',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:5}]},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false},tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>`$${ctx.parsed.y} (${rDataEgp[ctx.dataIndex]?.toLocaleString()||0} ج.م)`}}},scales:{x:axisDefaults,y:{...axisDefaults,ticks:{...axisDefaults.ticks,callback:v=>'$'+v}}}}});
+
+  // Status doughnut
+  if(statusChartInstance)statusChartInstance.destroy();
+  const sCtx=document.getElementById('statusChart').getContext('2d');
+  const sLabels=Object.keys(data.statusCounts).map(k=>({pending:'بانتظار القبول',accepted:'مقبول',completed:'مكتمل',closed:'مغلق',cancelled:'ملغي'}[k]||k));
+  const sData=Object.values(data.statusCounts);
+  const sColors=Object.keys(data.statusCounts).map(k=>({pending:'#f1c40f',accepted:'#3498db',completed:'#2ecc71',closed:'#e74c3c',cancelled:'#95a5a6'}[k]||'#888'));
+  statusChartInstance=new Chart(sCtx,{type:'doughnut',data:{labels:sLabels,datasets:[{data:sData,backgroundColor:sColors,borderColor:'#0d1117',borderWidth:3}]},options:{...chartDefaults,cutout:'65%',plugins:{...chartDefaults.plugins,legend:{position:'bottom',labels:{...chartDefaults.plugins.legend.labels,padding:8}}}}});
+
+  // Top services bar
+  if(topServicesChartInstance)topServicesChartInstance.destroy();
+  const tCtx=document.getElementById('topServicesChart').getContext('2d');
+  const tLabels=data.topServices.map(s=>s.emoji+' '+s.name.substring(0,20));
+  const tData=data.topServices.map(s=>s.revenue*CREDITS_TO_EGP*EGP_TO_USD);
+  topServicesChartInstance=new Chart(tCtx,{type:'bar',data:{labels:tLabels,datasets:[{label:'Revenue ($)',data:tData,backgroundColor:'rgba(88,166,255,.6)',borderColor:'#58a6ff',borderWidth:1,borderRadius:6}]},options:{...chartDefaults,indexAxis:'y',plugins:{...chartDefaults.plugins,legend:{display:false}},scales:{x:{...axisDefaults,ticks:{...axisDefaults.ticks,callback:v=>'$'+v}},y:{...axisDefaults,ticks:{...axisDefaults.ticks,font:{size:10}}}}}});
+
+  // Monthly chart
+  if(monthlyChartInstance)monthlyChartInstance.destroy();
+  const mCtx=document.getElementById('monthlyChart').getContext('2d');
+  const mLabels=data.monthlyRevenue.map(m=>m.month);
+  const mData=data.monthlyRevenue.map(m=>m.revenue*CREDITS_TO_EGP*EGP_TO_USD);
+  monthlyChartInstance=new Chart(mCtx,{type:'bar',data:{labels:mLabels,datasets:[{label:'Revenue ($)',data:mData,backgroundColor:['rgba(88,166,255,.6)','rgba(188,140,255,.6)','rgba(63,185,80,.6)','rgba(248,81,73,.6)','rgba(210,153,34,.6)','rgba(240,136,62,.6)'],borderRadius:8,borderSkipped:false}]},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}},scales:{x:axisDefaults,y:{...axisDefaults,ticks:{...axisDefaults.ticks,callback:v=>'$'+v}}}}});
+
+  // Recent orders table
+  const orders=await api('api/shop-orders');
+  const recent=Array.isArray(orders)?orders.slice(0,10):[];
+  const statusLabels2={pending:'⏳ بانتظار',accepted:'✅ مقبول',completed:'🏆 مكتمل',closed:'🔒 مغلق',cancelled:'❌ ملغي'};
+  const statusColors2={pending:'#f1c40f',accepted:'#3498db',completed:'#2ecc71',closed:'#e74c3c',cancelled:'#95a5a6'};
+  document.getElementById('salesRecentOrders').innerHTML=recent.length?`<table><tr><th>#</th><th>العميل</th><th>الخدمة</th><th>الكمية</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th></tr>${recent.map(o=>`<tr><td>${o.id}</td><td>${o.customerName||'—'}</td><td>${o.serviceEmoji||'🛒'} ${(o.serviceName||'').substring(0,25)}</td><td>${o.qty||1}</td><td>${fmtCreditsEgp(o.servicePrice*(o.qty||1))}</td><td><span style="color:${statusColors2[o.status]||'#888'};font-weight:700">${statusLabels2[o.status]||o.status}</span></td><td>${timeAgo(o.createdAt)}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد طلبات</div>';
+}
+
 // Auto-refresh
-setInterval(()=>{const p=document.querySelector('.sidebar button.active')?.dataset.page;if(p==='dashboard')loadAll();},30000);
+setInterval(()=>{const p=document.querySelector('.sidebar button.active')?.dataset.page;if(p==='dashboard')loadAll();if(p==='sales')loadSalesCharts();},30000);
 
 // ══════════════════════════════════════════════════════════════
 //  VISUAL EFFECTS

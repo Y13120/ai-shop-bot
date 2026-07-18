@@ -57,6 +57,13 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 #langToggle:hover{background:rgba(245,197,24,.2);box-shadow:0 0 15px rgba(245,197,24,.2)}
 [dir=rtl] #langToggle{margin-left:0;margin-right:auto}
 
+.search-bar{max-width:600px;margin:0 auto 30px;padding:0 20px;display:flex;gap:10px}
+.search-bar input{flex:1;padding:14px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;font-size:1em;transition:all .3s}
+.search-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(233,69,96,.1)}
+.search-bar input::placeholder{color:var(--muted)}
+.search-bar select{padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;font-size:.9em;cursor:pointer}
+.search-bar select:focus{outline:none;border-color:var(--accent)}
+
 .container{max-width:1200px;margin:0 auto;padding:40px 20px}
 .category-section{margin-bottom:50px;animation:fadeUp .5s ease both}
 .category-section:nth-child(2){animation-delay:.1s}
@@ -86,7 +93,87 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 .btn-order::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.15);border-radius:50%;transform:translate(-50%,-50%);transition:width .4s,height .4s}
 .btn-order:hover::after{width:200px;height:200px}
 .btn-order:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(233,69,96,.45)}
+.btn-cart{background:linear-gradient(135deg,var(--gold),#e67e22);color:#fff;border:none;padding:10px 18px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:.85em;font-weight:700;transition:all .3s;margin-left:8px}
+.btn-cart:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(245,197,24,.45)}
 
+/* CART SIDEBAR */
+.cart-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000}
+.cart-overlay.show{display:block}
+.cart-sidebar{position:fixed;top:0;right:0;width:420px;max-width:90vw;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:1001;transform:translateX(100%);transition:transform .35s ease;display:flex;flex-direction:column}
+[dir=rtl] .cart-sidebar{right:auto;left:0;transform:translateX(-100%);border-left:none;border-right:1px solid var(--border)}
+.cart-sidebar.show{transform:translateX(0)}
+.cart-header{padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cart-header h3{font-size:1.2em;font-weight:800;color:#fff}
+.cart-close{background:none;border:none;color:var(--muted);font-size:1.5em;cursor:pointer;transition:color .3s}
+.cart-close:hover{color:var(--accent)}
+.cart-items{flex:1;overflow-y:auto;padding:16px}
+.cart-empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.cart-empty .big{font-size:3em;margin-bottom:12px;opacity:.5}
+.cart-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:center}
+.cart-item .ci-emoji{font-size:1.8em;width:48px;height:48px;background:rgba(233,69,96,.08);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(233,69,96,.1);flex-shrink:0}
+.cart-item .ci-info{flex:1;min-width:0}
+.cart-item .ci-name{font-weight:700;font-size:.95em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-item .ci-price{color:var(--gold);font-weight:700;font-size:.9em;margin-top:2px}
+.cart-item .ci-qty{display:flex;align-items:center;gap:8px;margin-top:6px}
+.cart-item .ci-qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:#fff;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.cart-item .ci-qty button:hover{border-color:var(--accent);color:var(--accent)}
+.cart-item .ci-qty span{font-weight:700;font-size:.95em;min-width:20px;text-align:center}
+.cart-item .ci-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2em;transition:color .3s;padding:4px}
+.cart-item .ci-remove:hover{color:var(--accent)}
+.cart-footer{padding:20px;border-top:1px solid var(--border)}
+.cart-coupon{display:flex;gap:8px;margin-bottom:16px}
+.cart-coupon input{flex:1;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:inherit;font-size:.9em}
+.cart-coupon input:focus{outline:none;border-color:var(--gold)}
+.cart-coupon button{padding:12px 20px;background:var(--gold);color:#000;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;font-size:.9em;transition:all .2s}
+.cart-coupon button:hover{transform:scale(1.03)}
+.cart-summary{margin-bottom:16px}
+.cart-summary .cs-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.9em;color:var(--muted)}
+.cart-summary .cs-row.total{font-size:1.1em;font-weight:800;color:#fff;border-top:1px solid var(--border);padding-top:10px;margin-top:6px}
+.cart-summary .cs-row .discount{color:var(--green);font-weight:700}
+.cart-checkout{width:100%;padding:16px;background:linear-gradient(135deg,var(--green),#27ae60);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:1.05em;font-weight:800;cursor:pointer;transition:all .3s}
+.cart-checkout:hover{box-shadow:0 0 30px rgba(46,204,113,.4);transform:translateY(-1px)}
+.cart-checkout:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* CART BADGE */
+.cart-badge{position:relative}
+.cart-badge .badge-count{position:absolute;top:-8px;right:-8px;background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;font-size:.75em;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);display:none}
+.cart-badge .badge-count.show{display:flex}
+
+/* MY ORDERS PAGE */
+.page-section{display:none;animation:fadeUp .4s ease}
+.page-section.active{display:block}
+.orders-track{max-width:700px;margin:0 auto;padding:40px 20px}
+.orders-track h2{font-size:1.8em;font-weight:900;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.orders-track .subtitle{text-align:center;color:var(--muted);margin-bottom:30px}
+.orders-search{display:flex;gap:10px;margin-bottom:30px}
+.orders-search input{flex:1;padding:16px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;font-size:1.05em}
+.orders-search input:focus{outline:none;border-color:var(--accent)}
+.orders-search button{padding:16px 30px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:700;cursor:pointer;font-size:1em;transition:all .3s}
+.orders-search button:hover{box-shadow:0 0 25px rgba(233,69,96,.4)}
+.order-result{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;margin-top:20px}
+.order-result .or-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.order-result .or-id{font-size:1.3em;font-weight:800;color:var(--gold)}
+.order-result .or-status{padding:6px 16px;border-radius:20px;font-size:.85em;font-weight:700}
+.or-status.pending{background:rgba(245,197,24,.15);color:var(--gold);border:1px solid rgba(245,197,24,.3)}
+.or-status.progress{background:rgba(52,152,219,.15);color:var(--blue);border:1px solid rgba(52,152,219,.3)}
+.or-status.completed{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.or-status.closed{background:rgba(122,122,142,.15);color:var(--muted);border:1px solid rgba(122,122,142,.3)}
+.order-result .or-details{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.or-detail{background:var(--card2);border-radius:12px;padding:14px}
+.or-detail .label{font-size:.8em;color:var(--muted);margin-bottom:4px}
+.or-detail .value{font-weight:700;font-size:1em}
+.order-timeline{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.order-timeline h4{margin-bottom:12px;font-size:1em;color:var(--muted)}
+.timeline-steps{display:flex;flex-direction:column;gap:12px}
+.timeline-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:var(--card2)}
+.timeline-step.active{border:1px solid var(--green);background:rgba(46,204,113,.05)}
+.timeline-step .ts-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9em;flex-shrink:0}
+.timeline-step.active .ts-icon{background:rgba(46,204,113,.2);color:var(--green)}
+.timeline-step .ts-icon{background:rgba(122,122,142,.15);color:var(--muted)}
+.timeline-step .ts-text{font-size:.9em;font-weight:600}
+.timeline-step.active .ts-text{color:var(--green)}
+
+/* MODALS */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000;justify-content:center;align-items:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:modalIn .3s ease}
@@ -113,6 +200,7 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 .btn-cancel:hover{color:#fff;border-color:var(--accent)!important}
 
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:14px 32px;border-radius:14px;font-weight:700;font-size:.95em;z-index:2000;animation:toastIn .3s ease;box-shadow:0 8px 30px rgba(46,204,113,.3)}
+.toast.error{background:var(--accent)}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 .footer-bar{text-align:center;padding:50px 20px;color:var(--muted);border-top:1px solid var(--border);margin-top:50px}
@@ -134,6 +222,8 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
   .intro-grid{grid-template-columns:1fr}
   nav{padding:10px 12px;gap:6px}
   nav button{padding:7px 16px;font-size:.82em}
+  .cart-sidebar{width:100%}
+  .order-result .or-details{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -186,9 +276,33 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
 <!-- NAV -->
 <nav id="catNav"></nav>
 
-<!-- SERVICES -->
+<!-- SEARCH -->
+<div class="search-bar">
+  <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Search services..." oninput="renderServices()">
+  <select id="sortBy" onchange="renderServices()">
+    <option value="default" data-i18n="sortDefault">Sort by</option>
+    <option value="price-low" data-i18n="sortPriceLow">Price: Low to High</option>
+    <option value="price-high" data-i18n="sortPriceHigh">Price: High to Low</option>
+    <option value="name" data-i18n="sortName">Name A-Z</option>
+  </select>
+</div>
+
+<!-- SHOP CONTENT -->
 <div class="container" id="shopContent">
   <div class="empty"><div class="big-emoji">⏳</div><span data-i18n="loading">Loading services...</span></div>
+</div>
+
+<!-- MY ORDERS PAGE -->
+<div class="page-section" id="ordersPage">
+  <div class="orders-track">
+    <h2 data-i18n="ordersTitle">📦 Track Your Orders</h2>
+    <p class="subtitle" data-i18n="ordersSubtitle">Enter your Order ID to track the status</p>
+    <div class="orders-search">
+      <input type="text" id="orderSearchInput" data-i18n-placeholder="ordersSearchPh" placeholder="Enter Order ID (e.g. ABC123)" />
+      <button onclick="trackOrder()" data-i18n="ordersTrackBtn">Track</button>
+    </div>
+    <div id="orderResult"></div>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -197,6 +311,26 @@ nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)
   <p data-i18n="footerText">All services powered by latest AI technologies</p>
 </div>
 
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3 data-i18n="cartTitle">🛒 Shopping Cart</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty"><div class="big">🛒</div><span data-i18n="cartEmpty">Your cart is empty</span></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-coupon">
+      <input type="text" id="couponInput" data-i18n-placeholder="couponPh" placeholder="Coupon code" />
+      <button onclick="applyCoupon()" data-i18n="couponApply">Apply</button>
+    </div>
+    <div class="cart-summary" id="cartSummary"></div>
+    <button class="cart-checkout" onclick="checkoutCart()" data-i18n="cartCheckout">✅ Checkout</button>
+  </div>
 </div>
 
 <!-- ORDER MODAL -->
@@ -254,12 +388,14 @@ const T={
     introDesign:"Design & Photoshop",introDesignDesc:"Professional designs — logo, poster, banner, brand identity, background removal, and photo editing in the highest quality",
     introMontage:"Video Editing",introMontageDesc:"Professional editing for YouTube and TikTok — motion graphics, color correction, translation, and intro design",
     introCode:"Programming & Development",introCodeDesc:"Website & app development, Discord bots, automation scripts, API integration, and bug fixing",
-    navAll:"All",
+    navAll:"All",navOrders:"📦 My Orders",
+    searchPlaceholder:"Search services...",
+    sortDefault:"Sort by",sortPriceLow:"Price: Low to High",sortPriceHigh:"Price: High to Low",sortName:"Name A-Z",
     loading:"Loading services...",
     noServices:"No services available at the moment",
     noCategoryServices:"No services in this category",
     svcCount:"services",
-    orderBtn:"Order Now",
+    orderBtn:"Order Now",addToCartBtn:"🛒 Add",
     modalTitle:"📝 Order Service",
     formFullName:"Full Name *",formFullNamePh:"Your full name",
     formDiscord:"Discord Username *",formDiscordHelp:"Username without # — example: ahmed",
@@ -273,7 +409,15 @@ const T={
     errContact:"Please enter your contact details",
     sending:"⏳ Sending...",
     orderSuccess:"✅ Order submitted successfully! We'll contact you soon",
-    footerText:"All services powered by latest AI technologies"
+    footerText:"All services powered by latest AI technologies",
+    cartTitle:"🛒 Shopping Cart",cartEmpty:"Your cart is empty",
+    couponPh:"Coupon code",couponApply:"Apply",couponValid:"✅ Coupon applied!",couponInvalid:"❌ Invalid coupon",
+    cartCheckout:"✅ Checkout",cartSubtotal:"Subtotal",cartDiscount:"Discount",cartTotal:"Total",
+    addedToCart:"✅ Added to cart!",removedFromCart:"Removed from cart",
+    ordersTitle:"📦 Track Your Orders",ordersSubtitle:"Enter your Order ID to track the status",
+    ordersSearchPh:"Enter Order ID (e.g. ABC123)",ordersTrackBtn:"Track",
+    orderNotFound:"❌ Order not found",orderFound:"✅ Order found!",
+    stepOrdered:"Order Placed",stepAccepted:"Accepted",stepProgress:"In Progress",stepCompleted:"Completed",
   },
   ar:{
     heroBadge:"🔥 AI Shop — متجر الخدمات الرقمية",
@@ -285,12 +429,14 @@ const T={
     introDesign:"تصميم وفوتوشوب",introDesignDesc:"تصاميم احترافية — لوجو، بوستر، بانر، هوية بصرية، إزالة خلفية، وتعديل الصور بأعلى جودة",
     introMontage:"مونتاج وفيديو",introMontageDesc:"مونتاج احترافي لليوتيوب وتيك توك — موشن جرافيك، تصحيح ألوان، ترجمة، وتصميم إنтро",
     introCode:"برمجة وتطوير",introCodeDesc:"تطوير مواقع وتطبيقات، بوتات ديسكورد، سكربتات أتمتة، ربط API، وإصلاح المشاكل البرمجية",
-    navAll:"الكل",
+    navAll:"الكل",navOrders:"📦 طلباتي",
+    searchPlaceholder:"ابحث عن خدمة...",
+    sortDefault:"ترتيب حسب",sortPriceLow:"السعر: من الأقل للأعلى",sortPriceHigh:"السعر: من الأعلى للأقل",sortName:"الاسم",
     loading:"جاري تحميل الخدمات...",
     noServices:"لا توجد خدمات متاحة حالياً",
     noCategoryServices:"لا توجد خدمات في هذا التصنيف",
     svcCount:"خدمة",
-    orderBtn:"اطلب الآن",
+    orderBtn:"اطلب الآن",addToCartBtn:"🛒 أضف",
     modalTitle:"📝 اطلب الخدمة",
     formFullName:"الاسم الكامل *",formFullNamePh:"اسمك هنا",
     formDiscord:"اسم المستخدم في Discord *",formDiscordHelp:"اسم المستخدم بدون # — مثال: ahmed",
@@ -304,7 +450,15 @@ const T={
     errContact:"اكتب رقم أو يوزر طريقة التواصل",
     sending:"⏳ جاري الإرسال...",
     orderSuccess:"✅ تم إرسال طلبك بنجاح! سنتواصل معك قريباً",
-    footerText:"جميع الخدمات بتقنيات الذكاء الاصطناعي latest"
+    footerText:"جميع الخدمات بتقنيات الذكاء الاصطناعي latest",
+    cartTitle:"🛒 سلة المشتريات",cartEmpty:"سلتك فاضية",
+    couponPh:"كود الخصم",couponApply:"تطبيق",couponValid:"✅ تم تطبيق الكود!",couponInvalid:"❌ كود غير صالح",
+    cartCheckout:"✅ إتمام الشراء",cartSubtotal:"المجموع",cartDiscount:"الخصم",cartTotal:"الإجمالي",
+    addedToCart:"✅ تمت الإضافة للسلة!",removedFromCart:"تمت الإزالة من السلة",
+    ordersTitle:"📦 تتبع طلباتك",ordersSubtitle:"أدخل رقم الطلب لمتابعة الحالة",
+    ordersSearchPh:"أدخل رقم الطلب (مثال: ABC123)",ordersTrackBtn:"تتبع",
+    orderNotFound:"❌ الطلب غير موجود",orderFound:"✅ تم العثور على الطلب!",
+    stepOrdered:"تم الطلب",stepAccepted:"تم القبول",stepProgress:"جاري التنفيذ",stepCompleted:"تم التسليم",
   }
 };
 let lang=localStorage.getItem('shopLang')||'en';
@@ -324,6 +478,7 @@ function applyLang(){
   });
   buildNav();
   renderServices();
+  renderCart();
 }
 
 function toggleLang(){
@@ -338,6 +493,19 @@ const API=location.origin+'/';
 const CREDITS_TO_EGP=0.6/1000000;
 const EGP_TO_USD=1/50.5;
 let primaryCurrency='usd';
+
+// ── CART ──
+let cart=JSON.parse(localStorage.getItem('shopCart')||'[]');
+let appliedCoupon=null;
+
+// ── COUPONS (client-side validation) ──
+const COUPONS={
+  'WELCOME10':{type:'percent',value:10,description:'10% discount'},
+  'SAVE5':{type:'fixed',value:5,description:'$5 off'},
+  'AI2024':{type:'percent',value:15,description:'15% discount'},
+  'FIVESTAR':{type:'percent',value:20,description:'20% VIP discount'},
+  'NEWUSER':{type:'percent',value:10,description:'10% new user discount'},
+};
 
 async function api(u,opts={}){
   try{const r=await fetch(API+u,opts);return await r.json()}catch{return null}
@@ -360,6 +528,7 @@ function fmtPriceAll(credits){
   if(primaryCurrency==='credits')return`<span class="price-usd" style="color:var(--purple)">${cr}</span><span class="price-egp">${usd}</span><span class="price-credits">${egp}</span>`;
   return`<span class="price-usd">${usd}</span><span class="price-egp">${egp}</span><span class="price-credits">${cr}</span>`;
 }
+function fmtUSDFixed(credits){return'$'+(credits*CREDITS_TO_EGP*EGP_TO_USD).toFixed(2)}
 
 async function init(){
   allServices=await api('api/services');
@@ -399,6 +568,7 @@ function buildNav(){
   allCategories.forEach(c=>{
     if(grouped[c.id])html+=`<button onclick="filterCat('${c.id}',this)">${c.emoji} ${lang==='en'?(c.nameEn||c.name):c.name}</button>`;
   });
+  html+=`<button onclick="showOrdersPage()" class="cart-badge"><span class="badge-count ${cart.length?'show':''}" id="cartBadge">${cart.length}</span>${t.navOrders}</button>`;
   html+=`<button id="langToggle" onclick="toggleLang()">${lang==='en'?'🇸🇦 عربي':'🇺🇸 English'}</button>`;
   nav.innerHTML=html;
 }
@@ -408,7 +578,15 @@ function filterCat(cat,btn){
   currentFilter=cat;
   document.querySelectorAll('nav button:not(#langToggle)').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  document.getElementById('shopContent').style.display='block';
+  document.getElementById('ordersPage').classList.remove('active');
   renderServices();
+}
+
+function showOrdersPage(){
+  document.getElementById('shopContent').style.display='none';
+  document.getElementById('ordersPage').classList.add('active');
+  document.querySelectorAll('nav button:not(#langToggle)').forEach(b=>b.classList.remove('active'));
 }
 
 function renderServices(){
@@ -416,8 +594,24 @@ function renderServices(){
   const active=allServices.filter(s=>s.active);
   const t=T[lang];
   if(!active.length){container.innerHTML=`<div class="empty"><div class="big-emoji">📭</div>${t.noServices}</div>`;return;}
+
+  // Search
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  let filtered=active;
+  if(q)filtered=active.filter(s=>{
+    const name=(s.nameEn||s.name||'').toLowerCase();
+    const desc=(s.descriptionEn||s.description||'').toLowerCase();
+    return name.includes(q)||desc.includes(q)||s.id.toString().includes(q);
+  });
+
+  // Sort
+  const sort=document.getElementById('sortBy').value;
+  if(sort==='price-low')filtered.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-high')filtered.sort((a,b)=>b.price-a.price);
+  else if(sort==='name')filtered.sort((a,b)=>(a.nameEn||a.name||'').localeCompare(b.nameEn||b.name||''));
+
   const grouped={};
-  active.forEach(s=>{const c=s.category||'other';if(!grouped[c])grouped[c]=[];grouped[c].push(s)});
+  filtered.forEach(s=>{const c=s.category||'other';if(!grouped[c])grouped[c]=[];grouped[c].push(s)});
   let html='';
   const catsToShow=currentFilter==='all'?allCategories:allCategories.filter(c=>c.id===currentFilter);
   catsToShow.forEach(cat=>{
@@ -433,7 +627,7 @@ function renderServices(){
       <div class="grid">${svcs.map(s=>{
         const sName=lang==='en'?(s.nameEn||s.name):s.name;
         const sDesc=lang==='en'?(s.descriptionEn||s.description):s.description;
-        const cardData={...s,name:sName,description:sDesc};
+        const cardData={id:s.id,name:s.name,nameEn:s.nameEn,description:s.description,descriptionEn:s.descriptionEn,price:s.price,emoji:s.emoji,category:s.category};
         return`
         <div class="card">
           <div class="card-top"></div>
@@ -443,7 +637,10 @@ function renderServices(){
             <div class="desc">${sDesc||''}</div>
             <div class="card-footer">
               <div class="price">${fmtPriceAll(s.price)}</div>
-              <button class="btn-order" onclick='openOrder(${JSON.stringify(cardData).replace(/'/g,"&#39;")})'>${t.orderBtn}</button>
+              <div style="display:flex;gap:0">
+                <button class="btn-cart" onclick='addToCart(${JSON.stringify(cardData).replace(/'/g,"&#39;")})'>${t.addToCartBtn}</button>
+                <button class="btn-order" onclick='openOrder(${JSON.stringify(cardData).replace(/'/g,"&#39;")})'>${t.orderBtn}</button>
+              </div>
             </div>
           </div>
         </div>`}).join('')}
@@ -454,6 +651,148 @@ function renderServices(){
   container.innerHTML=html;
 }
 
+// ── CART SYSTEM ──
+function addToCart(s){
+  const existing=cart.find(c=>c.id===s.id);
+  if(existing){existing.qty++}
+  else{cart.push({...s,qty:1})}
+  saveCart();
+  renderCart();
+  toast(T[lang].addedToCart);
+}
+
+function removeFromCart(id){
+  cart=cart.filter(c=>c.id!==id);
+  saveCart();
+  renderCart();
+}
+
+function updateCartQty(id,delta){
+  const item=cart.find(c=>c.id===id);
+  if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0)removeFromCart(id);
+  else{saveCart();renderCart()}
+}
+
+function saveCart(){
+  localStorage.setItem('shopCart',JSON.stringify(cart));
+  const badge=document.getElementById('cartBadge');
+  if(badge){badge.textContent=cart.length;badge.classList.toggle('show',cart.length>0)}
+}
+
+function renderCart(){
+  const container=document.getElementById('cartItems');
+  const footer=document.getElementById('cartFooter');
+  const t=T[lang];
+  if(!cart.length){container.innerHTML=`<div class="cart-empty"><div class="big">🛒</div><span>${t.cartEmpty}</span></div>`;footer.style.display='none';return;}
+  footer.style.display='block';
+  container.innerHTML=cart.map(item=>{
+    const name=lang==='en'?(item.nameEn||item.name):item.name;
+    return`<div class="cart-item">
+      <div class="ci-emoji">${item.emoji||'🛒'}</div>
+      <div class="ci-info">
+        <div class="ci-name">${name}</div>
+        <div class="ci-price">${fmtUSDFixed(item.price)}</div>
+        <div class="ci-qty">
+          <button onclick="updateCartQty(${item.id},-1)">−</button>
+          <span>${item.qty}</span>
+          <button onclick="updateCartQty(${item.id},1)">+</button>
+        </div>
+      </div>
+      <button class="ci-remove" onclick="removeFromCart(${item.id})">🗑️</button>
+    </div>`;
+  }).join('');
+  updateCartSummary();
+}
+
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  const t=T[lang];
+  if(COUPONS[code]){appliedCoupon={...COUPONS[code],code};toast(t.couponValid);updateCartSummary()}
+  else{appliedCoupon=null;toast(t.couponInvalid);updateCartSummary()}
+}
+
+function getCartTotal(){
+  return cart.reduce((sum,item)=>sum+(item.price*item.qty),0);
+}
+
+function updateCartSummary(){
+  const t=T[lang];
+  const subtotal=getCartTotal();
+  let discount=0;
+  if(appliedCoupon){
+    if(appliedCoupon.type==='percent')discount=Math.round(subtotal*appliedCoupon.value/100);
+    else discount=Math.round(appliedCoupon.value*1000000/0.6*50.5);
+  }
+  const total=subtotal-discount;
+  document.getElementById('cartSummary').innerHTML=`
+    <div class="cs-row"><span>${t.cartSubtotal}</span><span>${fmtUSDFixed(subtotal)}</span></div>
+    ${appliedCoupon?`<div class="cs-row"><span>${t.cartDiscount} (${appliedCoupon.code})</span><span class="discount">-${fmtUSDFixed(discount)}</span></div>`:''}
+    <div class="cs-row total"><span>${t.cartTotal}</span><span>${fmtUSDFixed(total)}</span></div>
+  `;
+}
+
+function openCart(){document.getElementById('cartOverlay').classList.add('show');document.getElementById('cartSidebar').classList.add('show')}
+function closeCart(){document.getElementById('cartOverlay').classList.remove('show');document.getElementById('cartSidebar').classList.remove('show')}
+
+async function checkoutCart(){
+  if(!cart.length)return;
+  const t=T[lang];
+  // Submit each item as a separate order
+  let successCount=0;
+  for(const item of cart){
+    const r=await api('api/shop/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serviceId:item.id,name:'Cart Order',discord:'cart-checkout',contactType:'discord',contact:'cart',qty:item.qty,notes:appliedCoupon?`Coupon: ${appliedCoupon.code}`:''})});
+    if(r&&!r.error)successCount++;
+  }
+  cart=[];appliedCoupon=null;saveCart();renderCart();closeCart();
+  toast(successCount?`✅ ${successCount} orders submitted!`:'❌ Error submitting orders');
+}
+
+// ── ORDER TRACKING ──
+async function trackOrder(){
+  const id=document.getElementById('orderSearchInput').value.trim();
+  if(!id)return;
+  const t=T[lang];
+  const container=document.getElementById('orderResult');
+  container.innerHTML=`<div class="empty"><div class="big-emoji">⏳</div>${lang==='ar'?'جاري البحث...':'Searching...'}</div>`;
+
+  // Search in local orders from API
+  const orders=await api('api/orders');
+  if(!orders||!Array.isArray(orders)){container.innerHTML=`<div class="empty"><div class="big-emoji">❌</div>${t.orderNotFound}</div>`;return}
+
+  const order=orders.find(o=>String(o.id)===id||String(o.id).toLowerCase()===id.toLowerCase());
+  if(!order){container.innerHTML=`<div class="empty"><div class="big-emoji">🔍</div>${t.orderNotFound}</div>`;return}
+
+  const statusMap={pending:'pending',open:'pending',progress:'progress',completed:'completed',closed:'closed'};
+  const statusLabel={pending:lang==='ar'?'⏳ بانتظار القبول':'⏳ Pending',progress:lang==='ar'?'🔄 قيد التنفيذ':'🔄 In Progress',completed:lang==='ar'?'✅ مكتمل':'✅ Completed',closed:lang==='ar'?'🔒 مغلق':'🔒 Closed'};
+  const steps=['pending','progress','completed'];
+  const currentStep=order.status==='closed'?-1:steps.indexOf(order.status);
+  const serviceName=order.serviceName||'Service';
+
+  container.innerHTML=`<div class="order-result">
+    <div class="or-header">
+      <div class="or-id">#${order.id}</div>
+      <div class="or-status ${statusMap[order.status]||'pending'}">${statusLabel[order.status]||order.status}</div>
+    </div>
+    <div class="or-details">
+      <div class="or-detail"><div class="label">${lang==='ar'?'الخدمة':'Service'}</div><div class="value">${order.serviceEmoji||'🛒'} ${serviceName}</div></div>
+      <div class="or-detail"><div class="label">${lang==='ar'?'المستخدم':'User'}</div><div class="value">${order.username||'N/A'}</div></div>
+      <div class="or-detail"><div class="label">${lang==='ar'?'تاريخ الطلب':'Order Date'}</div><div class="value">${order.createdAt?new Date(order.createdAt).toLocaleDateString():'N/A'}</div></div>
+      <div class="or-detail"><div class="label">${lang==='ar'?'الحالة':'Status'}</div><div class="value">${statusLabel[order.status]||order.status}</div></div>
+    </div>
+    <div class="order-timeline">
+      <h4>${lang==='ar'?'تتبع الطلب':'Order Timeline'}</h4>
+      <div class="timeline-steps">
+        <div class="timeline-step ${currentStep>=0?'active':''}"><div class="ts-icon">📋</div><div class="ts-text">${t.stepOrdered}</div></div>
+        <div class="timeline-step ${currentStep>=1?'active':''}"><div class="ts-icon">🔄</div><div class="ts-text">${t.stepProgress}</div></div>
+        <div class="timeline-step ${currentStep>=2?'active':''}"><div class="ts-icon">✅</div><div class="ts-text">${t.stepCompleted}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── MODAL ──
 function openOrder(s){
   selectedService=s;
   const t=T[lang];
