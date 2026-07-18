@@ -1769,7 +1769,7 @@ client.on('interactionCreate', async (interaction) => {
             '# ✅ الإيجابيات\n' + (positives.join('\n') || 'مفيش') + '\n\n' +
             '# ❌ الملاحظات\n' + (negatives.join('\n') || 'مفيش') + '\n\n' +
             '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-            هنتواصل معاك في أقرب وقت إن شاء الله!'
+            '> هنتواصل معاك في أقرب وقت إن شاء الله!'
           )
           .setColor(percentage >= 75 ? 0x2ECC71 : percentage >= 50 ? 0xF1C40F : 0xE74C3C)
           .setTimestamp()
