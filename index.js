@@ -529,7 +529,7 @@ async function cmdSetup(interaction) {
         '# هتقيّم إزاي؟\n\n' +
         'استخدم الأمر `/review` مع رقم الخدمة والتقييم بتاعك\n\n' +
         '# مثال\n\n' +
-        `/review service:1 rating:5 comment:خدمة تحفة!`\n\n' +
+        '`/review service:1 rating:5 comment:خدمة تحفة!`\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '# 📊 شوف التقييمات\n\n' +
         'استخدم `/leaderboard` عشان تعرف أحسن الزبائن\n' +
@@ -659,25 +659,25 @@ async function cmdSetup(interaction) {
         '# 🤖 أوامر البوت\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '# 🛒 المتجر والطلبات\n' +
-        `/services` — شوف قائمة الخدمات\n' +
-        `/order service:رقم` — اطلب خدمة\n' +
-        `/support` — افتح تذكرة دعم فني\n' +
-        `/close` — اقفل التذكرة اللي مفتوحة\n\n' +
+        '`/services` — شوف قائمة الخدمات\n' +
+        '`/order service:رقم` — اطلب خدمة\n' +
+        '`/support` — افتح تذكرة دعم فني\n' +
+        '`/close` — اقفل التذكرة اللي مفتوحة\n\n' +
         '# ⭐ التقييمات\n' +
-        `/review service:رقم rating:1-5` — قيّم خدمة\n' +
-        `/leaderboard` — ترتيب الزبائن\n' +
-        `/top-customers` — أحسن الزبائن\n\n' +
+        '`/review service:رقم rating:1-5` — قيّم خدمة\n' +
+        '`/leaderboard` — ترتيب الزبائن\n' +
+        '`/top-customers` — أحسن الزبائن\n\n' +
         '# 🛡️ الإدارة (للستاف بس)\n' +
-        `/ban` — احظر عضو\n' +
-        `/kick` — اطرد عضو\n' +
-        `/mute` — كتم عضو\n' +
-        `/warn` — حدّر عضو\n' +
-        `/purge` — امسح رسائل\n\n' +
+        '`/ban` — احظر عضو\n' +
+        '`/kick` — اطرد عضو\n' +
+        '`/mute` — كتم عضو\n' +
+        '`/warn` — حدّر عضو\n' +
+        '`/purge` — امسح رسائل\n\n' +
         '# 📌 معلومات\n' +
-        `/server-info` — معلومات السيرفر\n' +
-        `/user-info` — معلومات عضو\n' +
-        `/stats` — إحصائيات البوت\n' +
-        `/ticket-stats` — إحصائيات التذاكر\n\n' +
+        '`/server-info` — معلومات السيرفر\n' +
+        '`/user-info` — معلومات عضو\n' +
+        '`/stats` — إحصائيات البوت\n' +
+        '`/ticket-stats` — إحصائيات التذاكر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x7D8590)
@@ -911,16 +911,16 @@ async function cmdSetup(interaction) {
         '🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '# 📋 أوامر الإدارة\n\n' +
-        `/setup` — جهّز السيرفر كلّه\n' +
-        `/add-service` —ضيف خدمة جديدة\n' +
-        `/edit-service` —عدّل خدمة\n' +
-        `/remove-service` — امسح خدمة\n' +
-        `/add-category` —ضيف تصنيف\n' +
-        `/announce` —ابعت إعلان\n' +
-        `/giveaway` —عمل سحبية\n' +
-        `/auto-role add` —ضيف رول تلقائي\n' +
-        `/set-logs` —حدّد قناة السجلات\n' +
-        `/automod` —إعداد الحماية\n\n' +
+        '`/setup` — جهّز السيرفر كلّه\n' +
+        '`/add-service` —ضيف خدمة جديدة\n' +
+        '`/edit-service` —عدّل خدمة\n' +
+        '`/remove-service` — امسح خدمة\n' +
+        '`/add-category` —ضيف تصنيف\n' +
+        '`/announce` —ابعت إعلان\n' +
+        '`/giveaway` —عمل سحبية\n' +
+        '`/auto-role add` —ضيف رول تلقائي\n' +
+        '`/set-logs` —حدّد قناة السجلات\n' +
+        '`/automod` —إعداد الحماية\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '# 🔒 القناة دي مقيدة للمالك والادمن بس\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
