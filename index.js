@@ -35,7 +35,7 @@ const BANNER_THEMES = {
   'لوحة-التحكم':     { emoji: '🔧', c1: '#da3633', c2: '#f85149', accent: '#ff7b72' },
 };
 
-function generateBanner(channelName, emoji, color1, color2, accent) {
+function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = false) {
   if (!Canvas) return null;
   const c = Canvas.createCanvas(BANNER_W, BANNER_H);
   const ctx = c.getContext('2d');
@@ -104,31 +104,41 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   }
   ctx.restore();
 
-  ctx.font = '56px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
+  if (emojiOnly) {
+    ctx.font = '80px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = color2 + '30';
+    ctx.shadowBlur = 40;
+    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2);
+    ctx.shadowBlur = 0;
+  } else {
+    ctx.font = '56px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
 
-  ctx.font = "bold 42px sans-serif";
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = color2 + '40';
-  ctx.shadowBlur = 30;
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(channelName, BANNER_W / 2, BANNER_H / 2 + 30);
-  ctx.shadowBlur = 0;
+    ctx.font = "bold 42px sans-serif";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = color2 + '40';
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(channelName, BANNER_W / 2, BANNER_H / 2 + 30);
+    ctx.shadowBlur = 0;
 
-  const subGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
-  subGrad.addColorStop(0, 'transparent');
-  subGrad.addColorStop(0.5, accent + '50');
-  subGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = subGrad;
-  ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
+    const subGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
+    subGrad.addColorStop(0, 'transparent');
+    subGrad.addColorStop(0.5, accent + '50');
+    subGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = subGrad;
+    ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
 
-  ctx.font = "600 13px sans-serif";
-  ctx.fillStyle = '#6b7394';
-  ctx.textAlign = 'center';
-  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
+    ctx.font = "600 13px sans-serif";
+    ctx.fillStyle = '#6b7394';
+    ctx.textAlign = 'center';
+    ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
+  }
 
   const botGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
   botGrad.addColorStop(0, 'transparent');
@@ -149,12 +159,12 @@ function getBannerForChannel(channelName) {
   return null;
 }
 
-async function sendBannerToChannel(channel) {
+async function sendBannerToChannel(channel, emojiOnly = false) {
   if (!Canvas) return false;
   const theme = getBannerForChannel(channel.name);
   if (!theme) return false;
   try {
-    const buf = generateBanner(channel.name.replace(/[^\w\u0600-\u06FF-]/g, '').replace(/-/g, ' '), theme.emoji, theme.c1, theme.c2, theme.accent);
+    const buf = generateBanner(channel.name.replace(/[^\w\u0600-\u06FF-]/g, '').replace(/-/g, ' '), theme.emoji, theme.c1, theme.c2, theme.accent, emojiOnly);
     if (!buf) return false;
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
@@ -603,11 +613,16 @@ async function cmdSetup(interaction) {
   try { await g.channels.fetch(); } catch {}
 
   if (Canvas) {
+    const skipChannels = ['القواعد', 'الخدمات'];
     for (const [, ch] of g.channels.cache) {
-      if (ch.isTextBased() && ch.name.includes('القواعد')) {
-        await sendBannerToChannel(ch);
-        await sleep(800);
+      if (!ch.isTextBased()) continue;
+      const isSpecial = skipChannels.some(k => ch.name.includes(k));
+      if (isSpecial) {
+        await sendBannerToChannel(ch, false);
+      } else {
+        await sendBannerToChannel(ch, true);
       }
+      await sleep(800);
     }
   }
 
@@ -622,7 +637,7 @@ async function cmdSetup(interaction) {
     saveCategories(DEFAULT_CATEGORIES);
   }
 
-  // ── 🛒 الخدمات — Embed + Select Menu + زر طلب ──
+  // ── 🛒 الخدمات — Embed + Select Menu (تصنيفات أولاً) ──
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
     const e = new EmbedBuilder()
@@ -641,10 +656,11 @@ async function cmdSetup(interaction) {
         '## 🛠️ تقدر تطلب أي خدمة خاصة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 عايز تطلب إزاي؟\n\n' +
-        '**`1️⃣`** اختار الخدمة من القائمة اللي تحت\n\n' +
-        '**`2️⃣`** شوف التفاصيل والسعر بتاعها\n\n' +
-        '**`3️⃣`** اضغط على زر **🛒 اطلب دلوقتي**\n\n' +
-        '**`4️⃣`** هنفتحلك تذكرة وننجزلك طلبك\n\n' +
+        '**`1️⃣`** اختار التصنيف من القائمة اللي تحت\n\n' +
+        '**`2️⃣`** اختار الخدمة اللي عايزها من التصنيف\n\n' +
+        '**`3️⃣`** شوف التفاصيل والسعر\n\n' +
+        '**`4️⃣`** اضغط على زر **🛒 اطلب دلوقتي**\n\n' +
+        '**`5️⃣`** هنفتحلك تذكرة وننجزلك طلبك\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 🔗 زور المتجر بتاعنا أونلاين\n\n' +
         '**🛒 [المتجر بتاعنا — اطلب أونلاين](https://ai-shop-bot-production.up.railway.app/shop)**\n\n' +
@@ -664,15 +680,20 @@ async function cmdSetup(interaction) {
       .setThumbnail(g.iconURL({ dynamic: true }))
       .setTimestamp()
       .setFooter({ text: `🛍️ ${g.name} — متجر الذكاء الاصطناعي`, iconURL: g.iconURL({ dynamic: true }) });
-    const select = new StringSelectMenuBuilder()
-      .setCustomId('services_menu')
-      .setPlaceholder('🛒 اختار الخدمة اللي عايزها...')
-      .addOptions(getServices().filter(s => s.active).slice(0, 25).map(s => ({
-        label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
-        description: `${fmt(s.price)} كريديت — ${s.category}`.substring(0, 100),
-        value: String(s.id),
-      })));
-    const row1 = new ActionRowBuilder().addComponents(select);
+    const cats = getCategories();
+    const services = getServices();
+    const catSelect = new StringSelectMenuBuilder()
+      .setCustomId('category_menu')
+      .setPlaceholder('📂 اختار التصنيف الأول...')
+      .addOptions(cats.map(c => {
+        const count = services.filter(s => s.category === c.id && s.active).length;
+        return {
+          label: `${c.emoji} ${c.name}`.substring(0, 100),
+          description: `${count} خدمة متاحة`.substring(0, 100),
+          value: c.id,
+        };
+      }));
+    const row1 = new ActionRowBuilder().addComponents(catSelect);
     const row2 = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Secondary),
       new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop'),
@@ -703,77 +724,6 @@ async function cmdSetup(interaction) {
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x2ECC71)
-      .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── ⭐ التقييمات ──
-  const reviewCh = g.channels.cache.find(c => c.name.includes('التقييمات') && c.isTextBased());
-  if (reviewCh) {
-    await reviewCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ ⭐ تقييمات العملاء ━━━━━━━━')
-      .setDescription(
-        '## ⭐ تقييمات العملاء\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## هتقيّم إزاي؟\n\n' +
-        'استخدم الأمر `/review` مع رقم الخدمة والتقييم بتاعك\n\n' +
-        '## مثال\n\n' +
-        '`/review service:1 rating:5 comment:خدمة تحفة!`\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📊 شوف التقييمات\n\n' +
-        'استخدم `/leaderboard` عشان تعرف أحسن الزبائن\n' +
-        'استخدم `/stats` عشان تشوف إحصائيات البوت\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0xF1C40F)
-      .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 💬 التواصل مع الستاف ──
-  const contactCh = g.channels.cache.find(c => c.name.includes('التواصل-مع-الستاف') && c.isTextBased());
-  if (contactCh) {
-    await contactCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 💬 التواصل مع الستاف ━━━━━━━━')
-      .setDescription(
-        '## 💬 التواصل مع الستاف\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🎫 فتح تذكرة\n' +
-        'روح قناة **🎫・فتح-تذكرة** واضغط على زر الدعم الفني\n\n' +
-        '## 🛒 طلب خدمة\n' +
-        'روح قناة **🛒・الخدمات** واختار الخدمة اللي عايزها\n\n' +
-        '## 💬 الشات العام\n' +
-        'تقدر تكتب أي سؤال في قناة **💬・العامة**\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⏰ أوقات الاستجابة\n\n' +
-        '**الدعم الفني:** من 5 لـ 15 دقيقة\n' +
-        '**الطلبات:** من 5 لـ 30 دقيقة\n' +
-        '**الاستفسارات:** خلال ساعة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x58A6FF)
-      .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 📣 الإعلانات ──
-  const annCh = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.isTextBased());
-  if (annCh) {
-    await annCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📣 الإعلانات ━━━━━━━━')
-      .setDescription(
-        '## 📣 الإعلانات\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## شوف آخر الأخبار والإعلانات هنا\n\n' +
-        '🔔 شغّل الإشعارات عشان متفوتكش أي حاجة\n' +
-        '📢 الإعلانات فيها العروض والخدمات الجديدة\n' +
-        '🎉 مسابقات وسحبية أحياناً\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x9B59B6)
       .setTimestamp()
       .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
     ] }).catch(() => {});
@@ -817,114 +767,6 @@ async function cmdSetup(interaction) {
     ] }).catch(() => {});
   }
 
-  // ── 💬 العامة ──
-  const generalCh = g.channels.cache.find(c => c.name.includes('العامة') && c.isTextBased());
-  if (generalCh) {
-    await generalCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 💬 الشات العام ━━━━━━━━')
-      .setDescription(
-        '## 💬 الشات العام\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## أهلاً بيك! 🎉\n\n' +
-        '💬 تكلّم مع الأعضاء وشارك أفكارك\n' +
-        '🤝 تعرّف على الأعضاء الجدد\n' +
-        '❓ اسأل أي سؤال عن الخدمات\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 خلّي بالك\n\n' +
-        'احترم الكل · ممنوع السبام · ممنوع المحتوى المخالف\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x58A6FF)
-      .setTimestamp()
-      .setFooter({ text: `💬 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 🤖 اوامر البوت ──
-  const botCmdCh = g.channels.cache.find(c => c.name.includes('اوامر-البوت') && c.isTextBased());
-  if (botCmdCh) {
-    await botCmdCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 🤖 أوامر البوت ━━━━━━━━')
-      .setDescription(
-        '## 🤖 أوامر البوت\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🛒 المتجر والطلبات\n' +
-        '`/services` — شوف قائمة الخدمات\n' +
-        '`/order service:رقم` — اطلب خدمة\n' +
-        '`/support` — افتح تذكرة دعم فني\n' +
-        '`/close` — اقفل التذكرة اللي مفتوحة\n\n' +
-        '## ⭐ التقييمات\n' +
-        '`/review service:رقم rating:1-5` — قيّم خدمة\n' +
-        '`/leaderboard` — ترتيب الزبائن\n' +
-        '`/top-customers` — أحسن الزبائن\n\n' +
-        '## 🛡️ الإدارة (للستاف بس)\n' +
-        '`/ban` — احظر عضو\n' +
-        '`/kick` — اطرد عضو\n' +
-        '`/mute` — كتم عضو\n' +
-        '`/warn` — حدّر عضو\n' +
-        '`/purge` — امسح رسائل\n\n' +
-        '## 📌 معلومات\n' +
-        '`/server-info` — معلومات السيرفر\n' +
-        '`/user-info` — معلومات عضو\n' +
-        '`/stats` — إحصائيات البوت\n' +
-        '`/ticket-stats` — إحصائيات التذاكر\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x7D8590)
-      .setTimestamp()
-      .setFooter({ text: `🤖 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 📊 حالة السيرفر ──
-  const statusCh = g.channels.cache.find(c => c.name.includes('حالة-السيرفر') && c.isTextBased());
-  if (statusCh) {
-    const memberCount = g.memberCount || 0;
-    await statusCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📊 حالة السيرفر ━━━━━━━━')
-      .setDescription(
-        `## 📊 حالة السيرفر\n\n` +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        `## إحصائيات السيرفر الحية\n\n` +
-        `👥 **عدد الأعضاء:** \`${memberCount}\`\n` +
-        `📢 **عدد القنوات:** \`${g.channels.cache.size}\`\n` +
-        `🏷️ **عدد الرولات:** \`${g.roles.cache.size}\`\n` +
-        `🎫 **التذاكر النشطة:** بتتحدث تلقائياً\n\n` +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '🔄 القناة دي بتتحدث تلقائياً كل فترة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x9B59B6)
-      .setTimestamp()
-      .setFooter({ text: `📊 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 👋 الترحيب ──
-  const welcomeCh = g.channels.cache.find(c => c.name.includes('الترحيب') && c.isTextBased());
-  if (welcomeCh) {
-    await welcomeCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 👋 أهلاً بيك ━━━━━━━━')
-      .setDescription(
-        '## 👋 أهلاً بيك\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## هنا هتستقبل ترحيب كل عضو جديد!\n\n' +
-        '🎉 **الترحيب التلقائي** — كل عضو جديد هياخد رسالة ترحيب\n' +
-        '🤖 **الرول التلقائي** — الأعضاء الجدد ياخدوا رول أوتوماتيك\n' +
-        '📢 **معلومات السيرفر** — روابط مهمة للأعضاء الجدد\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔗 روابط مهمة\n\n' +
-        '🛒 [المتجر](https://ai-shop-bot-production.up.railway.app/shop)\n' +
-        '📋 [القواعد](#)\n' +
-        '🛠️ [الدعم الفني](#)\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x2ECC71)
-      .setTimestamp()
-      .setFooter({ text: `👋 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
   // ── 🎫 فتح تذكرة ──
   const ticketCh = g.channels.cache.find(c => c.name.includes('فتح-تذكرة') && c.isTextBased());
   if (ticketCh) {
@@ -953,83 +795,6 @@ async function cmdSetup(interaction) {
       .setTimestamp()
       .setFooter({ text: `🎫 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
     ], components: [new ActionRowBuilder().addComponents(btn2, btnShop)] }).catch(() => {});
-  }
-
-  // ── 📦 التتسليمات ──
-  const deliveryCh = g.channels.cache.find(c => c.name.includes('التسليمات') && c.isTextBased());
-  if (deliveryCh) {
-    await deliveryCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📦 التوصيل والتسليمات ━━━━━━━━')
-      .setDescription(
-        '## 📦 التوصيل والتسليمات\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## تابع طلبك وتسليماتك هنا\n\n' +
-        '## 📦 إزاي بيشتغل التوصيل؟\n\n' +
-        '**`1️⃣`** بعد الدفع، هنفتحلك تذكرة خاصة بيك\n' +
-        '**`2️⃣`** الستاف هيبدأ ينفّذ طلبك\n' +
-        '**`3️⃣`** بعد ماخلص، هنبعتلك التسليم هنا\n' +
-        '**`4️⃣`** تأكد إنك استلمت طلبك وقيّم بـ `/review`\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⚠️ ملاحظات مهمة\n\n' +
-        '• تأكد إن التسليم مفصول في التذكرة\n' +
-        '• لو عايز تعدّل، افتح تذكرة دعم فنية جديدة\n' +
-        '• ممنوع تشارك معلومات التسليم مع أي حد\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x2ECC71)
-      .setTimestamp()
-      .setFooter({ text: `📦 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 💼 شات الستاف ──
-  const staffChatCh = g.channels.cache.find(c => c.name.includes('شات-الستاف') && c.isTextBased());
-  if (staffChatCh) {
-    await staffChatCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 💼 شات الستاف ━━━━━━━━')
-      .setDescription(
-        '## 💼 شات الستاف\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## المحادثة الداخلية بتاعة الستاف 🔒\n\n' +
-        '👥 **للستاف بس** — القناة دي مقيدة للستاف بس\n' +
-        '📋 **تنسيق الطلبات** — ناقش الطلبات الجديدة والمعلقة\n' +
-        '💡 **مشاركة الأفكار** — اقترح تحسينات للخدمة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 إرشادات\n\n' +
-        '• احترم زمايلك في الستاف\n' +
-        '• ممنون تشارك معلومات العملاء علني\n' +
-        '• سجّل أي مشاكل في 📋・ملاحظات-الستاف\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0xE74C3C)
-      .setTimestamp()
-      .setFooter({ text: `🔒 ${g.name} — مقيد للستاف`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 📋 ملاحظات الستاف ──
-  const staffNotesCh = g.channels.cache.find(c => c.name.includes('ملاحظات-الستاف') && c.isTextBased());
-  if (staffNotesCh) {
-    await staffNotesCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📋 ملاحظات الستاف ━━━━━━━━')
-      .setDescription(
-        '## 📋 ملاحظات الستاف\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## توثيق الملاحظات والتقارير 📝\n\n' +
-        '📊 **تقارير يومية** — سجّل ملخص الطلبات والتسليمات\n' +
-        '⚠️ **ملاحظات مهمة** — وثّق أي مشاكل أو ملاحظات\n' +
-        '💡 **اقتراحات** — اقترح تحسينات للخدمة أو السيرفر\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📌 إزاي توثّق\n\n' +
-        '• ابدأ بعنوان واضح للملاحظة\n' +
-        '• حط التاريخ والوقت\n' +
-        '• ذكر الأعضاء المعنيين لو فيه حد\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0xF1C40F)
-      .setTimestamp()
-      .setFooter({ text: `📋 ${g.name} — ملاحظات الستاف`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
   }
 
   // ── 📝 تقديم للادارة ──
@@ -1065,61 +830,8 @@ async function cmdSetup(interaction) {
       )]
     }).catch(() => {});
   }
-  if (logsCh) {
-    await logsCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📝 السجلات ━━━━━━━━')
-      .setDescription(
-        '## 📝 السجلات\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## السجلات التلقائية بتاعة البوت 🔒\n\n' +
-        '👋 **الترحيب والوداع** — تسجيل دخول وخروج الأعضاء\n' +
-        '🛠️ **الدعم الفني** — فتح وإغلاق التذاكر\n' +
-        '🛒 **الطلبات** — الطلبات الجديدة والتسليمات\n' +
-        '⚠️ **الحماية** — محاولات السبام والكلمات الممنوعة\n' +
-        '🛡️ **الإدارة** — التحذيرات والكتم والطرد\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 القناة دي مقيدة للستاف والمالك بس\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0x7D8590)
-      .setTimestamp()
-      .setFooter({ text: `🛡️ ${g.name} — السجلات`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
   // ── 🔧 لوحة التحكم ──
   const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة-التحكم') && c.isTextBased());
-  if (adminPanelCh) {
-    await adminPanelCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 🔧 لوحة التحكم ━━━━━━━━')
-      .setDescription(
-        '## 🔧 لوحة التحكم\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## لوحة تحكم البوت الإدارية 🔒\n\n' +
-        '## 🔗 روابط مهمة\n\n' +
-        '🖥️ [**الداشبورد**](https://ai-shop-bot-production.up.railway.app/dashboard)\n' +
-        '🛒 [**المتجر الإلكتروني**](https://ai-shop-bot-production.up.railway.app/shop)\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📋 أوامر الإدارة\n\n' +
-        '`/setup` — جهّز السيرفر كلّه\n' +
-        '`/add-service` —ضيف خدمة جديدة\n' +
-        '`/edit-service` —عدّل خدمة\n' +
-        '`/remove-service` — امسح خدمة\n' +
-        '`/add-category` —ضيف تصنيف\n' +
-        '`/announce` —ابعت إعلان\n' +
-        '`/giveaway` —عمل سحبية\n' +
-        '`/auto-role add` —ضيف رول تلقائي\n' +
-        '`/set-logs` —حدّد قناة السجلات\n' +
-        '`/automod` —إعداد الحماية\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🔒 القناة دي مقيدة للمالك والادمن بس\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-      )
-      .setColor(0xE74C3C)
-      .setTimestamp()
-      .setFooter({ text: `🔧 ${g.name} — لوحة التحكم`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
 }
@@ -1558,13 +1270,14 @@ async function cmdBanners(interaction) {
   await interaction.deferReply();
   const g = interaction.guild;
   let sent = 0, skipped = 0;
+  const skipChannels = ['القواعد', 'الخدمات'];
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
-    if (!ch.name.includes('القواعد')) { skipped++; continue; }
     const theme = getBannerForChannel(ch.name);
     if (!theme) { skipped++; continue; }
     try {
-      const buf = generateBanner(ch.name, theme.emoji, theme.c1, theme.c2, theme.accent);
+      const isSpecial = skipChannels.some(k => ch.name.includes(k));
+      const buf = generateBanner(ch.name, theme.emoji, theme.c1, theme.c2, theme.accent, !isSpecial);
       if (!buf) { skipped++; continue; }
       const { AttachmentBuilder } = require('discord.js');
       const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
@@ -1598,7 +1311,40 @@ client.on('interactionCreate', async (interaction) => {
       if (handler) return await handler(interaction);
     }
 
-    if (interaction.isStringSelectMenu() && interaction.customId === 'services_menu') {
+    if (interaction.isStringSelectMenu() && interaction.customId === 'category_menu') {
+      const catId = interaction.values[0];
+      const cats = getCategories(), cat = cats.find(c => c.id === catId);
+      const services = getServices().filter(s => s.category === catId && s.active);
+      if (!services.length) return interaction.reply({ content: `❌ مفيش خدمات في التصنيف ده`, ephemeral: true });
+
+      const embed = new EmbedBuilder()
+        .setTitle(`${cat?.emoji || '📂'} ${cat?.name || catId}`)
+        .setDescription(`**${services.length} خدمة متاحة**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+        .setColor(0x3498DB)
+        .setTimestamp()
+        .setFooter({ text: '🛍️ اختار الخدمة اللي عايزها من القائمة تحت' });
+
+      const svcSelect = new StringSelectMenuBuilder()
+        .setCustomId('cat_svc_menu')
+        .setPlaceholder('🛒 اختار الخدمة...')
+        .addOptions(services.slice(0, 25).map(s => ({
+          label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
+          description: `${fmt(s.price)} كريديت`.substring(0, 100),
+          value: String(s.id),
+        })));
+
+      const backBtn = new ButtonBuilder()
+        .setCustomId('back_to_categories')
+        .setLabel('🔙 رجوع للتصنيفات')
+        .setStyle(ButtonStyle.Secondary);
+
+      const row1 = new ActionRowBuilder().addComponents(svcSelect);
+      const row2 = new ActionRowBuilder().addComponents(backBtn);
+      await interaction.reply({ embeds: [embed], components: [row1, row2], ephemeral: true });
+      return;
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId === 'cat_svc_menu') {
       const id = parseInt(interaction.values[0]), services = getServices(), svc = services.find(s => s.id === id);
       if (!svc) return interaction.reply({ content: '❌ الخدمة مش موجودة', ephemeral: true });
       const embed = new EmbedBuilder()
@@ -1620,8 +1366,40 @@ client.on('interactionCreate', async (interaction) => {
         .setLabel('🌐 زيارة المتجر')
         .setStyle(ButtonStyle.Link)
         .setURL('https://ai-shop-bot-production.up.railway.app/shop');
-      const row = new ActionRowBuilder().addComponents(orderBtn, shopBtn);
+      const backBtn = new ButtonBuilder()
+        .setCustomId('back_to_categories')
+        .setLabel('🔙 رجوع للتصنيفات')
+        .setStyle(ButtonStyle.Secondary);
+      const row = new ActionRowBuilder().addComponents(orderBtn, shopBtn, backBtn);
       await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId === 'back_to_categories') {
+      const cats = getCategories();
+      const services = getServices();
+      const embed = new EmbedBuilder()
+        .setTitle('📂 اختار التصنيف')
+        .setDescription('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n**اختار التصنيف اللي فيه الخدمة اللي عايزها**\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+        .setColor(0x3498DB)
+        .setTimestamp()
+        .setFooter({ text: '🛍️ اختار التصنيف من القائمة تحت' });
+      const catSelect = new StringSelectMenuBuilder()
+        .setCustomId('category_menu')
+        .setPlaceholder('📂 اختار التصنيف...')
+        .addOptions(cats.map(c => {
+          const count = services.filter(s => s.category === c.id && s.active).length;
+          return {
+            label: `${c.emoji} ${c.name}`.substring(0, 100),
+            description: `${count} خدمة متاحة`.substring(0, 100),
+            value: c.id,
+          };
+        }));
+      const row1 = new ActionRowBuilder().addComponents(catSelect);
+      const row2 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Secondary),
+      );
+      await interaction.update({ embeds: [embed], components: [row1, row2] });
       return;
     }
 
