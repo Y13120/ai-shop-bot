@@ -1560,6 +1560,7 @@ async function cmdBanners(interaction) {
   let sent = 0, skipped = 0;
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
+    if (!ch.name.includes('القواعد')) { skipped++; continue; }
     const theme = getBannerForChannel(ch.name);
     if (!theme) { skipped++; continue; }
     try {
