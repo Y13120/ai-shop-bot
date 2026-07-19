@@ -2005,6 +2005,16 @@ const apiServer = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost'), p = url.pathname;
   try {
     if (req.method === 'GET' && (p === '/api/health' || p === '/')) return jsonRes(res, 200, { status: 'ok', uptime: process.uptime(), canvas: !!Canvas, arabicFont: arabicFontRegistered });
+
+    // ── GET: Favicon ──
+    if (req.method === 'GET' && p === '/favicon.png') {
+      try {
+        const fav = fs.readFileSync(path.join(__dirname, 'favicon.png'));
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        return res.end(fav);
+      } catch { res.writeHead(404); return res.end(); }
+    }
+
     const guild = client.guilds.cache.first();
     if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild' });
 
