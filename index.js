@@ -604,7 +604,7 @@ async function cmdSetup(interaction) {
 
   if (Canvas) {
     for (const [, ch] of g.channels.cache) {
-      if (ch.isTextBased() && getBannerForChannel(ch.name)) {
+      if (ch.isTextBased() && ch.name.includes('القواعد')) {
         await sendBannerToChannel(ch);
         await sleep(800);
       }
