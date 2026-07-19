@@ -92,19 +92,28 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
+  const cleanName = (channelName || '').replace(/^[\w\u0600-\u06FF]+[・·]\s*/, '').replace(/-/g, ' ').trim();
+  const theme = getBannerForChannel(channelName) || { emoji: '💬', c1: color1 || '#1a1a2e', c2: color2 || '#2d2d44', accent: accent || '#58a6ff' };
+  const e = emoji || theme.emoji;
+  const c1 = color1 || theme.c1;
+  const c2 = color2 || theme.c2;
+  const ac = accent || theme.accent;
+
   const bg = ctx.createLinearGradient(0, 0, BANNER_W, BANNER_H);
-  bg.addColorStop(0, '#0a0e1a');
-  bg.addColorStop(0.5, '#0d1220');
-  bg.addColorStop(1, '#0a0e1a');
+  bg.addColorStop(0, '#080b14');
+  bg.addColorStop(0.4, '#0c1020');
+  bg.addColorStop(0.6, '#0c1020');
+  bg.addColorStop(1, '#080b14');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, BANNER_W, BANNER_H);
 
-  for (let j = 0; j < 5; j++) {
+  for (let j = 0; j < 6; j++) {
     const x = Math.random() * BANNER_W;
     const y = Math.random() * BANNER_H;
-    const r = 80 + Math.random() * 160;
+    const r = 100 + Math.random() * 200;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, color1 + '18');
+    grad.addColorStop(0, c1 + '30');
+    grad.addColorStop(0.5, c1 + '10');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -112,40 +121,32 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.fill();
   }
 
-  const lineGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
-  lineGrad.addColorStop(0, 'transparent');
-  lineGrad.addColorStop(0.3, accent + '60');
-  lineGrad.addColorStop(0.5, accent);
-  lineGrad.addColorStop(0.7, accent + '60');
-  lineGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = lineGrad;
-  ctx.fillRect(0, 0, BANNER_W, 3);
-
-  const glowGrad = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 350);
-  glowGrad.addColorStop(0, color2 + '15');
-  glowGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = glowGrad;
+  const centerGlow = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 400);
+  centerGlow.addColorStop(0, c2 + '20');
+  centerGlow.addColorStop(0.5, c1 + '08');
+  centerGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = centerGlow;
   ctx.beginPath();
-  ctx.arc(BANNER_W / 2, BANNER_H / 2, 350, 0, Math.PI * 2);
+  ctx.arc(BANNER_W / 2, BANNER_H / 2, 400, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  for (let x = 0; x < BANNER_W; x += 40) {
-    for (let y = 0; y < BANNER_H; y += 40) {
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  for (let x = 0; x < BANNER_W; x += 32) {
+    for (let y = 0; y < BANNER_H; y += 32) {
       ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.arc(x, y, 1.2, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
   ctx.save();
-  ctx.globalAlpha = 0.04;
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 1;
-  for (let j = 0; j < 6; j++) {
-    const dx = 80 + Math.random() * (BANNER_W - 160);
-    const dy = 40 + Math.random() * (BANNER_H - 80);
-    const s = 20 + Math.random() * 40;
+  ctx.globalAlpha = 0.06;
+  ctx.strokeStyle = ac;
+  ctx.lineWidth = 1.5;
+  for (let j = 0; j < 8; j++) {
+    const dx = 60 + Math.random() * (BANNER_W - 120);
+    const dy = 30 + Math.random() * (BANNER_H - 60);
+    const s = 15 + Math.random() * 35;
     ctx.beginPath();
     ctx.moveTo(dx, dy - s);
     ctx.lineTo(dx + s, dy);
@@ -156,63 +157,80 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
   }
   ctx.restore();
 
-  if (emojiOnly) {
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.font = '80px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = accent;
-    ctx.shadowBlur = 50;
-    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2);
-    ctx.shadowBlur = 25;
-    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2);
-    ctx.shadowBlur = 0;
-    ctx.restore();
-  } else {
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.font = '56px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = accent;
-    ctx.shadowBlur = 40;
-    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
-    ctx.shadowBlur = 20;
-    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
-    ctx.shadowBlur = 0;
+  const topLine = ctx.createLinearGradient(0, 0, BANNER_W, 0);
+  topLine.addColorStop(0, 'transparent');
+  topLine.addColorStop(0.2, ac + '40');
+  topLine.addColorStop(0.5, ac);
+  topLine.addColorStop(0.8, ac + '40');
+  topLine.addColorStop(1, 'transparent');
+  ctx.fillStyle = topLine;
+  ctx.fillRect(0, 0, BANNER_W, 3);
 
-    const fontName = arabicFontRegistered ? 'bold 42px "Arabic", sans-serif' : 'bold 42px sans-serif';
+  const botLine = ctx.createLinearGradient(0, 0, BANNER_W, 0);
+  botLine.addColorStop(0, 'transparent');
+  botLine.addColorStop(0.2, ac + '30');
+  botLine.addColorStop(0.5, ac + '80');
+  botLine.addColorStop(0.8, ac + '30');
+  botLine.addColorStop(1, 'transparent');
+  ctx.fillStyle = botLine;
+  ctx.fillRect(0, BANNER_H - 3, BANNER_W, 3);
+
+  const sideGlowL = ctx.createRadialGradient(0, BANNER_H / 2, 0, 0, BANNER_H / 2, 200);
+  sideGlowL.addColorStop(0, c1 + '18');
+  sideGlowL.addColorStop(1, 'transparent');
+  ctx.fillStyle = sideGlowL;
+  ctx.beginPath();
+  ctx.arc(0, BANNER_H / 2, 200, 0, Math.PI * 2);
+  ctx.fill();
+
+  const sideGlowR = ctx.createRadialGradient(BANNER_W, BANNER_H / 2, 0, BANNER_W, BANNER_H / 2, 200);
+  sideGlowR.addColorStop(0, c2 + '18');
+  sideGlowR.addColorStop(1, 'transparent');
+  ctx.fillStyle = sideGlowR;
+  ctx.beginPath();
+  ctx.arc(BANNER_W, BANNER_H / 2, 200, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.font = '64px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = ac;
+  ctx.shadowBlur = 60;
+  ctx.fillText(e, BANNER_W / 2, BANNER_H / 2 - 35);
+  ctx.shadowBlur = 30;
+  ctx.fillText(e, BANNER_W / 2, BANNER_H / 2 - 35);
+  ctx.shadowBlur = 0;
+
+  const displayName = cleanName || channelName || '';
+  if (displayName) {
+    const fontName = arabicFontRegistered ? 'bold 38px "Arabic", sans-serif' : 'bold 38px sans-serif';
     ctx.font = fontName;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = color2 + '40';
-    ctx.shadowBlur = 30;
+    ctx.shadowColor = c2;
+    ctx.shadowBlur = 20;
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(channelName, BANNER_W / 2, BANNER_H / 2 + 30);
+    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 + 32);
     ctx.shadowBlur = 0;
 
-    const subGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
-    subGrad.addColorStop(0, 'transparent');
-    subGrad.addColorStop(0.5, accent + '50');
-    subGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = subGrad;
-    ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
-
-    const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px sans-serif';
-    ctx.font = fontSmall;
-    ctx.fillStyle = '#6b7394';
-    ctx.textAlign = 'center';
-    ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
-    ctx.restore();
+    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 100, 0, BANNER_W / 2 + 100, 0);
+    sepGrad.addColorStop(0, 'transparent');
+    sepGrad.addColorStop(0.3, ac + '60');
+    sepGrad.addColorStop(0.5, ac);
+    sepGrad.addColorStop(0.7, ac + '60');
+    sepGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = sepGrad;
+    ctx.fillRect(BANNER_W / 2 - 100, BANNER_H / 2 + 58, 200, 1.5);
   }
 
-  const botGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
-  botGrad.addColorStop(0, 'transparent');
-  botGrad.addColorStop(0.5, accent + '30');
-  botGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = botGrad;
-  ctx.fillRect(0, BANNER_H - 2, BANNER_W, 2);
+  const fontSmall = arabicFontRegistered ? '600 14px "Arabic", sans-serif' : '600 14px sans-serif';
+  ctx.font = fontSmall;
+  ctx.fillStyle = '#8090b0';
+  ctx.textAlign = 'center';
+  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 20);
+  ctx.restore();
 
   return Buffer.from(c.toBuffer('image/png'));
 }
@@ -231,7 +249,7 @@ async function sendBannerToChannel(channel, emojiOnly = false) {
   const theme = getBannerForChannel(channel.name);
   if (!theme) return false;
   try {
-    const buf = generateBanner(channel.name.replace(/[^\w\u0600-\u06FF-]/g, '').replace(/-/g, ' '), theme.emoji, theme.c1, theme.c2, theme.accent, emojiOnly);
+    const buf = generateBanner(channel.name, theme.emoji, theme.c1, theme.c2, theme.accent, false);
     if (!buf) return false;
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
@@ -680,16 +698,11 @@ async function cmdSetup(interaction) {
   try { await g.channels.fetch(); } catch {}
 
   if (Canvas) {
-    const skipChannels = ['القواعد', 'الخدمات'];
     for (const [, ch] of g.channels.cache) {
       if (!ch.isTextBased()) continue;
-      const isSpecial = skipChannels.some(k => ch.name.includes(k));
-      if (isSpecial) {
-        await sendBannerToChannel(ch, false);
-      } else {
-        await sendBannerToChannel(ch, true);
-      }
+      await sendBannerToChannel(ch, false);
       await sleep(800);
+    }
     }
   }
 
@@ -1337,21 +1350,15 @@ async function cmdBanners(interaction) {
   await interaction.deferReply();
   const g = interaction.guild;
   let sent = 0, skipped = 0;
-  const skipChannels = ['القواعد', 'الخدمات'];
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
-    const theme = getBannerForChannel(ch.name);
-    if (!theme) { skipped++; continue; }
-    try {
-      const isSpecial = skipChannels.some(k => ch.name.includes(k));
-      const buf = generateBanner(ch.name, theme.emoji, theme.c1, theme.c2, theme.accent, !isSpecial);
-      if (!buf) { skipped++; continue; }
-      const { AttachmentBuilder } = require('discord.js');
-      const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
-      await ch.send({ files: [attachment] });
-      sent++;
-      await sleep(800);
-    } catch { skipped++; }
+    const buf = generateBanner(ch.name, null, '#1a1a2e', '#2d2d44', '#ffffff', false);
+    if (!buf) { skipped++; continue; }
+    const { AttachmentBuilder } = require('discord.js');
+    const attachment = new AttachmentBuilder(buf, { name: `banner.png` });
+    await ch.send({ files: [attachment] });
+    sent++;
+    await sleep(800);
   }
   await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped} قناة` : ''}`);
 }
