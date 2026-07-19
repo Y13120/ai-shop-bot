@@ -241,17 +241,18 @@ function getBannerForChannel(channelName) {
 }
 
 async function sendBannerToChannel(channel) {
-  if (!Canvas) return false;
+  if (!Canvas) { console.log('⚠️ Canvas not available for banner'); return false; }
   const theme = getBannerForChannel(channel.name);
   if (!theme) return false;
   try {
     const buf = generateBanner(channel.name, null, theme.c1, theme.c2, theme.accent);
-    if (!buf) return false;
+    if (!buf) { console.log('⚠️ generateBanner returned null for', channel.name); return false; }
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
     await channel.send({ files: [attachment] });
+    console.log('✅ Banner sent to', channel.name);
     return true;
-  } catch { return false; }
+  } catch (e) { console.log('❌ Banner failed for', channel.name, ':', e.message); return false; }
 }
 
 // ══════════════════════════════════════════════════════════════
