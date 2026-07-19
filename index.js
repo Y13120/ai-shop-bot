@@ -695,11 +695,17 @@ async function cmdSetup(interaction) {
   try { await g.channels.fetch(); } catch {}
 
   if (Canvas) {
+    console.log('🎨 Canvas available, sending banners...');
+    let bannerCount = 0;
     for (const [, ch] of g.channels.cache) {
       if (!ch.isTextBased()) continue;
-      await sendBannerToChannel(ch);
+      const ok = await sendBannerToChannel(ch);
+      if (ok) bannerCount++;
       await sleep(800);
     }
+    console.log(`🎨 Banners done: ${bannerCount} sent`);
+  } else {
+    console.log('⚠️ Canvas not available — no banners will be sent');
   }
 
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
