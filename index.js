@@ -703,7 +703,6 @@ async function cmdSetup(interaction) {
       await sendBannerToChannel(ch, false);
       await sleep(800);
     }
-    }
   }
 
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
