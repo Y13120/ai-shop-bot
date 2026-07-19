@@ -85,6 +85,13 @@ const BANNER_THEMES = {
   'كيف-تطلب':        { emoji: '📖', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
 };
 
+function hexToRgb(hex) {
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return { r: parseInt(h.substring(0,2),16), g: parseInt(h.substring(2,4),16), b: parseInt(h.substring(4,6),16) };
+}
+function rgba(hex, a) { const c = hexToRgb(hex); return 'rgba('+c.r+','+c.g+','+c.b+','+a+')'; }
+
 function generateBanner(channelName, emoji, color1, color2, accent) {
   if (!Canvas) return null;
   const S = BANNER_SCALE;
@@ -106,7 +113,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     const y = Math.random() * BANNER_H;
     const r = 80 + Math.random() * 150;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, c1 + '18');
+    grad.addColorStop(0, rgba(c1, 0.1));
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -115,7 +122,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   }
 
   const centerGlow = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 300);
-  centerGlow.addColorStop(0, ac + '15');
+  centerGlow.addColorStop(0, rgba(ac, 0.08));
   centerGlow.addColorStop(1, 'transparent');
   ctx.fillStyle = centerGlow;
   ctx.beginPath();
@@ -137,9 +144,9 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const neonLine = (y, width) => {
     const g = ctx.createLinearGradient(BANNER_W / 2 - width, 0, BANNER_W / 2 + width, 0);
     g.addColorStop(0, 'transparent');
-    g.addColorStop(0.15, ac + '40');
+    g.addColorStop(0.15, rgba(ac, 0.25));
     g.addColorStop(0.5, ac);
-    g.addColorStop(0.85, ac + '40');
+    g.addColorStop(0.85, rgba(ac, 0.25));
     g.addColorStop(1, 'transparent');
     ctx.save();
     ctx.shadowColor = ac; ctx.shadowBlur = 15;
@@ -182,7 +189,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     ctx.save();
     ctx.shadowColor = ac; ctx.shadowBlur = 60;
-    ctx.fillStyle = ac + '30';
+    ctx.fillStyle = rgba(ac, 0.19);
     ctx.font = fontName;
     ctx.fillText(displayName, textX, textY);
     ctx.shadowBlur = 35;
@@ -198,9 +205,9 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 140, 0, BANNER_W / 2 + 140, 0);
     sepGrad.addColorStop(0, 'transparent');
-    sepGrad.addColorStop(0.2, ac + '30');
+    sepGrad.addColorStop(0.2, rgba(ac, 0.19));
     sepGrad.addColorStop(0.5, ac);
-    sepGrad.addColorStop(0.8, ac + '30');
+    sepGrad.addColorStop(0.8, rgba(ac, 0.19));
     sepGrad.addColorStop(1, 'transparent');
     ctx.save();
     ctx.shadowColor = ac; ctx.shadowBlur = 10;
@@ -214,7 +221,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.textAlign = 'center';
   ctx.save();
   ctx.shadowColor = ac; ctx.shadowBlur = 10;
-  ctx.fillStyle = ac + '80';
+  ctx.fillStyle = rgba(ac, 0.5);
   ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
   ctx.restore();
 
@@ -1341,20 +1348,22 @@ async function cmdBanners(interaction) {
   if (!Canvas) return interaction.reply({ content: '❌ مكتبة `canvas` مش متوفرة — البانرات مش هتتولّد', ephemeral: true });
   await interaction.deferReply();
   const g = interaction.guild;
-  let sent = 0, skipped = 0;
+  let sent = 0, skipped = 0, failed = 0;
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
     const theme = getBannerForChannel(ch.name);
     if (!theme) { skipped++; continue; }
-    const buf = generateBanner(ch.name, null, theme.c1, theme.c2, theme.accent);
-    if (!buf) { skipped++; continue; }
-    const { AttachmentBuilder } = require('discord.js');
-    const attachment = new AttachmentBuilder(buf, { name: `banner.png` });
-    await ch.send({ files: [attachment] });
-    sent++;
+    try {
+      const buf = generateBanner(ch.name, null, theme.c1, theme.c2, theme.accent);
+      if (!buf) { skipped++; continue; }
+      const { AttachmentBuilder } = require('discord.js');
+      const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name || 'ch'}.png` });
+      await ch.send({ files: [attachment] });
+      sent++;
+    } catch (e) { console.error('❌ Banner failed for', ch.name, ':', e.message); failed++; }
     await sleep(800);
   }
-  await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped} قناة` : ''}`);
+  await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}`);
 }
 
 // ══════════════════════════════════════════════════════════════
