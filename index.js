@@ -32,8 +32,9 @@ try {
 
   if (!fs.existsSync(fontPath) || !isValidFont(fontPath)) {
     const fontUrls = [
+      'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/static/NotoSansArabic-Bold.ttf',
       'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwght%5D.ttf',
-      'https://github.com/google/fonts/raw/main/ofl/notosansarabic/NotoSansArabic%5Bwght%5D.ttf',
+      'https://github.com/google/fonts/raw/main/ofl/notosansarabic/static/NotoSansArabic-Bold.ttf',
     ];
     let downloaded = false;
     for (const u of fontUrls) {
