@@ -100,7 +100,8 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ac = accent || theme.accent;
 
   function hexToRgb(hex) {
-    const h = hex.replace('#', '');
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
     return { r: parseInt(h.substring(0, 2), 16), g: parseInt(h.substring(2, 4), 16), b: parseInt(h.substring(4, 6), 16) };
   }
 
@@ -193,32 +194,21 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     const rgb = hexToRgb(ac);
     const textX = BANNER_W / 2;
     const textY = BANNER_H / 2 - 8;
-    const glowLayers = [
-      { size: 70, alpha: 0.04 },
-      { size: 55, alpha: 0.06 },
-      { size: 40, alpha: 0.08 },
-      { size: 28, alpha: 0.12 },
-      { size: 18, alpha: 0.18 },
-      { size: 10, alpha: 0.3 },
-      { size: 0, alpha: 1.0 },
+    const offsets = [
+      [-3,0],[3,0],[0,-3],[0,3],[-2,-2],[2,2],[-2,2],[2,-2],
+      [-5,0],[5,0],[0,-5],[0,5],[-4,-4],[4,4],[-4,4],[4,-4],
+      [-8,0],[8,0],[0,-8],[0,8],[-6,-6],[6,6],
     ];
-    for (const layer of glowLayers) {
-      ctx.font = fontName;
-      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${layer.alpha})`;
-      if (layer.size > 0) {
-        for (let dx = -layer.size; dx <= layer.size; dx += Math.max(layer.size / 3, 1)) {
-          for (let dy = -layer.size; dy <= layer.size; dy += Math.max(layer.size / 3, 1)) {
-            if (dx * dx + dy * dy <= layer.size * layer.size) {
-              ctx.fillText(displayName, textX + dx, textY + dy);
-            }
-          }
-        }
-      }
-      if (layer.alpha === 1.0) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(displayName, textX, textY);
-      }
-    }
+    const rgbStr = `${rgb.r},${rgb.g},${rgb.b}`;
+    ctx.font = fontName;
+    ctx.fillStyle = `rgba(${rgbStr},0.05)`;
+    for (const [dx, dy] of offsets) ctx.fillText(displayName, textX + dx, textY + dy);
+    ctx.fillStyle = `rgba(${rgbStr},0.15)`;
+    for (const [dx, dy] of offsets.slice(0, 12)) ctx.fillText(displayName, textX + dx, textY + dy);
+    ctx.fillStyle = `rgba(${rgbStr},0.4)`;
+    for (const [dx, dy] of offsets.slice(0, 8)) ctx.fillText(displayName, textX + dx * 0.5, textY + dy * 0.5);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(displayName, textX, textY);
 
     const sepRgb = hexToRgb(ac);
     const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 140, 0, BANNER_W / 2 + 140, 0);
@@ -237,13 +227,10 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.font = fontSmall;
   ctx.textAlign = 'center';
   const subRgb = hexToRgb(ac);
-  for (let i = 3; i >= 0; i--) {
-    ctx.fillStyle = `rgba(${subRgb.r},${subRgb.g},${subRgb.b},${[0.05, 0.12, 0.25, 0.5][3 - i]})`;
-    for (let dx = -i * 3; dx <= i * 3; dx += Math.max(i * 2, 1)) {
-      ctx.fillText('AI Shop Bot', BANNER_W / 2 + dx, BANNER_H - 22);
-    }
-  }
-  ctx.fillStyle = `rgba(${subRgb.r},${subRgb.g},${subRgb.b},0.7)`;
+  const subRgbStr = `${subRgb.r},${subRgb.g},${subRgb.b}`;
+  ctx.fillStyle = `rgba(${subRgbStr},0.15)`;
+  for (const dx of [-4,-2,0,2,4]) ctx.fillText('AI Shop Bot', BANNER_W / 2 + dx, BANNER_H - 22);
+  ctx.fillStyle = `rgba(${subRgbStr},0.6)`;
   ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
 
   return Buffer.from(c.toBuffer('image/png'));
