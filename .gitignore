@@ -1,5 +1,5 @@
 node_modules/
-fonts/
+fonts/test*
 data/config.json
 data/orders.json
 data/reviews.json
