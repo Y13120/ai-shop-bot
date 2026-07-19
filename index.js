@@ -85,7 +85,7 @@ const BANNER_THEMES = {
   'كيف-تطلب':        { emoji: '📖', c1: '#0e6245', c2: '#2ea043', accent: '#3fb950' },
 };
 
-function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = false) {
+function generateBanner(channelName, emoji, color1, color2, accent) {
   if (!Canvas) return null;
   const S = BANNER_SCALE;
   const c = Canvas.createCanvas(BANNER_W * S, BANNER_H * S);
@@ -93,8 +93,7 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
   ctx.scale(S, S);
 
   const cleanName = (channelName || '').replace(/^[\w\u0600-\u06FF]+[・·]\s*/, '').replace(/-/g, ' ').trim();
-  const theme = getBannerForChannel(channelName) || { emoji: '💬', c1: color1 || '#1a1a2e', c2: color2 || '#2d2d44', accent: accent || '#58a6ff' };
-  const e = emoji || theme.emoji;
+  const theme = getBannerForChannel(channelName) || { c1: color1 || '#1a1a2e', c2: color2 || '#2d2d44', accent: accent || '#58a6ff' };
   const c1 = color1 || theme.c1;
   const c2 = color2 || theme.c2;
   const ac = accent || theme.accent;
@@ -122,8 +121,8 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
   }
 
   const centerGlow = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 400);
-  centerGlow.addColorStop(0, c2 + '20');
-  centerGlow.addColorStop(0.5, c1 + '08');
+  centerGlow.addColorStop(0, c2 + '25');
+  centerGlow.addColorStop(0.5, c1 + '10');
   centerGlow.addColorStop(1, 'transparent');
   ctx.fillStyle = centerGlow;
   ctx.beginPath();
@@ -193,43 +192,40 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
 
   ctx.save();
   ctx.globalAlpha = 1;
-  ctx.font = '64px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = ac;
-  ctx.shadowBlur = 60;
-  ctx.fillText(e, BANNER_W / 2, BANNER_H / 2 - 35);
-  ctx.shadowBlur = 30;
-  ctx.fillText(e, BANNER_W / 2, BANNER_H / 2 - 35);
-  ctx.shadowBlur = 0;
 
   const displayName = cleanName || channelName || '';
   if (displayName) {
-    const fontName = arabicFontRegistered ? 'bold 38px "Arabic", sans-serif' : 'bold 38px sans-serif';
+    const isArabic = /[\u0600-\u06FF]/.test(displayName);
+    const fontName = isArabic && arabicFontRegistered
+      ? 'bold 52px "Arabic", sans-serif'
+      : 'bold 52px "Inter", "Segoe UI", sans-serif';
     ctx.font = fontName;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.shadowColor = c2;
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 30;
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 + 32);
+    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 10);
+    ctx.shadowColor = ac;
+    ctx.shadowBlur = 15;
+    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 10);
     ctx.shadowBlur = 0;
 
-    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 100, 0, BANNER_W / 2 + 100, 0);
+    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
     sepGrad.addColorStop(0, 'transparent');
     sepGrad.addColorStop(0.3, ac + '60');
     sepGrad.addColorStop(0.5, ac);
     sepGrad.addColorStop(0.7, ac + '60');
     sepGrad.addColorStop(1, 'transparent');
     ctx.fillStyle = sepGrad;
-    ctx.fillRect(BANNER_W / 2 - 100, BANNER_H / 2 + 58, 200, 1.5);
+    ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 28, 240, 1.5);
   }
 
-  const fontSmall = arabicFontRegistered ? '600 14px "Arabic", sans-serif' : '600 14px sans-serif';
+  const fontSmall = arabicFontRegistered ? '600 14px "Arabic", sans-serif' : '600 14px "Inter", sans-serif';
   ctx.font = fontSmall;
   ctx.fillStyle = '#8090b0';
   ctx.textAlign = 'center';
-  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 20);
+  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
   ctx.restore();
 
   return Buffer.from(c.toBuffer('image/png'));
@@ -244,12 +240,12 @@ function getBannerForChannel(channelName) {
   return null;
 }
 
-async function sendBannerToChannel(channel, emojiOnly = false) {
+async function sendBannerToChannel(channel) {
   if (!Canvas) return false;
   const theme = getBannerForChannel(channel.name);
   if (!theme) return false;
   try {
-    const buf = generateBanner(channel.name, theme.emoji, theme.c1, theme.c2, theme.accent, false);
+    const buf = generateBanner(channel.name, null, theme.c1, theme.c2, theme.accent);
     if (!buf) return false;
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
@@ -700,7 +696,7 @@ async function cmdSetup(interaction) {
   if (Canvas) {
     for (const [, ch] of g.channels.cache) {
       if (!ch.isTextBased()) continue;
-      await sendBannerToChannel(ch, false);
+      await sendBannerToChannel(ch);
       await sleep(800);
     }
   }
@@ -1351,7 +1347,9 @@ async function cmdBanners(interaction) {
   let sent = 0, skipped = 0;
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
-    const buf = generateBanner(ch.name, null, '#1a1a2e', '#2d2d44', '#ffffff', false);
+    const theme = getBannerForChannel(ch.name);
+    if (!theme) { skipped++; continue; }
+    const buf = generateBanner(ch.name, null, theme.c1, theme.c2, theme.accent);
     if (!buf) { skipped++; continue; }
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner.png` });
