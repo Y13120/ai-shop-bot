@@ -13,24 +13,48 @@ let arabicFontRegistered = false;
 try {
   Canvas = require('canvas');
   const fontDir = path.join(__dirname, 'fonts');
-  const fontPath = path.join(fontDir, 'NotoSansArabic.ttf');
+  const fontPath = path.join(fontDir, 'NotoSansArabic-Bold.ttf');
   if (!fs.existsSync(fontDir)) fs.mkdirSync(fontDir, { recursive: true });
-  if (!fs.existsSync(fontPath)) {
+
+  function isValidFont(f) {
     try {
-      const { execSync } = require('child_process');
-      execSync('curl -sL -o "' + fontPath + '" "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf"', { timeout: 30000 });
-    } catch {
+      const buf = fs.readFileSync(f);
+      return buf.length > 10000 && (
+        buf.slice(0, 4).toString() === '\x00\x01\x00\x00' ||
+        buf.slice(0, 4).toString() === 'true' ||
+        buf.slice(0, 4).toString() === 'OTTO' ||
+        buf.slice(4, 8).toString() === 'glyf' ||
+        buf.toString('ascii', 0, 4) === 'wOFF' ||
+        buf.toString('ascii', 0, 4) === 'wOF2'
+      );
+    } catch { return false; }
+  }
+
+  if (!fs.existsSync(fontPath) || !isValidFont(fontPath)) {
+    const fontUrls = [
+      'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwght%5D.ttf',
+      'https://github.com/google/fonts/raw/main/ofl/notosansarabic/NotoSansArabic%5Bwght%5D.ttf',
+    ];
+    let downloaded = false;
+    for (const u of fontUrls) {
+      if (downloaded) break;
       try {
         const { execSync } = require('child_process');
-        execSync('curl -sL -o "' + fontPath + '" "https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf"', { timeout: 30000 });
-      } catch {}
+        execSync('curl -fsSL --max-time 20 -o "' + fontPath + '" "' + u + '"', { timeout: 25000 });
+        if (isValidFont(fontPath)) { downloaded = true; break; }
+        else { try { fs.unlinkSync(fontPath); } catch {} }
+      } catch { try { fs.unlinkSync(fontPath); } catch {} }
     }
   }
-  if (fs.existsSync(fontPath)) {
+
+  if (fs.existsSync(fontPath) && isValidFont(fontPath)) {
     try {
-      Canvas.registerFont(fontPath, { family: 'Noto Sans Arabic', weight: 'bold' });
+      Canvas.registerFont(fontPath, { family: 'Arabic' });
       arabicFontRegistered = true;
-    } catch {}
+      console.log('✅ Arabic font loaded successfully');
+    } catch (e) { console.error('Font register error:', e.message); }
+  } else {
+    console.log('⚠️ Arabic font not available — banners will use fallback font');
   }
 } catch { Canvas = null; }
 
@@ -38,6 +62,7 @@ try {
 //  BANNER GENERATOR
 // ══════════════════════════════════════════════════════════════
 const BANNER_W = 1024, BANNER_H = 300;
+const BANNER_SCALE = 2;
 const BANNER_THEMES = {
   'الخدمات':          { emoji: '🛒', c1: '#1a6b2a', c2: '#2ea043', accent: '#3fb950' },
   'التخفيضات':       { emoji: '🎁', c1: '#8b2252', c2: '#e74c8b', accent: '#ff69b4' },
@@ -60,8 +85,10 @@ const BANNER_THEMES = {
 
 function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = false) {
   if (!Canvas) return null;
-  const c = Canvas.createCanvas(BANNER_W, BANNER_H);
+  const S = BANNER_SCALE;
+  const c = Canvas.createCanvas(BANNER_W * S, BANNER_H * S);
   const ctx = c.getContext('2d');
+  ctx.scale(S, S);
 
   const bg = ctx.createLinearGradient(0, 0, BANNER_W, BANNER_H);
   bg.addColorStop(0, '#0a0e1a');
@@ -141,7 +168,7 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.textBaseline = 'middle';
     ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
 
-    const fontName = arabicFontRegistered ? 'bold 42px "Noto Sans Arabic", sans-serif' : 'bold 42px sans-serif';
+    const fontName = arabicFontRegistered ? 'bold 42px "Arabic", sans-serif' : 'bold 42px sans-serif';
     ctx.font = fontName;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -158,7 +185,7 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.fillStyle = subGrad;
     ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
 
-    const fontSmall = arabicFontRegistered ? '600 13px "Noto Sans Arabic", sans-serif' : '600 13px sans-serif';
+    const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px sans-serif';
     ctx.font = fontSmall;
     ctx.fillStyle = '#6b7394';
     ctx.textAlign = 'center';
