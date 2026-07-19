@@ -11,7 +11,7 @@ const http = require('http');
 let Canvas;
 let arabicFontRegistered = false;
 try {
-  Canvas = require('canvas');
+  Canvas = require('@napi-rs/canvas');
   const fontDir = path.join(__dirname, 'fonts');
   const fontPath = path.join(fontDir, 'NotoSansArabic-Bold.ttf');
   if (!fs.existsSync(fontDir)) fs.mkdirSync(fontDir, { recursive: true });
@@ -32,9 +32,8 @@ try {
 
   if (!fs.existsSync(fontPath) || !isValidFont(fontPath)) {
     const fontUrls = [
+      'https://fonts.gstatic.com/s/notosansarabic/v33/nwpxtLGrOAZMl5nJ_wfgRg3DrWFZWsnVBJ_sS6tlqHHFlhQ5l3sQWIHPqzCfL2uvuw.ttf',
       'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/static/NotoSansArabic-Bold.ttf',
-      'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwght%5D.ttf',
-      'https://github.com/google/fonts/raw/main/ofl/notosansarabic/static/NotoSansArabic-Bold.ttf',
     ];
     let downloaded = false;
     for (const u of fontUrls) {
@@ -50,14 +49,15 @@ try {
 
   if (fs.existsSync(fontPath) && isValidFont(fontPath)) {
     try {
-      Canvas.registerFont(fontPath, { family: 'Arabic' });
+      Canvas.GlobalFonts.registerFromPath(fontPath, 'Arabic');
       arabicFontRegistered = true;
       console.log('✅ Arabic font loaded successfully');
     } catch (e) { console.error('Font register error:', e.message); }
   } else {
     console.log('⚠️ Arabic font not available — banners will use fallback font');
   }
-} catch { Canvas = null; }
+  console.log('✅ Canvas library loaded: @napi-rs/canvas');
+} catch (e) { Canvas = null; console.error('❌ Canvas failed to load:', e.message); }
 
 // ══════════════════════════════════════════════════════════════
 //  BANNER GENERATOR
@@ -88,7 +88,8 @@ const BANNER_THEMES = {
 function generateBanner(channelName, emoji, color1, color2, accent) {
   if (!Canvas) return null;
   const S = BANNER_SCALE;
-  const c = Canvas.createCanvas(BANNER_W * S, BANNER_H * S);
+  const { createCanvas } = Canvas;
+  const c = createCanvas(BANNER_W * S, BANNER_H * S);
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
