@@ -1570,7 +1570,8 @@ client.on('interactionCreate', async (interaction) => {
         if (!svc) return interaction.editReply('❌ الخدمة مش موجودة');
 
         const g = interaction.guild;
-        const orderId = Date.now().toString(36).toUpperCase();
+        const orders = getOrders();
+        const orderId = nextId(orders);
         const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
 
         const ow = [
@@ -1586,13 +1587,16 @@ client.on('interactionCreate', async (interaction) => {
           permissionOverwrites: ow,
         });
 
+        orders.push({ id: orderId, type: 'order', serviceId: svc.id, serviceName: svc.name, serviceEmoji: svc.emoji || '🛒', servicePrice: svc.price || 0, userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'pending', createdAt: Date.now() });
+        save('orders.json', orders);
+
         const e = new EmbedBuilder()
           .setTitle(`🛒 طلب خدمة — ${svc.emoji || '🛒'} ${svc.name}`)
           .setDescription(
             `# طلب خدمة جديد\n\n` +
             `**العميل:** ${interaction.user}\n` +
             `**الخدمة:** ${svc.emoji || '🛒'} **${svc.name}**\n` +
-            `**السعر:** \`${fmt(svc.price)} كريديت\`\n` +
+            `**السعر:** \`${fmt(svc.price)}\`\n` +
             `**رقم الطلب:** \`${orderId}\`\n\n` +
             `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
             `## 📝 وصف الخدمة\n\n` +
