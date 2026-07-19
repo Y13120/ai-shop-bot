@@ -11,7 +11,7 @@ const http = require('http');
 let Canvas;
 let arabicFontRegistered = false;
 try {
-  Canvas = require('@napi-rs/canvas');
+  Canvas = require('canvas');
   const fontDir = path.join(__dirname, 'fonts');
   const fontPath = path.join(fontDir, 'NotoSansArabic-Bold.ttf');
   if (!fs.existsSync(fontDir)) fs.mkdirSync(fontDir, { recursive: true });
@@ -49,14 +49,14 @@ try {
 
   if (fs.existsSync(fontPath) && isValidFont(fontPath)) {
     try {
-      Canvas.GlobalFonts.registerFromPath(fontPath, 'Arabic');
+      Canvas.registerFont(fontPath, { family: 'Arabic' });
       arabicFontRegistered = true;
       console.log('✅ Arabic font loaded successfully');
     } catch (e) { console.error('Font register error:', e.message); }
   } else {
     console.log('⚠️ Arabic font not available — banners will use fallback font');
   }
-  console.log('✅ Canvas library loaded: @napi-rs/canvas');
+  console.log('✅ Canvas loaded');
 } catch (e) { Canvas = null; console.error('❌ Canvas failed to load:', e.message); }
 
 // ══════════════════════════════════════════════════════════════
@@ -88,8 +88,7 @@ const BANNER_THEMES = {
 function generateBanner(channelName, emoji, color1, color2, accent) {
   if (!Canvas) return null;
   const S = BANNER_SCALE;
-  const { createCanvas } = Canvas;
-  const c = createCanvas(BANNER_W * S, BANNER_H * S);
+  const c = Canvas.createCanvas(BANNER_W * S, BANNER_H * S);
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
@@ -98,12 +97,6 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const c1 = color1 || theme.c1;
   const c2 = color2 || theme.c2;
   const ac = accent || theme.accent;
-
-  function hexToRgb(hex) {
-    let h = hex.replace('#', '');
-    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-    return { r: parseInt(h.substring(0, 2), 16), g: parseInt(h.substring(2, 4), 16), b: parseInt(h.substring(4, 6), 16) };
-  }
 
   ctx.fillStyle = '#050510';
   ctx.fillRect(0, 0, BANNER_W, BANNER_H);
@@ -134,48 +127,42 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.strokeStyle = ac;
   ctx.lineWidth = 0.5;
   for (let y = 20; y < BANNER_H; y += 20) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(BANNER_W, y);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(BANNER_W, y); ctx.stroke();
   }
   for (let x = 20; x < BANNER_W; x += 20) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, BANNER_H);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, BANNER_H); ctx.stroke();
   }
   ctx.restore();
 
   const neonLine = (y, width) => {
-    const rgb = hexToRgb(ac);
-    for (let i = 3; i >= 0; i--) {
-      const spread = i * 4;
-      const alpha = [0.08, 0.15, 0.3, 1.0][3 - i];
-      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
-      ctx.fillRect(BANNER_W / 2 - width - spread, y - 1 - spread, (width + spread) * 2, 2 + spread * 2);
-    }
+    const g = ctx.createLinearGradient(BANNER_W / 2 - width, 0, BANNER_W / 2 + width, 0);
+    g.addColorStop(0, 'transparent');
+    g.addColorStop(0.15, ac + '40');
+    g.addColorStop(0.5, ac);
+    g.addColorStop(0.85, ac + '40');
+    g.addColorStop(1, 'transparent');
+    ctx.save();
+    ctx.shadowColor = ac; ctx.shadowBlur = 15;
+    ctx.fillStyle = g;
+    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
+    ctx.shadowBlur = 8;
+    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
+    ctx.restore();
   };
   neonLine(6, 300);
   neonLine(BANNER_H - 6, 300);
 
   const neonCorner = (cx, cy, flipX, flipY) => {
-    const rgb = hexToRgb(ac);
-    for (let i = 3; i >= 0; i--) {
-      const spread = i * 2;
-      const alpha = [0.1, 0.25, 0.5, 1.0][3 - i];
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-      ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
-      ctx.lineWidth = 2 + spread;
-      ctx.beginPath();
-      ctx.moveTo(0, 30 + spread);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(30 + spread, 0);
-      ctx.stroke();
-      ctx.restore();
-    }
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+    ctx.shadowColor = ac; ctx.shadowBlur = 12;
+    ctx.strokeStyle = ac; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 30); ctx.lineTo(0, 0); ctx.lineTo(30, 0);
+    ctx.stroke();
+    ctx.shadowBlur = 6; ctx.stroke();
+    ctx.restore();
   };
   neonCorner(20, 20, false, false);
   neonCorner(BANNER_W - 20, 20, true, false);
@@ -190,48 +177,46 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
       : 'bold 54px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
-    const rgb = hexToRgb(ac);
     const textX = BANNER_W / 2;
     const textY = BANNER_H / 2 - 8;
-    const offsets = [
-      [-3,0],[3,0],[0,-3],[0,3],[-2,-2],[2,2],[-2,2],[2,-2],
-      [-5,0],[5,0],[0,-5],[0,5],[-4,-4],[4,4],[-4,4],[4,-4],
-      [-8,0],[8,0],[0,-8],[0,8],[-6,-6],[6,6],
-    ];
-    const rgbStr = `${rgb.r},${rgb.g},${rgb.b}`;
-    ctx.font = fontName;
-    ctx.fillStyle = `rgba(${rgbStr},0.05)`;
-    for (const [dx, dy] of offsets) ctx.fillText(displayName, textX + dx, textY + dy);
-    ctx.fillStyle = `rgba(${rgbStr},0.15)`;
-    for (const [dx, dy] of offsets.slice(0, 12)) ctx.fillText(displayName, textX + dx, textY + dy);
-    ctx.fillStyle = `rgba(${rgbStr},0.4)`;
-    for (const [dx, dy] of offsets.slice(0, 8)) ctx.fillText(displayName, textX + dx * 0.5, textY + dy * 0.5);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(displayName, textX, textY);
 
-    const sepRgb = hexToRgb(ac);
+    ctx.save();
+    ctx.shadowColor = ac; ctx.shadowBlur = 60;
+    ctx.fillStyle = ac + '30';
+    ctx.font = fontName;
+    ctx.fillText(displayName, textX, textY);
+    ctx.shadowBlur = 35;
+    ctx.fillText(displayName, textX, textY);
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 8;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = fontName;
+    ctx.fillText(displayName, textX, textY);
+    ctx.restore();
+
     const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 140, 0, BANNER_W / 2 + 140, 0);
     sepGrad.addColorStop(0, 'transparent');
-    sepGrad.addColorStop(0.2, `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},0.3)`);
+    sepGrad.addColorStop(0.2, ac + '30');
     sepGrad.addColorStop(0.5, ac);
-    sepGrad.addColorStop(0.8, `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},0.3)`);
+    sepGrad.addColorStop(0.8, ac + '30');
     sepGrad.addColorStop(1, 'transparent');
-    for (let i = 4; i >= 0; i--) {
-      ctx.fillStyle = `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},${i === 0 ? 1.0 : 0.08})`;
-      ctx.fillRect(BANNER_W / 2 - 140 - i * 3, BANNER_H / 2 + 30 - i, 280 + i * 6, 1.5 + i * 2);
-    }
+    ctx.save();
+    ctx.shadowColor = ac; ctx.shadowBlur = 10;
+    ctx.fillStyle = sepGrad;
+    ctx.fillRect(BANNER_W / 2 - 140, BANNER_H / 2 + 30, 280, 1.5);
+    ctx.restore();
   }
 
   const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px sans-serif';
   ctx.font = fontSmall;
   ctx.textAlign = 'center';
-  const subRgb = hexToRgb(ac);
-  const subRgbStr = `${subRgb.r},${subRgb.g},${subRgb.b}`;
-  ctx.fillStyle = `rgba(${subRgbStr},0.15)`;
-  for (const dx of [-4,-2,0,2,4]) ctx.fillText('AI Shop Bot', BANNER_W / 2 + dx, BANNER_H - 22);
-  ctx.fillStyle = `rgba(${subRgbStr},0.6)`;
+  ctx.save();
+  ctx.shadowColor = ac; ctx.shadowBlur = 10;
+  ctx.fillStyle = ac + '80';
   ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
+  ctx.restore();
 
   return Buffer.from(c.toBuffer('image/png'));
 }
