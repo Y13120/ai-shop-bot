@@ -582,6 +582,8 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('top-customers').setDescription('أفضل الزبائن'),
   new SlashCommandBuilder().setName('help').setDescription('شوف كل الأوامر'),
   new SlashCommandBuilder().setName('banners').setDescription('ولّد بانرات للقنوات وابعتهم'),
+  new SlashCommandBuilder().setName('enable-community').setDescription('فعّل وضع Community في السيرفر')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -1366,6 +1368,82 @@ async function cmdBanners(interaction) {
   await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}`);
 }
 
+async function cmdEnableCommunity(interaction) {
+  if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
+    return interaction.reply({ content: '❌ محتاج صلاحيات Admin', ephemeral: true });
+  }
+  await interaction.deferReply({ ephemeral: true });
+  const g = interaction.guild;
+
+  const log = [];
+
+  // 1. Check member count
+  if (g.memberCount < 1000) {
+    log.push(`⚠️ السيرفر عنده **${g.memberCount}** عضو بس — Discord بيطلب 1000 عضو على الأقل عشان تفعّل Community.\nلو السيرفر فيه 7 أيام اشتراك أو أكتر، ممكن تقدّم طلب استثناء من Discord.`);
+  }
+
+  // 2. Check if already community
+  const features = g.features || [];
+  if (features.includes('COMMUNITY')) {
+    return interaction.editReply('✅ السيرفر Community بالفعل!');
+  }
+
+  // 3. Create community channels if missing
+  try {
+    let rulesChannel = g.channels.cache.find(c => c.name.includes('القواعد') && c.type === ChannelType.GuildText);
+    let updatesChannel = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.type === ChannelType.GuildText);
+
+    if (!rulesChannel) {
+      const cat = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.type === ChannelType.GuildCategory);
+      rulesChannel = await g.channels.create({ name: '📋・القواعد', type: ChannelType.GuildText, parent: cat?.id, topic: 'قوانين السيرفر — يُرجى قراءتها قبل أي شيء' });
+      log.push('✅ قناة **القواعد** اتعملت');
+      await sleep(600);
+    }
+
+    if (!updatesChannel) {
+      const cat = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.type === ChannelType.GuildCategory);
+      updatesChannel = await g.channels.create({ name: '📣・إعلانات-المجتمع', type: ChannelType.GuildText, parent: cat?.id, topic: 'إعلانات المجتمع والتحديثات' });
+      log.push('✅ قناة **إعلانات المجتمع** اتعملت');
+      await sleep(600);
+    }
+
+    // 4. Set rules and updates channels via API
+    try {
+      await g.edit({ rulesChannelId: rulesChannel.id });
+      log.push(`✅ تم ربط **${rulesChannel.name}** كقناة القواعد`);
+    } catch (e) { log.push(`❌ ما قدرش يربط القواعد: ${e.message}`); }
+
+    try {
+      await g.edit({ publicUpdatesChannelId: updatesChannel.id });
+      log.push(`✅ تم ربط **${updatesChannel.name}** كقناة تحديثات المجتمع`);
+    } catch (e) { log.push(`❌ ما قدرش يربط تحديثات المجتمع: ${e.message}`); }
+
+  } catch (e) { log.push(`❌ خطأ: ${e.message}`); }
+
+  // 5. Send instructions
+  const embed = new EmbedBuilder()
+    .setTitle('🌍 تفعيل Community')
+    .setDescription(
+      (log.length ? log.join('\n') + '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' : '') +
+      '**الخطوات الباقية (لازم تفعلها يدوياً):**\n\n' +
+      '**`1️⃣`** ادخل **Server Settings** ⚙️\n' +
+      '**`2️⃣`** اختار **Enable Community** من القائمة\n' +
+      '**`3️⃣`** اضغط **Get Started**\n' +
+      '**`4️⃣`** اختار **القواعد** كقناة القواعد الإلزامية\n' +
+      '**`5️⃣`** اختار **إعلانات المجتمع** كقناة التحديثات\n' +
+      '**`6️⃣`** فعّل **Default Notifications** لو عايز\n' +
+      '**`7️⃣`** اضغط **I agree** لتفعيل Community\n\n' +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+      '💡 **ملاحظة:** لازم السيرفر يكون عنده **1000 عضو** على الأقل أو **7 أيام** عشان Discord يقبل التفعيل.\n\n' +
+      '🔗 أو ادخل من هنا مباشرة: https://discord.com/guilds/' + g.id + '/onboarding'
+    )
+    .setColor(0x57F287)
+    .setFooter({ text: 'AI Shop Bot' })
+    .setTimestamp();
+
+  await interaction.editReply({ embeds: [embed] });
+}
+
 // ══════════════════════════════════════════════════════════════
 //  MAIN INTERACTION ROUTER
 // ══════════════════════════════════════════════════════════════
@@ -1383,6 +1461,7 @@ client.on('interactionCreate', async (interaction) => {
         warn: cmdWarn, warnings: cmdWarnings, 'clear-warnings': cmdClearWarnings, purge: cmdPurge,
         'server-info': cmdServerInfo, 'user-info': cmdUserInfo, stats: cmdStats, 'ticket-stats': cmdTicketStats,
         'top-customers': cmdTopCustomers, giveaway: cmdGiveaway, 'end-giveaway': cmdEndGiveaway,
+        'enable-community': cmdEnableCommunity,
       };
       const handler = map[interaction.commandName];
       if (handler) return await handler(interaction);
