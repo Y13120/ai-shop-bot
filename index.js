@@ -99,15 +99,20 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const c2 = color2 || theme.c2;
   const ac = accent || theme.accent;
 
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    return { r: parseInt(h.substring(0, 2), 16), g: parseInt(h.substring(2, 4), 16), b: parseInt(h.substring(4, 6), 16) };
+  }
+
   ctx.fillStyle = '#050510';
   ctx.fillRect(0, 0, BANNER_W, BANNER_H);
 
-  for (let j = 0; j < 4; j++) {
+  for (let j = 0; j < 5; j++) {
     const x = Math.random() * BANNER_W;
     const y = Math.random() * BANNER_H;
     const r = 80 + Math.random() * 150;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, c1 + '12');
+    grad.addColorStop(0, c1 + '18');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -116,7 +121,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   }
 
   const centerGlow = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 300);
-  centerGlow.addColorStop(0, ac + '0d');
+  centerGlow.addColorStop(0, ac + '15');
   centerGlow.addColorStop(1, 'transparent');
   ctx.fillStyle = centerGlow;
   ctx.beginPath();
@@ -124,9 +129,9 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.fill();
 
   ctx.save();
-  ctx.globalAlpha = 0.08;
+  ctx.globalAlpha = 0.07;
   ctx.strokeStyle = ac;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 0.5;
   for (let y = 20; y < BANNER_H; y += 20) {
     ctx.beginPath();
     ctx.moveTo(0, y);
@@ -142,40 +147,34 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.restore();
 
   const neonLine = (y, width) => {
-    const g1 = ctx.createLinearGradient(BANNER_W / 2 - width, 0, BANNER_W / 2 + width, 0);
-    g1.addColorStop(0, 'transparent');
-    g1.addColorStop(0.15, ac + '40');
-    g1.addColorStop(0.5, ac);
-    g1.addColorStop(0.85, ac + '40');
-    g1.addColorStop(1, 'transparent');
-    ctx.shadowColor = ac;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = g1;
-    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
-    ctx.shadowBlur = 8;
-    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
-    ctx.shadowBlur = 0;
+    const rgb = hexToRgb(ac);
+    for (let i = 3; i >= 0; i--) {
+      const spread = i * 4;
+      const alpha = [0.08, 0.15, 0.3, 1.0][3 - i];
+      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+      ctx.fillRect(BANNER_W / 2 - width - spread, y - 1 - spread, (width + spread) * 2, 2 + spread * 2);
+    }
   };
   neonLine(6, 300);
   neonLine(BANNER_H - 6, 300);
 
   const neonCorner = (cx, cy, flipX, flipY) => {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-    ctx.shadowColor = ac;
-    ctx.shadowBlur = 12;
-    ctx.strokeStyle = ac;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, 30);
-    ctx.lineTo(0, 0);
-    ctx.lineTo(30, 0);
-    ctx.stroke();
-    ctx.shadowBlur = 6;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.restore();
+    const rgb = hexToRgb(ac);
+    for (let i = 3; i >= 0; i--) {
+      const spread = i * 2;
+      const alpha = [0.1, 0.25, 0.5, 1.0][3 - i];
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+      ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+      ctx.lineWidth = 2 + spread;
+      ctx.beginPath();
+      ctx.moveTo(0, 30 + spread);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(30 + spread, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
   };
   neonCorner(20, 20, false, false);
   neonCorner(BANNER_W - 20, 20, true, false);
@@ -187,47 +186,65 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
       ? 'bold 54px "Arabic", sans-serif'
-      : 'bold 54px "Inter", "Segoe UI", sans-serif';
-    ctx.font = fontName;
+      : 'bold 54px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.shadowColor = ac;
-    ctx.shadowBlur = 60;
-    ctx.fillStyle = ac + '30';
-    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 8);
-    ctx.shadowBlur = 40;
-    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 8);
-    ctx.shadowBlur = 25;
-    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 8);
+    const rgb = hexToRgb(ac);
+    const textX = BANNER_W / 2;
+    const textY = BANNER_H / 2 - 8;
+    const glowLayers = [
+      { size: 70, alpha: 0.04 },
+      { size: 55, alpha: 0.06 },
+      { size: 40, alpha: 0.08 },
+      { size: 28, alpha: 0.12 },
+      { size: 18, alpha: 0.18 },
+      { size: 10, alpha: 0.3 },
+      { size: 0, alpha: 1.0 },
+    ];
+    for (const layer of glowLayers) {
+      ctx.font = fontName;
+      ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${layer.alpha})`;
+      if (layer.size > 0) {
+        for (let dx = -layer.size; dx <= layer.size; dx += Math.max(layer.size / 3, 1)) {
+          for (let dy = -layer.size; dy <= layer.size; dy += Math.max(layer.size / 3, 1)) {
+            if (dx * dx + dy * dy <= layer.size * layer.size) {
+              ctx.fillText(displayName, textX + dx, textY + dy);
+            }
+          }
+        }
+      }
+      if (layer.alpha === 1.0) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(displayName, textX, textY);
+      }
+    }
 
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(displayName, BANNER_W / 2, BANNER_H / 2 - 8);
-    ctx.shadowBlur = 0;
-
+    const sepRgb = hexToRgb(ac);
     const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 140, 0, BANNER_W / 2 + 140, 0);
     sepGrad.addColorStop(0, 'transparent');
-    sepGrad.addColorStop(0.2, ac + '30');
+    sepGrad.addColorStop(0.2, `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},0.3)`);
     sepGrad.addColorStop(0.5, ac);
-    sepGrad.addColorStop(0.8, ac + '30');
+    sepGrad.addColorStop(0.8, `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},0.3)`);
     sepGrad.addColorStop(1, 'transparent');
-    ctx.shadowColor = ac;
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = sepGrad;
-    ctx.fillRect(BANNER_W / 2 - 140, BANNER_H / 2 + 30, 280, 1.5);
-    ctx.shadowBlur = 0;
+    for (let i = 4; i >= 0; i--) {
+      ctx.fillStyle = `rgba(${sepRgb.r},${sepRgb.g},${sepRgb.b},${i === 0 ? 1.0 : 0.08})`;
+      ctx.fillRect(BANNER_W / 2 - 140 - i * 3, BANNER_H / 2 + 30 - i, 280 + i * 6, 1.5 + i * 2);
+    }
   }
 
-  const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px "Inter", sans-serif';
+  const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px sans-serif';
   ctx.font = fontSmall;
   ctx.textAlign = 'center';
-  ctx.shadowColor = ac;
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = ac + '80';
+  const subRgb = hexToRgb(ac);
+  for (let i = 3; i >= 0; i--) {
+    ctx.fillStyle = `rgba(${subRgb.r},${subRgb.g},${subRgb.b},${[0.05, 0.12, 0.25, 0.5][3 - i]})`;
+    for (let dx = -i * 3; dx <= i * 3; dx += Math.max(i * 2, 1)) {
+      ctx.fillText('AI Shop Bot', BANNER_W / 2 + dx, BANNER_H - 22);
+    }
+  }
+  ctx.fillStyle = `rgba(${subRgb.r},${subRgb.g},${subRgb.b},0.7)`;
   ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
-  ctx.shadowBlur = 0;
 
   return Buffer.from(c.toBuffer('image/png'));
 }
