@@ -9,7 +9,30 @@ const path = require('path');
 const http = require('http');
 
 let Canvas;
-try { Canvas = require('canvas'); } catch { Canvas = null; }
+let arabicFontRegistered = false;
+try {
+  Canvas = require('canvas');
+  const fontDir = path.join(__dirname, 'fonts');
+  const fontPath = path.join(fontDir, 'NotoSansArabic.ttf');
+  if (!fs.existsSync(fontDir)) fs.mkdirSync(fontDir, { recursive: true });
+  if (!fs.existsSync(fontPath)) {
+    try {
+      const { execSync } = require('child_process');
+      execSync('curl -sL -o "' + fontPath + '" "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf"', { timeout: 30000 });
+    } catch {
+      try {
+        const { execSync } = require('child_process');
+        execSync('curl -sL -o "' + fontPath + '" "https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf"', { timeout: 30000 });
+      } catch {}
+    }
+  }
+  if (fs.existsSync(fontPath)) {
+    try {
+      Canvas.registerFont(fontPath, { family: 'Noto Sans Arabic', weight: 'bold' });
+      arabicFontRegistered = true;
+    } catch {}
+  }
+} catch { Canvas = null; }
 
 // ══════════════════════════════════════════════════════════════
 //  BANNER GENERATOR
@@ -118,7 +141,8 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.textBaseline = 'middle';
     ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
 
-    ctx.font = "bold 42px sans-serif";
+    const fontName = arabicFontRegistered ? 'bold 42px "Noto Sans Arabic", sans-serif' : 'bold 42px sans-serif';
+    ctx.font = fontName;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.shadowColor = color2 + '40';
@@ -134,7 +158,8 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.fillStyle = subGrad;
     ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
 
-    ctx.font = "600 13px sans-serif";
+    const fontSmall = arabicFontRegistered ? '600 13px "Noto Sans Arabic", sans-serif' : '600 13px sans-serif';
+    ctx.font = fontSmall;
     ctx.fillStyle = '#6b7394';
     ctx.textAlign = 'center';
     ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
