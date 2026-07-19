@@ -595,7 +595,6 @@ function renderServices(){
   const t=T[lang];
   if(!active.length){container.innerHTML=`<div class="empty"><div class="big-emoji">📭</div>${t.noServices}</div>`;return;}
 
-  // Search
   const q=document.getElementById('searchInput').value.trim().toLowerCase();
   let filtered=active;
   if(q)filtered=active.filter(s=>{
@@ -604,27 +603,33 @@ function renderServices(){
     return name.includes(q)||desc.includes(q)||s.id.toString().includes(q);
   });
 
-  // Sort
   const sort=document.getElementById('sortBy').value;
-  if(sort==='price-low')filtered.sort((a,b)=>a.price-b.price);
-  else if(sort==='price-high')filtered.sort((a,b)=>b.price-a.price);
-  else if(sort==='name')filtered.sort((a,b)=>(a.nameEn||a.name||'').localeCompare(b.nameEn||b.name||''));
 
   const grouped={};
   filtered.forEach(s=>{const c=s.category||'other';if(!grouped[c])grouped[c]=[];grouped[c].push(s)});
+
+  function sortServices(arr){
+    const sorted=[...arr];
+    if(sort==='price-low')sorted.sort((a,b)=>a.price-b.price);
+    else if(sort==='price-high')sorted.sort((a,b)=>b.price-a.price);
+    else sorted.sort((a,b)=>(a.nameEn||a.name||'').localeCompare(b.nameEn||b.name||''));
+    return sorted;
+  }
+
   let html='';
   const catsToShow=currentFilter==='all'?allCategories:allCategories.filter(c=>c.id===currentFilter);
   catsToShow.forEach(cat=>{
     const svcs=grouped[cat.id];
     if(!svcs||!svcs.length)return;
+    const sorted=sortServices(svcs);
     const catLabel=lang==='en'?(cat.nameEn||cat.name):cat.name;
     html+=`<div class="category-section">
       <div class="category-header">
         <div class="cat-icon">${cat.emoji}</div>
         <h2>${catLabel}</h2>
-        <span class="count">${svcs.length} ${t.svcCount}</span>
+        <span class="count">${sorted.length} ${t.svcCount}</span>
       </div>
-      <div class="grid">${svcs.map(s=>{
+      <div class="grid">${sorted.map(s=>{
         const sName=lang==='en'?(s.nameEn||s.name):s.name;
         const sDesc=lang==='en'?(s.descriptionEn||s.description):s.description;
         const cardData={id:s.id,name:s.name,nameEn:s.nameEn,description:s.description,descriptionEn:s.descriptionEn,price:s.price,emoji:s.emoji,category:s.category};
