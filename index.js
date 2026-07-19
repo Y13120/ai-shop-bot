@@ -82,6 +82,7 @@ const BANNER_THEMES = {
   'تقديم-للادارة':   { emoji: '📝', c1: '#1158c7', c2: '#388bfd', accent: '#58a6ff' },
   'السجلات':         { emoji: '📝', c1: '#3b3f47', c2: '#586069', accent: '#8b949e' },
   'لوحة-التحكم':     { emoji: '🔧', c1: '#da3633', c2: '#f85149', accent: '#ff7b72' },
+  'كيف-تطلب':        { emoji: '📖', c1: '#0e6245', c2: '#2ea043', accent: '#3fb950' },
 };
 
 function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = false) {
@@ -156,18 +157,30 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
   ctx.restore();
 
   if (emojiOnly) {
+    ctx.save();
+    ctx.globalAlpha = 1;
     ctx.font = '80px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = color2 + '30';
-    ctx.shadowBlur = 40;
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = 50;
+    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2);
+    ctx.shadowBlur = 25;
     ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2);
     ctx.shadowBlur = 0;
+    ctx.restore();
   } else {
+    ctx.save();
+    ctx.globalAlpha = 1;
     ctx.font = '56px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = 40;
     ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
+    ctx.shadowBlur = 20;
+    ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
+    ctx.shadowBlur = 0;
 
     const fontName = arabicFontRegistered ? 'bold 42px "Arabic", sans-serif' : 'bold 42px sans-serif';
     ctx.font = fontName;
@@ -191,6 +204,7 @@ function generateBanner(channelName, emoji, color1, color2, accent, emojiOnly = 
     ctx.fillStyle = '#6b7394';
     ctx.textAlign = 'center';
     ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
+    ctx.restore();
   }
 
   const botGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
