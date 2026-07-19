@@ -99,7 +99,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
-  const cleanName = (channelName || '').replace(/^[\w\u0600-\u06FF]+[・·]\s*/, '').replace(/-/g, ' ').trim();
+  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').trim();
   const theme = getBannerForChannel(channelName) || { c1: color1 || '#0ff', c2: color2 || '#08f', accent: accent || '#0ff' };
   const c1 = color1 || theme.c1;
   const c2 = color2 || theme.c2;
