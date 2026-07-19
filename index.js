@@ -1995,7 +1995,7 @@ const apiServer = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(200); return res.end(); }
   const url = new URL(req.url, 'http://localhost'), p = url.pathname;
   try {
-    if (req.method === 'GET' && (p === '/api/health' || p === '/')) return jsonRes(res, 200, { status: 'ok', uptime: process.uptime() });
+    if (req.method === 'GET' && (p === '/api/health' || p === '/')) return jsonRes(res, 200, { status: 'ok', uptime: process.uptime(), canvas: !!Canvas, arabicFont: arabicFontRegistered });
     const guild = client.guilds.cache.first();
     if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild' });
 
