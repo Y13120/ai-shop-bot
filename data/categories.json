@@ -1,10 +1,13 @@
 [
-  { "id": "ai", "name": "أدوات الذكاء الاصطناعي", "nameEn": "AI Tools", "emoji": "🤖" },
-  { "id": "subscriptions", "name": "اشتراكات البث", "nameEn": "Streaming Subscriptions", "emoji": "📺" },
-  { "id": "design", "name": "التصميم", "nameEn": "Design", "emoji": "🎨" },
-  { "id": "montage", "name": "المونتاج", "nameEn": "Video Editing", "emoji": "🎬" },
-  { "id": "dev", "name": "البرمجة والتطوير", "nameEn": "Development", "emoji": "💻" },
-  { "id": "academic", "name": "الخدمات الأكاديمية", "nameEn": "Academic Services", "emoji": "📚" },
-  { "id": "general", "name": "خدمات عامة", "nameEn": "General Services", "emoji": "⚡" },
-  { "id": "projects", "name": "بروجيكتات بالطلب", "nameEn": "Custom Projects", "emoji": "🏗️" }
+  { "id": "ai", "name": "أدوات الذكاء الاصطناعي", "emoji": "🤖" },
+  { "id": "subscriptions", "name": "اشتراكات البث", "emoji": "📺" },
+  { "id": "design", "name": "التصميم", "emoji": "🎨" },
+  { "id": "montage", "name": "المونتاج", "emoji": "🎬" },
+  { "id": "dev", "name": "البرمجة والتطوير", "emoji": "💻" },
+  { "id": "academic", "name": "الخدمات الأكاديمية", "emoji": "📚" },
+  { "id": "general", "name": "خدمات عامة", "emoji": "⚡" },
+  { "id": "projects", "name": "بروجيكتات بالطلب", "emoji": "🏗️" },
+  { "id": "accounts", "name": "حسابات واشتراكات رقمية", "emoji": "🔑" },
+  { "id": "social", "name": "خدمات السوشيال ميديا", "emoji": "📢" },
+  { "id": "products", "name": "منتجات رقمية جاهزة", "emoji": "📦" }
 ]

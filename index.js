@@ -8,6 +8,161 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
+let Canvas;
+try { Canvas = require('canvas'); } catch { Canvas = null; }
+
+// ══════════════════════════════════════════════════════════════
+//  BANNER GENERATOR
+// ══════════════════════════════════════════════════════════════
+const BANNER_W = 1024, BANNER_H = 300;
+const BANNER_THEMES = {
+  'الخدمات':          { emoji: '🛒', c1: '#1a6b2a', c2: '#2ea043', accent: '#3fb950' },
+  'التخفيضات':       { emoji: '🎁', c1: '#8b2252', c2: '#e74c8b', accent: '#ff69b4' },
+  'التقييمات':       { emoji: '⭐', c1: '#7a5500', c2: '#e3b341', accent: '#f1c40f' },
+  'التواصل-مع-الستاف':{ emoji: '💬', c1: '#1158c7', c2: '#388bfd', accent: '#58a6ff' },
+  'الإعلانات':       { emoji: '📣', c1: '#8957e5', c2: '#a371f7', accent: '#bc8cff' },
+  'القواعد':         { emoji: '📋', c1: '#6e40c9', c2: '#8957e5', accent: '#a371f7' },
+  'العامة':          { emoji: '💬', c1: '#1f6feb', c2: '#388bfd', accent: '#58a6ff' },
+  'اوامر-البوت':     { emoji: '🤖', c1: '#1158c7', c2: '#1f6feb', accent: '#58a6ff' },
+  'حالة-السيرفر':    { emoji: '📊', c1: '#0e4d6e', c2: '#1a8ccc', accent: '#58a6ff' },
+  'الترحيب':         { emoji: '👋', c1: '#1a6b2a', c2: '#3fb950', accent: '#56d364' },
+  'فتح-تذكرة':       { emoji: '🎫', c1: '#9e6a03', c2: '#e3b341', accent: '#f1c40f' },
+  'التسليمات':       { emoji: '📦', c1: '#0e6245', c2: '#2ea043', accent: '#3fb950' },
+  'شات-الستاف':      { emoji: '💼', c1: '#8957e5', c2: '#a371f7', accent: '#bc8cff' },
+  'ملاحظات-الستاف':  { emoji: '📋', c1: '#6e40c9', c2: '#8957e5', accent: '#bc8cff' },
+  'تقديم-للادارة':   { emoji: '📝', c1: '#1158c7', c2: '#388bfd', accent: '#58a6ff' },
+  'السجلات':         { emoji: '📝', c1: '#3b3f47', c2: '#586069', accent: '#8b949e' },
+  'لوحة-التحكم':     { emoji: '🔧', c1: '#da3633', c2: '#f85149', accent: '#ff7b72' },
+};
+
+function generateBanner(channelName, emoji, color1, color2, accent) {
+  if (!Canvas) return null;
+  const c = Canvas.createCanvas(BANNER_W, BANNER_H);
+  const ctx = c.getContext('2d');
+
+  const bg = ctx.createLinearGradient(0, 0, BANNER_W, BANNER_H);
+  bg.addColorStop(0, '#0a0e1a');
+  bg.addColorStop(0.5, '#0d1220');
+  bg.addColorStop(1, '#0a0e1a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, BANNER_W, BANNER_H);
+
+  for (let j = 0; j < 5; j++) {
+    const x = Math.random() * BANNER_W;
+    const y = Math.random() * BANNER_H;
+    const r = 80 + Math.random() * 160;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, color1 + '18');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const lineGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
+  lineGrad.addColorStop(0, 'transparent');
+  lineGrad.addColorStop(0.3, accent + '60');
+  lineGrad.addColorStop(0.5, accent);
+  lineGrad.addColorStop(0.7, accent + '60');
+  lineGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = lineGrad;
+  ctx.fillRect(0, 0, BANNER_W, 3);
+
+  const glowGrad = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 350);
+  glowGrad.addColorStop(0, color2 + '15');
+  glowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = glowGrad;
+  ctx.beginPath();
+  ctx.arc(BANNER_W / 2, BANNER_H / 2, 350, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  for (let x = 0; x < BANNER_W; x += 40) {
+    for (let y = 0; y < BANNER_H; y += 40) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.save();
+  ctx.globalAlpha = 0.04;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 1;
+  for (let j = 0; j < 6; j++) {
+    const dx = 80 + Math.random() * (BANNER_W - 160);
+    const dy = 40 + Math.random() * (BANNER_H - 80);
+    const s = 20 + Math.random() * 40;
+    ctx.beginPath();
+    ctx.moveTo(dx, dy - s);
+    ctx.lineTo(dx + s, dy);
+    ctx.lineTo(dx, dy + s);
+    ctx.lineTo(dx - s, dy);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.font = '56px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, BANNER_W / 2, BANNER_H / 2 - 42);
+
+  ctx.font = "bold 42px sans-serif";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = color2 + '40';
+  ctx.shadowBlur = 30;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(channelName, BANNER_W / 2, BANNER_H / 2 + 30);
+  ctx.shadowBlur = 0;
+
+  const subGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
+  subGrad.addColorStop(0, 'transparent');
+  subGrad.addColorStop(0.5, accent + '50');
+  subGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = subGrad;
+  ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 62, 240, 1);
+
+  ctx.font = "600 13px sans-serif";
+  ctx.fillStyle = '#6b7394';
+  ctx.textAlign = 'center';
+  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 24);
+
+  const botGrad = ctx.createLinearGradient(0, 0, BANNER_W, 0);
+  botGrad.addColorStop(0, 'transparent');
+  botGrad.addColorStop(0.5, accent + '30');
+  botGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = botGrad;
+  ctx.fillRect(0, BANNER_H - 2, BANNER_W, 2);
+
+  return Buffer.from(c.toBuffer('image/png'));
+}
+
+function getBannerForChannel(channelName) {
+  for (const [key, theme] of Object.entries(BANNER_THEMES)) {
+    if (channelName.includes(key)) {
+      return { ...theme, name: key };
+    }
+  }
+  return null;
+}
+
+async function sendBannerToChannel(channel) {
+  if (!Canvas) return false;
+  const theme = getBannerForChannel(channel.name);
+  if (!theme) return false;
+  try {
+    const buf = generateBanner(channel.name.replace(/[^\w\u0600-\u06FF-]/g, '').replace(/-/g, ' '), theme.emoji, theme.c1, theme.c2, theme.accent);
+    if (!buf) return false;
+    const { AttachmentBuilder } = require('discord.js');
+    const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
+    await channel.send({ files: [attachment] });
+    return true;
+  } catch { return false; }
+}
+
 // ══════════════════════════════════════════════════════════════
 //  CONFIG & DATA
 // ══════════════════════════════════════════════════════════════
@@ -36,78 +191,103 @@ const getCategories = () => load('categories.json', DEFAULT_CATEGORIES);
 const saveCategories = (cats) => save('categories.json', cats);
 const DEFAULT_SERVICES = [
   // 🤖 أدوات الذكاء الاصطناعي
-  { id: 1, name: 'ChatGPT Plus اشتراك شهري', nameEn: 'ChatGPT Plus Monthly', description: 'اشتراك ChatGPT Plus لمدة شهر — GPT-4o — غير محدود', descriptionEn: 'ChatGPT Plus subscription — 1 month — GPT-4o — Unlimited', price: 250000000, category: 'ai', emoji: '🤖', active: true },
-  { id: 2, name: 'Claude Pro اشتراك شهري', nameEn: 'Claude Pro Monthly', description: 'اشتراك Claude Pro لمدة شهر — Claude 3.5 Sonnet — 5x أكثر', descriptionEn: 'Claude Pro subscription — 1 month — 5x more usage', price: 250000000, category: 'ai', emoji: '🧠', active: true },
-  { id: 3, name: 'Midjourney اشتراك', nameEn: 'Midjourney Subscription', description: 'اشتراك Midjourney — توليد صور بالذكاء الاصطناعي — 30 ساعة شهرياً', descriptionEn: 'Midjourney subscription — AI image generation — 30 hrs/month', price: 416667000, category: 'ai', emoji: '🖼️', active: true },
-  { id: 4, name: 'Suno AI توليد موسيقى', nameEn: 'Suno AI Music', description: 'توليد موسيقى بالذكاء الاصطناعي — أي جنس — صوت احترافي', descriptionEn: 'AI music generation — Any genre — Professional quality', price: 125000000, category: 'ai', emoji: '🎵', active: true },
-  { id: 5, name: 'ElevenLabs صوت AI', nameEn: 'ElevenLabs Voice AI', description: 'تحويل نص لكلام صوتي بالذكاء الاصطناعي — أصوات واقعية — أي لغة', descriptionEn: 'Text to speech AI — Realistic voices — Any language', price: 83333000, category: 'ai', emoji: '🔊', active: true },
-  { id: 6, name: 'CapCut Pro اشتراك', nameEn: 'CapCut Pro Subscription', description: 'اشتراك CapCut Pro — مونتاج بالذكاء الاصطناعي — ميزات متقدمة', descriptionEn: 'CapCut Pro subscription — AI editing — Advanced features', price: 133333000, category: 'ai', emoji: '✂️', active: true },
-  { id: 7, name: 'توليد صور AI', nameEn: 'AI Image Generation', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', descriptionEn: 'AI image generation — DALL-E 3 — 3 images', price: 41667000, category: 'ai', emoji: '📸', active: true },
-  { id: 8, name: 'صوت AI — نص لكلام', nameEn: 'AI Text to Speech', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', descriptionEn: 'Convert text to natural AI voice — Multiple languages + Emotions', price: 25000000, category: 'ai', emoji: '🎙️', active: true },
-  { id: 9, name: 'صوت AI — كلام لنص', nameEn: 'AI Speech to Text', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', descriptionEn: 'Convert audio/speech to written text — Accurate + Fast', price: 25000000, category: 'ai', emoji: '📝', active: true },
-  { id: 10, name: 'تحليل بيانات AI', nameEn: 'AI Data Analysis', description: 'تحليل أي مجموعة بيانات بالذكاء الاصطناعي — رسوم بيانية + تقارير', descriptionEn: 'Professional data analysis with AI — Charts + Reports + CSV', price: 83333000, category: 'ai', emoji: '📊', active: true },
+  { id: 1, name: 'ChatGPT Plus اشتراك شهري', description: 'اشتراك ChatGPT Plus لمدة شهر — GPT-4o — غير محدود', price: 250000000, category: 'ai', emoji: '🤖', active: true },
+  { id: 2, name: 'Claude Pro اشتراك شهري', description: 'اشتراك Claude Pro لمدة شهر — Claude 3.5 Sonnet — 5x أكثر', price: 250000000, category: 'ai', emoji: '🧠', active: true },
+  { id: 3, name: 'Midjourney اشتراك', description: 'اشتراك Midjourney — توليد صور بالذكاء الاصطناعي — 30 ساعة شهرياً', price: 416667000, category: 'ai', emoji: '🖼️', active: true },
+  { id: 4, name: 'Suno AI توليد موسيقى', description: 'توليد موسيقى بالذكاء الاصطناعي — أي جنس — صوت احترافي', price: 125000000, category: 'ai', emoji: '🎵', active: true },
+  { id: 5, name: 'ElevenLabs صوت AI', description: 'تحويل نص لكلام صوتي بالذكاء الاصطناعي — أصوات واقعية — أي لغة', price: 83333000, category: 'ai', emoji: '🔊', active: true },
+  { id: 6, name: 'CapCut Pro اشتراك', description: 'اشتراك CapCut Pro — مونتاج بالذكاء الاصطناعي — ميزات متقدمة', price: 133333000, category: 'ai', emoji: '✂️', active: true },
+  { id: 7, name: 'توليد صور AI', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', price: 16667000, category: 'ai', emoji: '📸', active: true },
+  { id: 8, name: 'صوت AI — نص لكلام', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', price: 16667000, category: 'ai', emoji: '🎙️', active: true },
+  { id: 9, name: 'صوت AI — كلام لنص', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', price: 16667000, category: 'ai', emoji: '📝', active: true },
+  { id: 10, name: 'تحليل بيانات AI', description: 'تحليل أي مجموعة بيانات بالذكاء الاصطناعي — رسوم بيانية + تقارير', price: 83333000, category: 'ai', emoji: '📊', active: true },
+  { id: 11, name: 'كتابة محتوى بالـ AI', description: 'كتابة مقالات أو سكريبتات أو محتوى تسويقي بالذكاء الاصطناعي', price: 25000000, category: 'ai', emoji: '✍️', active: true },
+  { id: 12, name: 'تصميم لوجو بالـ AI', description: 'تصميم لوجو بالذكاء الاصطناعي — أي ستايل — تعديلات', price: 25000000, category: 'ai', emoji: '🎨', active: true },
   // 📺 اشتراكات البث
-  { id: 11, name: 'Netflix اشتراك شهري', nameEn: 'Netflix Monthly', description: 'اشتراك Netflix لمدة شهر — فردي أو مشترك — 4K', descriptionEn: 'Netflix subscription — 1 month — Individual or Shared — 4K', price: 666667000, category: 'subscriptions', emoji: '🎬', active: true },
-  { id: 12, name: 'Spotify Premium', nameEn: 'Spotify Premium', description: 'اشتراك Spotify Premium لمدة شهر — بدون إعلانات — تحميل', descriptionEn: 'Spotify Premium — 1 month — No ads — Offline download', price: 416667000, category: 'subscriptions', emoji: '🎵', active: true },
-  { id: 13, name: 'YouTube Premium', nameEn: 'YouTube Premium', description: 'اشتراك YouTube Premium لمدة شهر — بدون إعلانات — خلف الشاشة', descriptionEn: 'YouTube Premium — 1 month — No ads — Background play', price: 500000000, category: 'subscriptions', emoji: '▶️', active: true },
-  { id: 14, name: 'Disney+ / Prime Video', nameEn: 'Disney+ / Prime Video', description: 'اشتراك Disney+ أو Amazon Prime Video لمدة شهر', descriptionEn: 'Disney+ or Amazon Prime Video subscription — 1 month', price: 416667000, category: 'subscriptions', emoji: '🏰', active: true },
-  { id: 15, name: 'Crunchyroll أنمي', nameEn: 'Crunchyroll Anime', description: 'اشتراك Crunchyroll — أنمي بدون إعلانات — ترجمة عربية', descriptionEn: 'Crunchyroll subscription — Ad-free anime — Arabic subtitles', price: 333333000, category: 'subscriptions', emoji: '🎌', active: true },
-  { id: 16, name: 'Canva Pro اشتراك', nameEn: 'Canva Pro Subscription', description: 'اشتراك Canva Pro — تصميم بدون حدود — قوالب احترافية', descriptionEn: 'Canva Pro subscription — Unlimited design — Professional templates', price: 500000000, category: 'subscriptions', emoji: '🎨', active: true },
+  { id: 13, name: 'Netflix اشتراك شهري', description: 'اشتراك Netflix لمدة شهر — فردي أو مشترك — 4K', price: 666667000, category: 'subscriptions', emoji: '🎬', active: true },
+  { id: 14, name: 'Spotify Premium', description: 'اشتراك Spotify Premium لمدة شهر — بدون إعلانات — تحميل', price: 416667000, category: 'subscriptions', emoji: '🎵', active: true },
+  { id: 15, name: 'YouTube Premium', description: 'اشتراك YouTube Premium لمدة شهر — بدون إعلانات — خلف الشاشة', price: 500000000, category: 'subscriptions', emoji: '▶️', active: true },
+  { id: 16, name: 'Disney+ / Prime Video', description: 'اشتراك Disney+ أو Amazon Prime Video لمدة شهر', price: 416667000, category: 'subscriptions', emoji: '🏰', active: true },
+  { id: 17, name: 'Crunchyroll أنمي', description: 'اشتراك Crunchyroll — أنمي بدون إعلانات — ترجمة عربية', price: 333333000, category: 'subscriptions', emoji: '🎌', active: true },
+  { id: 18, name: 'Canva Pro اشتراك', description: 'اشتراك Canva Pro — تصميم بدون حدود — قوالب احترافية', price: 500000000, category: 'subscriptions', emoji: '🎨', active: true },
   // 🎨 التصميم
-  { id: 17, name: 'تصميم لوجو احترافي', nameEn: 'Professional Logo Design', description: 'تصميم لوجو احترافي — أحجام متعددة — شفاف — أي ستايل', descriptionEn: 'Professional logo design — Multiple sizes — Transparent — Any style', price: 833333000, category: 'design', emoji: '✏️', active: true },
-  { id: 18, name: 'تصميم بوستر إعلاني', nameEn: 'Poster Design', description: 'تصميم بوستر إعلاني أو ترويجي — جودة عالية + تعديلات', descriptionEn: 'Professional poster design — Print + Digital — High quality', price: 583333000, category: 'design', emoji: '🖼️', active: true },
-  { id: 19, name: 'تصميم بانر', nameEn: 'Banner Design', description: 'تصميم بانر لسوشيال ميديا أو ويب — جميع الأحجام', descriptionEn: 'Professional banner design — Social media + YouTube + Twitch', price: 416667000, category: 'design', emoji: '🎨', active: true },
-  { id: 20, name: 'تصميم UI/UX', nameEn: 'UI/UX Design', description: 'تصميم واجهة مستخدم احترافية — Mockups + Prototypes', descriptionEn: 'Modern UI/UX design — Mockups + Prototypes', price: 5833333000, category: 'design', emoji: '📱', active: true },
-  { id: 21, name: 'تصميم هوية بصرية', nameEn: 'Brand Identity Design', description: 'تصميم هوية بصرية كاملة — لوجو + ألوان + خطوط + بطاقات', descriptionEn: 'Complete brand identity — Logo + Colors + Typography + Guidelines', price: 10000000000, category: 'design', emoji: '💼', active: true },
-  { id: 22, name: 'تصميم Thumbnail يوتيوب', nameEn: 'YouTube Thumbnail', description: 'تصميم صورة غلاف لليوتيوب — جذابة + احترافية + عالية الجودة', descriptionEn: 'Professional YouTube thumbnail — Eye-catching + High quality', price: 333333000, category: 'design', emoji: '📺', active: true },
-  { id: 23, name: 'retouch صور', nameEn: 'Photo Retouching', description: 'retouch احترافي للصور — تنعيم البشرة — إزالة العيوب — تحسين الألوان', descriptionEn: 'Professional photo retouching — Skin smoothing + Color correction', price: 200000000, category: 'design', emoji: '🖌️', active: true },
-  { id: 24, name: 'إزالة الخلفية', nameEn: 'Background Removal', description: 'إزالة خلفية الصورة بدقة — استبدال أو شفاف', descriptionEn: 'Professional background removal — Clean + High quality', price: 83333000, category: 'design', emoji: '✂️', active: true },
+  { id: 19, name: 'تصميم لوجو احترافي', description: 'تصميم لوجو احترافي — أحجام متعددة — شفاف — أي ستايل', price: 250000000, category: 'design', emoji: '✏️', active: true },
+  { id: 20, name: 'تصميم بوستر إعلاني', description: 'تصميم بوستر إعلاني أو ترويجي — جودة عالية + تعديلات', price: 166667000, category: 'design', emoji: '🖼️', active: true },
+  { id: 21, name: 'تصميم بانر', description: 'تصميم بانر لسوشيال ميديا أو ويب — جميع الأحجام', price: 125000000, category: 'design', emoji: '🎨', active: true },
+  { id: 22, name: 'تصميم UI/UX', description: 'تصميم واجهة مستخدم احترافية — Mockups + Prototypes', price: 500000000, category: 'design', emoji: '📱', active: true },
+  { id: 23, name: 'تصميم هوية بصرية', description: 'تصميم هوية بصرية كاملة — لوجو + ألوان + خطوط + بطاقات', price: 833333000, category: 'design', emoji: '💼', active: true },
+  { id: 24, name: 'تصميم Thumbnail يوتيوب', description: 'تصميم صورة غلاف لليوتيوب — جذابة + احترافية + عالية الجودة', price: 83333000, category: 'design', emoji: '📺', active: true },
+  { id: 25, name: '_retouch_ صور', description: 'retouch احترافي للصور — تنعيم البشرة — إزالة العيوب — تحسين الألوان', price: 50000000, category: 'design', emoji: '🖌️', active: true },
+  { id: 26, name: 'إزالة الخلفية', description: 'إزالة خلفية الصورة بدقة — استبدال أو شفاف', price: 16667000, category: 'design', emoji: '✂️', active: true },
   // 🎬 المونتاج
-  { id: 25, name: 'مونتاج فيديو احترافي', nameEn: 'Professional Video Editing', description: 'مونتاج فيديو احترافي — قص + ترتيب + انتقالات + موسيقى', descriptionEn: 'Professional video editing — Cuts + Transitions + Effects', price: 4166667000, category: 'montage', emoji: '🎬', active: true },
-  { id: 26, name: 'مونتاج Reels / تيك توك', nameEn: 'Reels / TikTok Editing', description: 'مونتاج ريلز أو تيك توك — سرعة + تأثيرات + موسيقى ترند', descriptionEn: 'Short-form video editing — Reels + TikTok + Viral effects', price: 833333000, category: 'montage', emoji: '📱', active: true },
-  { id: 27, name: 'مونتاج يوتيوب', nameEn: 'YouTube Video Editing', description: 'مونتاج فيديو يوتيوب كامل — قص + موسيقى + تأثيرات + ترجمة', descriptionEn: 'Professional YouTube video editing — Cuts + Thumbnails + Effects', price: 6666667000, category: 'montage', emoji: '▶️', active: true },
-  { id: 28, name: 'تصميم إنтро/أوترو', nameEn: 'Intro/Outro Design', description: 'تصميم مقدمة ونهاية للفيديوهات — أنيميشن + لوجو', descriptionEn: 'Professional intro/outro for YouTube — Animation + Sound', price: 1333333000, category: 'montage', emoji: '✨', active: true },
-  { id: 29, name: 'موشن جرافيك', nameEn: 'Motion Graphics', description: 'تصميم موشن جرافيك — أنيميشن — شرح — إعلانات متحركة', descriptionEn: 'Professional motion graphics — Animation + Effects + Typography', price: 6666667000, category: 'montage', emoji: '🎭', active: true },
-  { id: 30, name: 'إنشاء فيديو AI', nameEn: 'AI Video Creation', description: 'إنشاء فيديو بالذكاء الاصطناعي — كرتوني أو واقعي — جودة HD', descriptionEn: 'AI-powered video creation — Script + Voiceover + Editing — HD', price: 2000000000, category: 'montage', emoji: '🤖', active: true },
+  { id: 27, name: 'مونتاج فيديو احترافي', description: 'مونتاج فيديو احترافي — قص + ترتيب + انتقالات + موسيقى', price: 500000000, category: 'montage', emoji: '🎬', active: true },
+  { id: 28, name: 'مونتاج Reels / تيك توك', description: 'مونتاج ريلز أو تيك توك — سرعة + تأثيرات + موسيقى ترند', price: 166667000, category: 'montage', emoji: '📱', active: true },
+  { id: 29, name: 'مونتاج يوتيوب', description: 'مونتاج فيديو يوتيوب كامل — قص + موسيقى + تأثيرات + ترجمة', price: 833333000, category: 'montage', emoji: '▶️', active: true },
+  { id: 30, name: 'تصميم إنтро/أوترو', description: 'تصميم مقدمة ونهاية للفيديوهات — أنيميشن + لوجو', price: 250000000, category: 'montage', emoji: '✨', active: true },
+  { id: 31, name: 'موشن جرافيك', description: 'تصميم موشن جرافيك — أنيميشن — شرح — إعلانات متحركة', price: 833333000, category: 'montage', emoji: '🎭', active: true },
+  { id: 32, name: 'إنشاء فيديو AI', description: 'إنشاء فيديو بالذكاء الاصطناعي — كرتوني أو واقعي — جودة HD', price: 166667000, category: 'montage', emoji: '🤖', active: true },
   // 💻 البرمجة
-  { id: 31, name: 'بوت Discord مخصص', nameEn: 'Custom Discord Bot', description: 'إنشاء بوت Discord مخصص — أوامر + تذاكر + أتمتة + إدارة', descriptionEn: 'Custom Discord bot — Commands + Database + Dashboard + Support', price: 4166667000, category: 'dev', emoji: '🤖', active: true },
-  { id: 32, name: 'تطوير موقع ويب كامل', nameEn: 'Full Website Development', description: 'تطوير موقع ويب كامل — تصميم + كود + ربط + استضافة', descriptionEn: 'Complete website development — Design + Code + Hosting', price: 10000000000, category: 'dev', emoji: '🌐', active: true },
-  { id: 33, name: 'Landing Page', nameEn: 'Landing Page', description: 'تصميم صفحة هبوط احترافية — متجاوبة + سريعة + تحويل عالي', descriptionEn: 'High-converting landing page — Responsive + Fast + SEO', price: 2500000000, category: 'dev', emoji: '📄', active: true },
-  { id: 34, name: 'تطوير تطبيق موبايل', nameEn: 'Mobile App Development', description: 'تطوير تطبيق موبايل كامل — Android أو iOS — تصميم + كود', descriptionEn: 'Full mobile app development — Android or iOS — Design + Code', price: 16666667000, category: 'dev', emoji: '📱', active: true },
-  { id: 35, name: 'سكربت أتمتة', nameEn: 'Automation Script', description: 'كتابة سكربت لأتمتة أي مهمة — Python, JS — سريع وموثوق', descriptionEn: 'Automation script for any task — Python, JS — Fast + Reliable', price: 1333333000, category: 'dev', emoji: '⚙️', active: true },
-  { id: 36, name: 'إعداد WordPress', nameEn: 'WordPress Setup', description: 'إعداد و تخصيص موقع WordPress — ثيم + بلاغينات + إعداد', descriptionEn: 'Full WordPress website — Theme + Plugins + Content', price: 2000000000, category: 'dev', emoji: '🔧', active: true },
-  { id: 37, name: 'ربط API', nameEn: 'API Integration', description: 'ربط أي API مع مشروعك — REST + JSON + أمان', descriptionEn: 'Connect any API to your app — REST + JSON + Auth', price: 1666667000, category: 'dev', emoji: '🔗', active: true },
-  { id: 38, name: 'إصلاح مشكلة برمجية', nameEn: 'Bug Fix', description: 'إصلاح أي bug أو مشكلة في كودك — أي لغة برمجة', descriptionEn: 'Fix any bug or issue in your code — Fast + Reliable', price: 666667000, category: 'dev', emoji: '🐛', active: true },
+  { id: 33, name: 'بوت Discord مخصص', description: 'إنشاء بوت Discord مخصص — أوامر + تذاكر + أتمتة + إدارة', price: 500000000, category: 'dev', emoji: '🤖', active: true },
+  { id: 34, name: 'تطوير موقع ويب كامل', description: 'تطوير موقع ويب كامل — تصميم + كود + ربط + استضافة', price: 1666667000, category: 'dev', emoji: '🌐', active: true },
+  { id: 35, name: 'Landing Page', description: 'تصميم صفحة هبوط احترافية — متجاوبة + سريعة + تحويل عالي', price: 333333000, category: 'dev', emoji: '📄', active: true },
+  { id: 36, name: 'تطوير تطبيق موبايل', description: 'تطوير تطبيق موبايل كامل — Android أو iOS — تصميم + كود', price: 2500000000, category: 'dev', emoji: '📱', active: true },
+  { id: 37, name: 'سكربت أتمتة', description: 'كتابة سكربت لأتمتة أي مهمة — Python, JS — سريع وموثوق', price: 250000000, category: 'dev', emoji: '⚙️', active: true },
+  { id: 38, name: 'إعداد WordPress', description: 'إعداد و تخصيص موقع WordPress — ثيم + بلاغينات + إعداد', price: 166667000, category: 'dev', emoji: '🔧', active: true },
+  { id: 39, name: 'ربط API', description: 'ربط أي API مع مشروعك — REST + JSON + أمان', price: 166667000, category: 'dev', emoji: '🔗', active: true },
+  { id: 40, name: 'إصلاح مشكلة برمجية', description: 'إصلاح أي bug أو مشكلة في كودك — أي لغة برمجة', price: 83333000, category: 'dev', emoji: '🐛', active: true },
   // 📚 الخدمات الأكاديمية
-  { id: 39, name: 'كتابة مقالات أكاديمية', nameEn: 'Academic Writing', description: 'كتابة أي نوع من المقالات — أكاديمي، تسويقي، تقني، إبداعي', descriptionEn: 'Academic paper writing — Grammar + Style + Citations', price: 500000000, category: 'academic', emoji: '📝', active: true },
-  { id: 40, name: 'ترجمة احترافية', nameEn: 'Professional Translation', description: 'ترجمة أي نص — بدقة عالية + سياق طبيعي + مراجعة', descriptionEn: 'Professional translation — Arabic ↔ English + Any language', price: 416667000, category: 'academic', emoji: '🌐', active: true },
-  { id: 41, name: 'حلول رياضيات', nameEn: 'Math Solutions', description: 'حلول مسائل رياضيات — جبر — حساب تفاضلي — احصاء — أي مستوى', descriptionEn: 'Math problem solutions — Algebra — Calculus — Statistics — Any level', price: 250000000, category: 'academic', emoji: '🔢', active: true },
-  { id: 42, name: 'حلول فيزياء', nameEn: 'Physics Solutions', description: 'حلول مسائل فيزياء — ميكانيكا — كهرباء — أي مستوى', descriptionEn: 'Physics problem solutions — Mechanics — Electricity — Any level', price: 250000000, category: 'academic', emoji: '⚛️', active: true },
-  { id: 43, name: 'تصميم CV / سيرة ذاتية', nameEn: 'CV / Resume Design', description: 'تصميم سيرة ذاتية احترافية — جذابة — متوافقة مع ATS', descriptionEn: 'Professional CV/Resume design — Eye-catching — ATS-friendly', price: 416667000, category: 'academic', emoji: '📋', active: true },
+  { id: 41, name: 'كتابة مقالات أكاديمية', description: 'كتابة أي نوع من المقالات — أكاديمي، تسويقي، تقني، إبداعي', price: 166667000, category: 'academic', emoji: '📝', active: true },
+  { id: 42, name: 'ترجمة احترافية', description: 'ترجمة أي نص — بدقة عالية + سياق طبيعي + مراجعة', price: 125000000, category: 'academic', emoji: '🌐', active: true },
+  { id: 43, name: 'حلول رياضيات', description: 'حلول مسائل رياضيات — جبر — حساب تفاضلي — احصاء — أي مستوى', price: 83333000, category: 'academic', emoji: '🔢', active: true },
+  { id: 44, name: 'حلول فيزياء', description: 'حلول مسائل فيزياء — ميكانيكا — كهرباء — أي مستوى', price: 83333000, category: 'academic', emoji: '⚛️', active: true },
+  { id: 45, name: 'تصميم CV / سيرة ذاتية', description: 'تصميم سيرة ذاتية احترافية — جذابة — متوافقة مع ATS', price: 83333000, category: 'academic', emoji: '📋', active: true },
+  { id: 46, name: 'ملخصات ومراجعات', description: 'عمل ملخصات وشيتات مذاكرة لأي مادة — مرتّبة ومفصّلة', price: 50000000, category: 'academic', emoji: '📖', active: true },
   // ⚡ خدمات عامة
-  { id: 44, name: 'إعداد سيرفر Discord', nameEn: 'Discord Server Setup', description: 'إعداد سيرفر كامل — رولات + قنوات + صلاحيات + بوتات + ترحيب', descriptionEn: 'Full Discord server setup — Roles + Channels + Bots + Rules', price: 666667000, category: 'general', emoji: '🎮', active: true },
-  { id: 45, name: 'مساعدة برمجية', nameEn: 'Programming Tutoring', description: 'مساعدة في أي لغة برمجة — Python, JS, C++, Java, PHP', descriptionEn: 'One-on-one programming tutoring — Python, JS, C++, Java, PHP', price: 666667000, category: 'general', emoji: '💻', active: true },
-  { id: 46, name: 'كتابة محتوى تسويقي', nameEn: 'Copywriting', description: 'كتابة محتوى تسويقي — إعلانات — وصف منتج — سوشيال ميديا', descriptionEn: 'Marketing copywriting — Ads — Product descriptions — Social media', price: 416667000, category: 'general', emoji: '📢', active: true },
-  { id: 47, name: 'إدارة سوشيال ميديا', nameEn: 'Social Media Management', description: 'إدارة حسابات سوشيال ميديا — محتوى + جدولة + تفاعل', descriptionEn: 'Social media management — Content + Scheduling + Engagement', price: 3333333000, category: 'general', emoji: '📱', active: true },
-  { id: 48, name: 'إعداد متجر إلكتروني', nameEn: 'E-commerce Store Setup', description: 'إعداد متجر إلكتروني كامل — منتجات + سلة + دفع إلكتروني', descriptionEn: 'Full e-commerce store — Products + Cart + Payment gateway', price: 6666667000, category: 'general', emoji: '🛒', active: true },
+  { id: 47, name: 'إعداد سيرفر Discord', description: 'إعداد سيرفر كامل — رولات + قنوات + صلاحيات + بوتات + ترحيب', price: 166667000, category: 'general', emoji: '🎮', active: true },
+  { id: 48, name: 'مساعدة برمجية', description: 'مساعدة في أي لغة برمجة — Python, JS, C++, Java, PHP', price: 83333000, category: 'general', emoji: '💻', active: true },
+  { id: 49, name: 'كتابة محتوى تسويقي', description: 'كتابة محتوى تسويقي — إعلانات — وصف منتج — سوشيال ميديا', price: 125000000, category: 'general', emoji: '📢', active: true },
+  { id: 50, name: 'إدارة سوشيال ميديا', description: 'إدارة حسابات سوشيال ميديا — محتوى + جدولة + تفاعل', price: 500000000, category: 'general', emoji: '📱', active: true },
+  { id: 51, name: 'إعداد متجر إلكتروني', description: 'إعداد متجر إلكتروني كامل — منتجات + سلة + دفع إلكتروني', price: 833333000, category: 'general', emoji: '🛒', active: true },
+  { id: 52, name: 'كوسات وتدريب', description: 'دورة تدريبية في أي مجال — تصميم — برمجة — تسويق — على مكالمتك', price: 250000000, category: 'general', emoji: '🎓', active: true },
   // 🏗️ بروجيكتات بالطلب
-  { id: 49, name: 'بروجيكت ويب كامل بالطلب', nameEn: 'Custom Web Project', description: 'أي بروجيكت ويب بالطلب — وصف متطلباتك وهننفذهولك', descriptionEn: 'Any custom web project — describe your requirements', price: 500000000, category: 'projects', emoji: '🌐', active: true },
-  { id: 50, name: 'بروجيكت موبايل بالطلب', nameEn: 'Custom Mobile Project', description: 'أي تطبيق موبايل بالطلب — Android أو iOS — وصف متطلباتك', descriptionEn: 'Any custom mobile app — Android or iOS — Describe your needs', price: 500000000, category: 'projects', emoji: '📱', active: true },
-  { id: 51, name: 'بروجيكت برمجي خاص', nameEn: 'Custom Software Project', description: 'أي بروجيكت برمجي بالطلب — سكربتات — أتمتة — أدوات — وصف متطلباتك', descriptionEn: 'Any custom software project — Scripts — Automation — Tools', price: 300000000, category: 'projects', emoji: '⚙️', active: true },
-  { id: 52, name: 'بروجيكت تصميم بالطلب', nameEn: 'Custom Design Project', description: 'أي تصميم بالطلب — لوجو — بوستر — هوية بصرية — وصف متطلباتك', descriptionEn: 'Any custom design project — Logo — Poster — Brand identity', price: 250000000, category: 'projects', emoji: '🎨', active: true },
-  { id: 53, name: 'بروجيكت مونتاج بالطلب', nameEn: 'Custom Video Project', description: 'أي فيديو أو مونتاج بالطلب — ريلز — يوتيوب — إعلانات — وصف متطلباتك', descriptionEn: 'Any custom video project — Reels — YouTube — Ads', price: 300000000, category: 'projects', emoji: '🎬', active: true },
-  { id: 54, name: 'بروجيكت أكاديمي بالطلب', nameEn: 'Custom Academic Project', description: 'أي عمل أكاديمي بالطلب — بحث — تقرير — عرض — وصف متطلباتك', descriptionEn: 'Any custom academic work — Research — Report — Presentation', price: 200000000, category: 'projects', emoji: '📚', active: true },
-  { id: 55, name: 'بروجيكت خاص بأي خدمة', nameEn: 'Any Custom Service', description: 'مش لاقي الخدمة اللي عايزها؟ اطلب أي خدمة خاصة واحنا هننفذهالك', descriptionEn: "Can't find what you need? Request any custom service", price: 100000000, category: 'projects', emoji: '✨', active: true },
+  { id: 53, name: 'بروجيكت ويب كامل بالطلب', description: 'أي بروجيكت ويب بالطلب — وصف متطلباتك وهننفذهولك', price: 500000000, category: 'projects', emoji: '🌐', active: true },
+  { id: 54, name: 'بروجيكت موبايل بالطلب', description: 'أي تطبيق موبايل بالطلب — Android أو iOS — وصف متطلباتك', price: 500000000, category: 'projects', emoji: '📱', active: true },
+  { id: 55, name: 'بروجيكت برمجي خاص', description: 'أي بروجيكت برمجي بالطلب — سكربتات — أتمتة — أدوات', price: 300000000, category: 'projects', emoji: '⚙️', active: true },
+  { id: 56, name: 'بروجيكت تصميم بالطلب', description: 'أي تصميم بالطلب — لوجو — بوستر — هوية بصرية', price: 166667000, category: 'projects', emoji: '🎨', active: true },
+  { id: 57, name: 'بروجيكت مونتاج بالطلب', description: 'أي فيديو أو مونتاج بالطلب — ريلز — يوتيوب — إعلانات', price: 300000000, category: 'projects', emoji: '🎬', active: true },
+  { id: 58, name: 'بروجيكت أكاديمي بالطلب', description: 'أي عمل أكاديمي بالطلب — بحث — تقرير — عرض', price: 166667000, category: 'projects', emoji: '📚', active: true },
+  { id: 59, name: 'بروجيكت خاص بأي خدمة', description: 'مش لاقي الخدمة اللي عايزها؟ اطلب أي خدمة خاصة واحنا هننفذهالك', price: 83333000, category: 'projects', emoji: '✨', active: true },
+  // 📱 حسابات واشتراكات رقمية
+  { id: 60, name: 'حساب Steam مميز', description: 'حساب Steam بألعاب مميزة — أو شحن محفظة Steam', price: 250000000, category: 'accounts', emoji: '🎮', active: true },
+  { id: 61, name: 'PlayStation Plus اشتراك', description: 'اشتراك PlayStation Plus — ألعاب مجانية — أونلاين', price: 333333000, category: 'accounts', emoji: '🎮', active: true },
+  { id: 62, name: 'Xbox Game Pass اشتراك', description: 'اشتراك Xbox Game Pass — مئات الألعاب — PC + Console', price: 333333000, category: 'accounts', emoji: '🟢', active: true },
+  { id: 63, name: 'Adobe Creative Cloud', description: 'اشتراك Adobe — Photoshop + Illustrator + Premiere + كل البرامج', price: 500000000, category: 'accounts', emoji: '🎨', active: true },
+  { id: 64, name: 'حسابات تطبيقات مميزة', description: 'حسابات مميزة لأي تطبيق — أدوبي — فوتوشاوب — أي حاجة', price: 166667000, category: 'accounts', emoji: '📱', active: true },
+  // 📢 خدمات السوشيال ميديا
+  { id: 65, name: 'زيادة متابعين انستجرام', description: 'زيادة متابعين حقيقيين لحسابك على انستجرام — فوري + آمن', price: 166667000, category: 'social', emoji: '📸', active: true },
+  { id: 66, name: 'زيادة متابعين تيك توك', description: 'زيادة متابعين ومشاهدات لحسابك على تيك توك — فوري', price: 166667000, category: 'social', emoji: '🎵', active: true },
+  { id: 67, name: 'زيادة متابعين يوتيوب', description: 'زيادة مشتركين ومشاهدات لقناتك على يوتيوب — فوري', price: 250000000, category: 'social', emoji: '▶️', active: true },
+  { id: 68, name: 'تصميم محتوى سوشيال', description: 'تصميم بوستات — ريلز — ستوريز — لجميع المنصات', price: 83333000, category: 'social', emoji: '🎨', active: true },
+  { id: 69, name: 'إدارة حساب سوشيال ميديا', description: 'إدارة حسابك على أي منصة — محتوى + جدولة + تفاعل — لمدة شهر', price: 500000000, category: 'social', emoji: '📱', active: true },
+  // 📦 منتجات رقمية جاهزة
+  { id: 70, name: 'قوالب بوتات Discord', description: 'قوالب جاهزة لبوتات ديسكورد — جاهزة للتعديل والتشغيل', price: 50000000, category: 'products', emoji: '🤖', active: true },
+  { id: 71, name: 'قوالب مواقع', description: 'قوالب جاهزة لمواقع الويب — HTML + CSS — متجاوبة', price: 50000000, category: 'products', emoji: '🌐', active: true },
+  { id: 72, name: 'قوالب عروض تقديمية', description: 'قوالب PowerPoint / Google Slides — احترافية ومتنوعة', price: 25000000, category: 'products', emoji: '📊', active: true },
+  { id: 73, name: 'إيموجيز وستيكرز مخصصة', description: 'تصميم إيموجيز وستيكرز مخصصة لسيرفرك أو تطبيقك', price: 50000000, category: 'products', emoji: '😀', active: true },
+  { id: 74, name: 'خطوط وأصول تصميم', description: 'خطوط عربية وإنجليزية + عناصر تصميم جاهزة', price: 25000000, category: 'products', emoji: '🔤', active: true },
 ];
 const DEFAULT_CATEGORIES = [
-  { id: 'ai', name: 'أدوات الذكاء الاصطناعي', nameEn: 'AI Tools', emoji: '🤖' },
-  { id: 'subscriptions', name: 'اشتراكات البث', nameEn: 'Streaming Subscriptions', emoji: '📺' },
-  { id: 'design', name: 'التصميم', nameEn: 'Design', emoji: '🎨' },
-  { id: 'montage', name: 'المونتاج', nameEn: 'Video Editing', emoji: '🎬' },
-  { id: 'dev', name: 'البرمجة والتطوير', nameEn: 'Development', emoji: '💻' },
-  { id: 'academic', name: 'الخدمات الأكاديمية', nameEn: 'Academic Services', emoji: '📚' },
-  { id: 'general', name: 'خدمات عامة', nameEn: 'General Services', emoji: '⚡' },
-  { id: 'projects', name: 'بروجيكتات بالطلب', nameEn: 'Custom Projects', emoji: '🏗️' },
+  { id: 'ai', name: 'أدوات الذكاء الاصطناعي', emoji: '🤖' },
+  { id: 'subscriptions', name: 'اشتراكات البث', emoji: '📺' },
+  { id: 'design', name: 'التصميم', emoji: '🎨' },
+  { id: 'montage', name: 'المونتاج', emoji: '🎬' },
+  { id: 'dev', name: 'البرمجة والتطوير', emoji: '💻' },
+  { id: 'academic', name: 'الخدمات الأكاديمية', emoji: '📚' },
+  { id: 'general', name: 'خدمات عامة', emoji: '⚡' },
+  { id: 'projects', name: 'بروجيكتات بالطلب', emoji: '🏗️' },
+  { id: 'accounts', name: 'حسابات واشتراكات رقمية', emoji: '🔑' },
+  { id: 'social', name: 'خدمات السوشيال ميديا', emoji: '📢' },
+  { id: 'products', name: 'منتجات رقمية جاهزة', emoji: '📦' },
 ];
 
 const getServices  = () => load('services.json', DEFAULT_SERVICES);
@@ -312,6 +492,7 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('ticket-stats').setDescription('إحصائيات التذاكر'),
   new SlashCommandBuilder().setName('top-customers').setDescription('أفضل الزبائن'),
   new SlashCommandBuilder().setName('help').setDescription('شوف كل الأوامر'),
+  new SlashCommandBuilder().setName('banners').setDescription('ولّد بانرات للقنوات وابعتهم'),
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -340,13 +521,13 @@ async function cmdSetup(interaction) {
 
   const roles = {};
   const roleDefs = [
-    { k: 'owner', n: '👑 ┃ Owner', c: '#FFD700', p: [PermissionFlagsBits.Administrator] },
-    { k: 'admin', n: '⚡⚡⚡ ┃ Admin', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
-    { k: 'mod', n: '🔧 ┃ Moderator', c: '#E67E22', p: [PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.SendMessages] },
-    { k: 'staff', n: '⭐⭐⭐ ┃ Staff', c: '#F1C40F', p: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
-    { k: 'trial', n: '🌟 ┃ Trial Staff', c: '#3498DB', p: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
-    { k: 'vip', n: '💎 ┃ VIP', c: '#9B59B6', p: [] },
-    { k: 'customer', n: '🛒 ┃ Customer', c: '#1ABC9C', p: [] },
+    { k: 'owner', n: '👑 ┃ المالك', c: '#FFD700', p: [PermissionFlagsBits.Administrator] },
+    { k: 'admin', n: '💎 ┃ ادمن', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
+    { k: 'mod', n: '⚡ ┃ مشرف', c: '#E67E22', p: [PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.SendMessages] },
+    { k: 'staff', n: '⭐ ┃ ستاف', c: '#F1C40F', p: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
+    { k: 'trial', n: '🌟 ┃ ستاف تجريبي', c: '#3498DB', p: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
+    { k: 'vip', n: '🔥 ┃ VIP', c: '#9B59B6', p: [] },
+    { k: 'customer', n: '🛒 ┃ زبون', c: '#1ABC9C', p: [] },
   ];
   for (const rd of roleDefs) {
     try { roles[rd.k] = await g.roles.create({ name: rd.n, color: rd.c, permissions: rd.p }); log.push(`✅ ${rd.n}`); } catch { log.push(`❌ ${rd.n}`); }
@@ -420,6 +601,15 @@ async function cmdSetup(interaction) {
 
   await sleep(1500);
   try { await g.channels.fetch(); } catch {}
+
+  if (Canvas) {
+    for (const [, ch] of g.channels.cache) {
+      if (ch.isTextBased() && getBannerForChannel(ch.name)) {
+        await sendBannerToChannel(ch);
+        await sleep(800);
+      }
+    }
+  }
 
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
   if (logsCh) { CFG.logsChannel = logsCh.id; save('config.json', CFG); }
@@ -1358,9 +1548,31 @@ async function cmdUserInfo(interaction) {
 async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
     { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/review` `/leaderboard` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
-    { name: '🛡️ إدارية', value: '`/setup` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/giveaway` `/end-giveaway`' },
+    { name: '🛡️ إدارية', value: '`/setup` `/banners` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/giveaway` `/end-giveaway`' },
         { name: '🔨 الإدارة والضبط', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
   ).setColor(0xFF0000).setTimestamp()], ephemeral: true });
+}
+
+async function cmdBanners(interaction) {
+  if (!Canvas) return interaction.reply({ content: '❌ مكتبة `canvas` مش متوفرة — البانرات مش هتتولّد', ephemeral: true });
+  await interaction.deferReply();
+  const g = interaction.guild;
+  let sent = 0, skipped = 0;
+  for (const [, ch] of g.channels.cache) {
+    if (!ch.isTextBased()) continue;
+    const theme = getBannerForChannel(ch.name);
+    if (!theme) { skipped++; continue; }
+    try {
+      const buf = generateBanner(ch.name, theme.emoji, theme.c1, theme.c2, theme.accent);
+      if (!buf) { skipped++; continue; }
+      const { AttachmentBuilder } = require('discord.js');
+      const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
+      await ch.send({ files: [attachment] });
+      sent++;
+      await sleep(800);
+    } catch { skipped++; }
+  }
+  await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped} قناة` : ''}`);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1372,7 +1584,7 @@ client.on('interactionCreate', async (interaction) => {
       const map = {
         setup: cmdSetup, services: cmdServices,
         review: cmdReview, leaderboard: cmdLeaderboard,
-        help: cmdHelp, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
+        help: cmdHelp, banners: cmdBanners, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
         'auto-role': cmdAutoRole, 'set-logs': cmdSetLogs, automod: cmdAutomod, announce: cmdAnnounce,
         'add-category': cmdAddCategory, 'remove-category': cmdRemoveCategory, 'list-categories': cmdListCategories,
         order: cmdOrder, support: cmdSupport, close: cmdClose,
