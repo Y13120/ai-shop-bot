@@ -678,6 +678,17 @@ async function cmdSetup(interaction) {
     ]},
   ];
 
+  const catChannels = DEFAULT_CATEGORIES.map(cat => ({
+    n: `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`,
+    p: full,
+  }));
+  if (catChannels.length > 0) {
+    structure.push({
+      n: '╔════════════ 🛍️ الخدمات ════════════',
+      chs: catChannels,
+    });
+  }
+
   for (const cat of structure) {
     try {
       const c = await g.channels.create({ name: cat.n, type: ChannelType.GuildCategory });
