@@ -618,6 +618,17 @@ const COMMANDS = [
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(o => o.setName('message-id').setDescription('رسالة السحبية').setRequired(true)),
 
+  // ── Credits & Invites ──
+  new SlashCommandBuilder().setName('balance').setDescription('شوف رصيدك من الكريديت'),
+  new SlashCommandBuilder().setName('invite-link').setDescription('احصل على رابط الانفايت بتاعك'),
+  new SlashCommandBuilder().setName('invites').setDescription('شوف عدد الانفايتات بتاعتك')
+    .addUserOption(o => o.setName('user').setDescription('عضو معين')),
+  new SlashCommandBuilder().setName('give-credits').setDescription('اعطي كريديت لعضو (ادمن)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addUserOption(o => o.setName('user').setDescription('العضو').setRequired(true))
+    .addNumberOption(o => o.setName('amount').setDescription('المبلغ').setRequired(true)),
+  new SlashCommandBuilder().setName('credits-leaderboard').setDescription('ترتيب الكريديت'),
+
   // ── General ──
   new SlashCommandBuilder().setName('review').setDescription('قيّم خدمة')
     .addStringOption(o => o.setName('service').setDescription('رقم الخدمة').setRequired(true))
@@ -692,44 +703,44 @@ async function cmdSetup(interaction) {
 
   const structure = [
     { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
-      { n: 'store-features', display: '✦ ┃ الخدمات', p: full },
-      { n: 'store-howto', display: '✦ ┃ كيف تطلب', p: noSend },
-      { n: 'store-reviews', display: '✦ ┃ التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
-      { n: 'store-support', display: '✦ ┃ تواصل مع الستاف', p: full },
+      { n: 'store-features', display: '•〢 الخدمات', p: full },
+      { n: 'store-howto', display: '•〢 كيف تطلب', p: noSend },
+      { n: 'store-reviews', display: '•〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
+      { n: 'store-support', display: '•〢 تواصل مع الستاف', p: full },
     ]},
     { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
-      { n: 'announce-news', display: '✦ ┃ الاخبار والاعلانات', p: noSend },
-      { n: 'announce-rules', display: '✦ ┃ القوانين', p: noSend },
-      { n: 'announce-giveaway', display: '✦ ┃ السحبيات', p: noSend },
+      { n: 'announce-news', display: '•〢 الاخبار والاعلانات', p: noSend },
+      { n: 'announce-rules', display: '•〢 القوانين', p: noSend },
+      { n: 'announce-giveaway', display: '•〢 السحبيات', p: noSend },
     ]},
     { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
-      { n: 'chat-general', display: '✦ ┃ الشات العام', p: full },
-      { n: 'chat-bot', display: '✦ ┃ اوامر البوت', p: full },
-      { n: 'chat-ai', display: '✦ ┃ الذكاء الاصطناعي', p: full },
+      { n: 'chat-general', display: '•〢 الشات العام', p: full },
+      { n: 'chat-bot', display: '•〢 اوامر البوت', p: full },
+      { n: 'chat-ai', display: '•〢 الذكاء الاصطناعي', p: full },
     ]},
     { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
-      { n: 'ticket-open', display: '✦ ┃ فتح تذكرة', p: full },
-      { n: 'ticket-orders', display: '✦ ┃ الطلبات', p: full },
+      { n: 'ticket-open', display: '•〢 فتح تذكرة', p: full },
+      { n: 'ticket-orders', display: '•〢 الطلبات', p: full },
     ]},
     { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
-      { n: 'delivery-status', display: '✦ ┃ حالة التوصيل', p: noSend },
-      { n: 'delivery-completed', display: '✦ ┃ التسليمات', p: noSend },
+      { n: 'delivery-status', display: '•〢 حالة التوصيل', p: noSend },
+      { n: 'delivery-completed', display: '•〢 التسليمات', p: noSend },
     ]},
     { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
-      { n: 'staff-chat', display: '✦ ┃ شات الستاف', p: staffOnly },
-      { n: 'staff-notes', display: '✦ ┃ ملاحظات', p: staffOnly },
-      { n: 'staff-apply', display: '✦ ┃ تقديم للادارة', p: full },
+      { n: 'staff-chat', display: '•〢 شات الستاف', p: staffOnly },
+      { n: 'staff-notes', display: '•〢 ملاحظات', p: staffOnly },
+      { n: 'staff-apply', display: '•〢 تقديم للادارة', p: full },
     ]},
     { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
-      { n: 'logs-main', display: '✦ ┃ السجلات', p: noSend },
+      { n: 'logs-main', display: '•〢 السجلات', p: noSend },
     ]},
     { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
-      { n: 'admin-panel', display: '✦ ┃ لوحة التحكم', p: adminOnly },
+      { n: 'admin-panel', display: '•〢 لوحة التحكم', p: adminOnly },
     ]},
   ];
 
   const catChannels = DEFAULT_CATEGORIES.map(cat => ({
-    display: `${cat.emoji} ┃ ${cat.name}`,
+    display: `${cat.emoji}〢 ${cat.name}`,
     n: `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`,
     p: full,
   }));
@@ -854,7 +865,7 @@ async function cmdSetup(interaction) {
         '## 📝 دليل طلب الخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## اتبع الخطوات دي:\n\n' +
-        '**`1️⃣`** 🛒 اختار الخدمة من قناة **✦ ┃ الخدمات**\n\n' +
+        '**`1️⃣`** 🛒 اختار الخدمة من قناة **•〢 الخدمات**\n\n' +
         '**`2️⃣`** 📋 شوف التفاصيل والسعر بتاعها\n\n' +
         '**`3️⃣`** 💬 اضغط زر **🛒 اطلب دلوقتي** عشان تفتح تذكرة\n\n' +
         '**`4️⃣`** 💰 ادفع بالطريقة اللي تناسبك\n\n' +
@@ -864,7 +875,7 @@ async function cmdSetup(interaction) {
         '## 💡 نصايح مهمة\n\n' +
         '• تأكد إنك اختارت الخدمة الصح قبل ما تطلب\n' +
         '• احتفظ بإيصال الدفع\n' +
-        '• لو عندك سؤال، استخدم قناة **✦ ┃ تواصل مع الستاف**\n\n' +
+        '• لو عندك سؤال، استخدم قناة **•〢 تواصل مع الستاف**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x2ECC71)
@@ -931,8 +942,8 @@ async function cmdSetup(interaction) {
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 نصيحة\n\n' +
         'قبل ما تفتح تذكرة، تأكد إن الإجابة موجودة في:\n' +
-        '• قناة **✦ ┃ كيف تطلب** — عشان تعرف تطلب إزاي\n' +
-        '• قناة **✦ ┃ اوامر البوت** — عشان تشوف كل الأوامر\n\n' +
+        '• قناة **•〢 كيف تطلب** — عشان تعرف تطلب إزاي\n' +
+        '• قناة **•〢 اوامر البوت** — عشان تشوف كل الأوامر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x9B59B6)
@@ -1436,6 +1447,68 @@ async function cmdUserInfo(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle(`👤 ${user.username}`).setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 })).addFields({ name: '🆔 ID', value: user.id, inline: true }, { name: '📅 الحساب', value: `<t:${Math.floor(user.createdAt.getTime() / 1000)}:R>`, inline: true }, { name: '📥 دخل', value: member?.joinedAt ? `<t:${Math.floor(member.joinedAt.getTime() / 1000)}:R>` : '—', inline: true },     { name: '⚠️ تحذيرات', value: `${warns}`, inline: true }).setColor(0x3498DB).setTimestamp()] });
 }
 
+// ═══════════════ CREDITS & INVITES ═══════════════
+async function cmdBalance(interaction) {
+  const bal = getCreditsFor(interaction.user.id);
+  const inviteData = getInviteTracking();
+  const myInvites = inviteData[interaction.user.id]?.invites || 0;
+  const embed = new EmbedBuilder()
+    .setTitle('💰 رصيدك')
+    .setDescription(`**الكريديت:** \`${fmt(bal)}\`\n**الانفايتات:** \`${myInvites}\`\n**مكافأة كل انفايت:** \`${fmt(INVITE_REWARD)}\``)
+    .setColor(0xF1C40F).setTimestamp()
+    .setFooter({ text: '💰 Codex Zone — الرصيد' });
+  await interaction.reply({ embeds: [embed], ephemeral: true });
+}
+
+async function cmdInviteLink(interaction) {
+  const g = interaction.guild;
+  const invite = await g.invites.create(g.id, { maxAge: 0, reason: `Invite link for ${interaction.user.tag}` }).catch(() => null);
+  if (!invite) return interaction.reply({ content: '❌ مقدرش أعمل رابط دلوقتي', ephemeral: true });
+  const embed = new EmbedBuilder()
+    .setTitle('🔗 رابط الانفايت بتاعك')
+    .setDescription(`**شارك الرابط ده مع أصحابك:**\n\nhttps://discord.gg/${invite.code}\n\n**كل ما حد ينضم بالرابط ده، هتكسب \`${fmt(INVITE_REWARD)}\` كريديت!**`)
+    .setColor(0x2ECC71).setTimestamp()
+    .setFooter({ text: '🔗 Codex Zone — Invite' });
+  await interaction.reply({ embeds: [embed], ephemeral: true });
+}
+
+async function cmdInvites(interaction) {
+  const target = interaction.options.getUser('user') || interaction.user;
+  const inviteData = getInviteTracking();
+  const data = inviteData[target.id] || { invites: 0, rewarded: 0 };
+  const embed = new EmbedBuilder()
+    .setTitle(`🔗 انفايتات ${target.username}`)
+    .setDescription(`**عدد الانفايتات:** \`${data.invites}\`\n**مكافآت مستلمة:** \`${fmt(data.rewarded)}\``)
+    .setColor(0x3498DB).setTimestamp()
+    .setFooter({ text: '🔗 Codex Zone — Invites' });
+  await interaction.reply({ embeds: [embed] });
+}
+
+async function cmdGiveCredits(interaction) {
+  const target = interaction.options.getUser('user');
+  const amount = interaction.options.getNumber('amount');
+  if (amount <= 0) return interaction.reply({ content: '❌ المبلغ لازم يكون أكبر من 0', ephemeral: true });
+  addCredits(target.id, amount);
+  const bal = getCreditsFor(target.id);
+  await interaction.reply({ content: `✅ تم إعطاء **${fmt(amount)}** كريديت لـ ${target}. الرصيد الجديد: **${fmt(bal)}**`, ephemeral: true });
+  sendLog(interaction.guild, `💰 ${interaction.user.tag} gave ${fmt(amount)} credits to ${target.tag}`);
+}
+
+async function cmdCreditsLeaderboard(interaction) {
+  const credits = getCredits();
+  const sorted = Object.entries(credits).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  if (!sorted.length) return interaction.reply({ content: '📭 مفيش كريديت لسه', ephemeral: true });
+  const medals = ['🥇', '🥈', '🥉'];
+  const lines = sorted.map(([id, bal], i) => `${medals[i] || `**${i + 1}.**`} <@${id}> — \`${fmt(bal)}\``).join('\n');
+  const embed = new EmbedBuilder()
+    .setTitle('💰 ترتيب الكريديت')
+    .setDescription(lines)
+    .setColor(0xF1C40F).setTimestamp()
+    .setFooter({ text: '💰 Codex Zone — Top Credits' });
+  await interaction.reply({ embeds: [embed] });
+}
+
+// ═══════════════ HELP ═══════════════
 async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
     { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/review` `/leaderboard` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
