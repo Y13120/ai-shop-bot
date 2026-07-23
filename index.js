@@ -68,28 +68,39 @@ const BANNER_THEMES = {
   'الخدمات':          { emoji: '🛒', c1: '#0a4', c2: '#0f6', accent: '#0fa' },
   'التخفيضات':       { emoji: '🎁', c1: '#f06', c2: '#f0a', accent: '#f6a' },
   'التقييمات':       { emoji: '⭐', c1: '#fa0', c2: '#fc0', accent: '#fd0' },
-  'التواصل-مع-الستاف':{ emoji: '💬', c1: '#06f', c2: '#08f', accent: '#0af' },
-  'الإعلانات':       { emoji: '📣', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
+  'التواصل':         { emoji: '💬', c1: '#06f', c2: '#08f', accent: '#0af' },
+  'الاعلانات':       { emoji: '📣', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
+  'الاخبار':         { emoji: '📣', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
+  'القوانين':        { emoji: '📋', c1: '#80f', c2: '#a0f', accent: '#b0f' },
   'القواعد':         { emoji: '📋', c1: '#80f', c2: '#a0f', accent: '#b0f' },
-  'العامة':          { emoji: '💬', c1: '#08f', c2: '#0af', accent: '#0cf' },
-  'اوامر-البوت':     { emoji: '🤖', c1: '#06f', c2: '#09f', accent: '#0bf' },
-  'حالة-السيرفر':    { emoji: '📊', c1: '#08c', c2: '#0ac', accent: '#0cf' },
+  'العام':           { emoji: '💬', c1: '#08f', c2: '#0af', accent: '#0cf' },
+  'الشات':           { emoji: '💬', c1: '#08f', c2: '#0af', accent: '#0cf' },
+  'اوامر':           { emoji: '🤖', c1: '#06f', c2: '#09f', accent: '#0bf' },
+  'الذكاء':          { emoji: '🤖', c1: '#60a', c2: '#80c', accent: '#a0f' },
+  'السيرفر':         { emoji: '📊', c1: '#08c', c2: '#0ac', accent: '#0cf' },
   'الترحيب':         { emoji: '👋', c1: '#0c6', c2: '#0f6', accent: '#0f9' },
-  'فتح-تذكرة':       { emoji: '🎫', c1: '#fa0', c2: '#fc0', accent: '#fe0' },
+  'فتح':             { emoji: '🎫', c1: '#fa0', c2: '#fc0', accent: '#fe0' },
+  'تذكرة':           { emoji: '🎫', c1: '#fa0', c2: '#fc0', accent: '#fe0' },
+  'الطلبات':         { emoji: '📦', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
+  'التوصيل':         { emoji: '📦', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
   'التسليمات':       { emoji: '📦', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
-  'شات-الستاف':      { emoji: '💼', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
-  'ملاحظات-الستاف':  { emoji: '📋', c1: '#80f', c2: '#a0f', accent: '#b0f' },
-  'تقديم-للادارة':   { emoji: '📝', c1: '#06f', c2: '#08f', accent: '#0af' },
+  'شات':             { emoji: '💼', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
+  'الستاف':          { emoji: '💼', c1: '#a0f', c2: '#c0f', accent: '#d0f' },
+  'ملاحظات':         { emoji: '📋', c1: '#80f', c2: '#a0f', accent: '#b0f' },
+  'تقديم':           { emoji: '📝', c1: '#06f', c2: '#08f', accent: '#0af' },
+  'الادارة':         { emoji: '📝', c1: '#06f', c2: '#08f', accent: '#0af' },
   'السجلات':         { emoji: '📝', c1: '#668', c2: '#88a', accent: '#99b' },
-  'لوحة-التحكم':     { emoji: '🔧', c1: '#f33', c2: '#f66', accent: '#f88' },
-  'كيف-تطلب':        { emoji: '📖', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
-  // ═══════════════ ═══════════════
+  'التحكم':          { emoji: '🔧', c1: '#f33', c2: '#f66', accent: '#f88' },
+  'لوحة':            { emoji: '🔧', c1: '#f33', c2: '#f66', accent: '#f88' },
+  'كيف':             { emoji: '📖', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
+  'السحبيات':        { emoji: '🎁', c1: '#f06', c2: '#f0a', accent: '#f6a' },
+  'الحالة':          { emoji: '📊', c1: '#08c', c2: '#0ac', accent: '#0cf' },
   // ═══════════════ كاتيجوري الخدم ═══════════════
-  'الذكاء-الاصطناعي': { emoji: '🤖', c1: '#206', c2: '#40a', accent: '#60f' },
-  'اشتراكات-البث':    { emoji: '📺', c1: '#c04', c2: '#f06', accent: '#f48' },
+  'الذكاء الاصطناعي': { emoji: '🤖', c1: '#206', c2: '#40a', accent: '#60f' },
+  'اشتراكات البث':    { emoji: '📺', c1: '#c04', c2: '#f06', accent: '#f48' },
   'التصميم':          { emoji: '🎨', c1: '#a06', c2: '#c0a', accent: '#e0f' },
   'المونتاج':         { emoji: '🎬', c1: '#c00', c2: '#f22', accent: '#f44' },
-  'البرمجة':          { emoji: '💻', c1: '#064', c2: '#0a6', accent: '#0f8' },
+  'البرمجة والتطوير': { emoji: '💻', c1: '#064', c2: '#0a6', accent: '#0f8' },
   'الأكاديمية':       { emoji: '📚', c1: '#640', c2: '#a60', accent: '#c80' },
   'عامة':             { emoji: '⚡', c1: '#a60', c2: '#c80', accent: '#fa0' },
   'بالطلب':           { emoji: '🏗️', c1: '#446', c2: '#668', accent: '#88a' },
@@ -400,6 +411,9 @@ const getWarnings  = () => load('warnings.json', []);
 const getGiveaways = () => load('giveaways.json', []);
 const getSpamData  = () => load('spam.json', []);
 const getRaidData  = () => load('raid.json', []);
+const getCredits   = () => load('credits.json', {});
+const getInviteTracking = () => load('invite_tracking.json', {});
+const INVITE_REWARD = 1000000;
 
 // ══════════════════════════════════════════════════════════════
 //  HELPERS
@@ -412,6 +426,29 @@ function fmt(n) {
   if (num >= 1e6) return (num / 1e6).toFixed(num % 1e6 === 0 ? 0 : 1) + 'M';
   if (num >= 1e3) return (num / 1e3).toFixed(0) + 'K';
   return num.toLocaleString('en-US');
+}
+
+function getCreditsFor(userId) {
+  const credits = getCredits();
+  return credits[userId] || 0;
+}
+function addCredits(userId, amount) {
+  const credits = getCredits();
+  credits[userId] = (credits[userId] || 0) + amount;
+  save('credits.json', credits);
+  return credits[userId];
+}
+function removeCredits(userId, amount) {
+  const credits = getCredits();
+  if ((credits[userId] || 0) < amount) return false;
+  credits[userId] -= amount;
+  save('credits.json', credits);
+  return true;
+}
+function setCredits(userId, amount) {
+  const credits = getCredits();
+  credits[userId] = amount;
+  save('credits.json', credits);
 }
 
 function safe(val, max = 1000) {
@@ -625,8 +662,8 @@ async function cmdSetup(interaction) {
 
   const roles = {};
   const roleDefs = [
-    { k: 'owner', n: '👑 ┃ المالك', c: '#FFD700', p: [PermissionFlagsBits.Administrator] },
-    { k: 'admin', n: '💎 ┃ ادمن', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
+    { k: 'owner', n: '👑 ┃ Owner', c: '#FFD700', p: [PermissionFlagsBits.Administrator] },
+    { k: 'admin', n: '💎 ┃ Admin', c: '#E74C3C', p: [PermissionFlagsBits.Administrator] },
     { k: 'mod', n: '⚡ ┃ مشرف', c: '#E67E22', p: [PermissionFlagsBits.BanMembers, PermissionFlagsBits.KickMembers, PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.ManageMessages, PermissionFlagsBits.SendMessages] },
     { k: 'staff', n: '⭐ ┃ ستاف', c: '#F1C40F', p: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages] },
     { k: 'trial', n: '🌟 ┃ ستاف تجريبي', c: '#3498DB', p: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages] },
@@ -654,50 +691,51 @@ async function cmdSetup(interaction) {
   const full = [{ id: g.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }];
 
   const structure = [
-    { n: '╔════════════ 🏪 المتجر ════════════', chs: [
-      { n: '🛒・الخدمات', p: full },
-      { n: '📝・كيف-تطلب', p: noSend },
-      { n: '⭐・التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
-      { n: '💬・التواصل-مع-الستاف', p: full },
+    { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
+      { n: 'store-features', display: '✦ ┃ الخدمات', p: full },
+      { n: 'store-howto', display: '✦ ┃ كيف تطلب', p: noSend },
+      { n: 'store-reviews', display: '✦ ┃ التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
+      { n: 'store-support', display: '✦ ┃ تواصل مع الستاف', p: full },
     ]},
-    { n: '╔════════════ 📢 الإعلانات ════════════', chs: [
-      { n: '📣・الإعلانات', p: noSend },
-      { n: '📋・القواعد', p: noSend },
+    { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
+      { n: 'announce-news', display: '✦ ┃ الاخبار والاعلانات', p: noSend },
+      { n: 'announce-rules', display: '✦ ┃ القوانين', p: noSend },
+      { n: 'announce-giveaway', display: '✦ ┃ السحبيات', p: noSend },
     ]},
-    { n: '╔════════════ 💬 الدردشة ════════════', chs: [
-      { n: '💬・العامة', p: full },
-      { n: '🤖・اوامر-البوت', p: full },
+    { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
+      { n: 'chat-general', display: '✦ ┃ الشات العام', p: full },
+      { n: 'chat-bot', display: '✦ ┃ اوامر البوت', p: full },
+      { n: 'chat-ai', display: '✦ ┃ الذكاء الاصطناعي', p: full },
     ]},
-    { n: '╔════════════ 📌 معلومات ════════════', chs: [
-      { n: '📊・حالة-السيرفر', p: noSend },
-      { n: '👋・الترحيب', p: noSend },
+    { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
+      { n: 'ticket-open', display: '✦ ┃ فتح تذكرة', p: full },
+      { n: 'ticket-orders', display: '✦ ┃ الطلبات', p: full },
     ]},
-    { n: '╔════════════ 🎫 التذاكر ════════════', chs: [
-      { n: '🎫・فتح-تذكرة', p: full },
+    { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
+      { n: 'delivery-status', display: '✦ ┃ حالة التوصيل', p: noSend },
+      { n: 'delivery-completed', display: '✦ ┃ التسليمات', p: noSend },
     ]},
-    { n: '╔════════════ 📦 التوصيل ════════════', chs: [
-      { n: '📦・التسليمات', p: noSend },
+    { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
+      { n: 'staff-chat', display: '✦ ┃ شات الستاف', p: staffOnly },
+      { n: 'staff-notes', display: '✦ ┃ ملاحظات', p: staffOnly },
+      { n: 'staff-apply', display: '✦ ┃ تقديم للادارة', p: full },
     ]},
-    { n: '╔════════════ 👔 الستاف ════════════', chs: [
-      { n: '💼・شات-الستاف', p: staffOnly },
-      { n: '📋・ملاحظات-الستاف', p: staffOnly },
-      { n: '📝・تقديم-للادارة', p: full },
+    { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
+      { n: 'logs-main', display: '✦ ┃ السجلات', p: noSend },
     ]},
-    { n: '╔════════════ 🛡️ السجلات ════════════', chs: [
-      { n: '📝・السجلات', p: noSend },
-    ]},
-    { n: '╔════════════ ⚙️ الإدارة ════════════', chs: [
-      { n: '🔧・لوحة-التحكم', p: adminOnly },
+    { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
+      { n: 'admin-panel', display: '✦ ┃ لوحة التحكم', p: adminOnly },
     ]},
   ];
 
   const catChannels = DEFAULT_CATEGORIES.map(cat => ({
+    display: `${cat.emoji} ┃ ${cat.name}`,
     n: `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`,
     p: full,
   }));
   if (catChannels.length > 0) {
     structure.push({
-      n: '╔════════════ 🛍️ الخدمات ════════════',
+      n: '━━━━━━━━ 🛍️ ━━━━━━━━',
       chs: catChannels,
     });
   }
@@ -707,7 +745,8 @@ async function cmdSetup(interaction) {
       const c = await g.channels.create({ name: cat.n, type: ChannelType.GuildCategory });
       log.push(`✅ ${cat.n}`);
       for (const ch of cat.chs) {
-        try { await g.channels.create({ name: ch.n, type: ChannelType.GuildText, parent: c.id, permissionOverwrites: ch.p }); log.push(`✅ ${ch.n}`); } catch { log.push(`❌ ${ch.n}`); }
+        const chName = ch.display || ch.n;
+        try { await g.channels.create({ name: chName, type: ChannelType.GuildText, parent: c.id, permissionOverwrites: ch.p }); log.push(`✅ ${chName}`); } catch { log.push(`❌ ${chName}`); }
         await sleep(600);
       }
     } catch { log.push(`❌ كاتيقوري`); }
@@ -807,7 +846,7 @@ async function cmdSetup(interaction) {
   }
 
   // ── 📝 كيف تطلب — Embed محسّن ──
-  const howCh = g.channels.cache.find(c => c.name.includes('كيف-تطلب') && c.isTextBased());
+  const howCh = g.channels.cache.find(c => c.name.includes('كيف تطلب') && c.isTextBased());
   if (howCh) {
     await howCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━ 📝 دليل طلب الخدمة ━━━━━━━━')
@@ -815,7 +854,7 @@ async function cmdSetup(interaction) {
         '## 📝 دليل طلب الخدمة\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## اتبع الخطوات دي:\n\n' +
-        '**`1️⃣`** 🛒 اختار الخدمة من قناة **🛒・الخدمات**\n\n' +
+        '**`1️⃣`** 🛒 اختار الخدمة من قناة **✦ ┃ الخدمات**\n\n' +
         '**`2️⃣`** 📋 شوف التفاصيل والسعر بتاعها\n\n' +
         '**`3️⃣`** 💬 اضغط زر **🛒 اطلب دلوقتي** عشان تفتح تذكرة\n\n' +
         '**`4️⃣`** 💰 ادفع بالطريقة اللي تناسبك\n\n' +
@@ -825,7 +864,7 @@ async function cmdSetup(interaction) {
         '## 💡 نصايح مهمة\n\n' +
         '• تأكد إنك اختارت الخدمة الصح قبل ما تطلب\n' +
         '• احتفظ بإيصال الدفع\n' +
-        '• لو عندك سؤال، استخدم قناة **💬・التواصل-مع-الستاف**\n\n' +
+        '• لو عندك سؤال، استخدم قناة **✦ ┃ تواصل مع الستاف**\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x2ECC71)
@@ -873,7 +912,7 @@ async function cmdSetup(interaction) {
   }
 
   // ── 🎫 فتح تذكرة ──
-  const ticketCh = g.channels.cache.find(c => c.name.includes('فتح-تذكرة') && c.isTextBased());
+  const ticketCh = g.channels.cache.find(c => c.name.includes('فتح تذكرة') && c.isTextBased());
   if (ticketCh) {
     const btn2 = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
     const btnShop = new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop');
@@ -892,8 +931,8 @@ async function cmdSetup(interaction) {
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 نصيحة\n\n' +
         'قبل ما تفتح تذكرة، تأكد إن الإجابة موجودة في:\n' +
-        '• قناة **📝・كيف-تطلب** — عشان تعرف تطلب إزاي\n' +
-        '• قناة **🤖・اوامر-البوت** — عشان تشوف كل الأوامر\n\n' +
+        '• قناة **✦ ┃ كيف تطلب** — عشان تعرف تطلب إزاي\n' +
+        '• قناة **✦ ┃ اوامر البوت** — عشان تشوف كل الأوامر\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x9B59B6)
@@ -936,7 +975,7 @@ async function cmdSetup(interaction) {
     }).catch(() => {});
   }
   // ── 🔧 لوحة التحكم ──
-  const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة-التحكم') && c.isTextBased());
+  const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة التحكم') && c.isTextBased());
 
   // ── 🏷️ قنوات الكاتيجوري — اعرض الخدمات في كل قنات كاتيجوري ──
   const cats = getCategories();
