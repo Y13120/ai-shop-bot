@@ -123,131 +123,133 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
-  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').trim();
-  const theme = getBannerForChannel(channelName) || { c1: color1 || '#0ff', c2: color2 || '#08f', accent: accent || '#0ff' };
-  const c1 = color1 || theme.c1;
-  const c2 = color2 || theme.c2;
-  const ac = accent || theme.accent;
+  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').replace(/•〢\s*/, '').trim();
+  const GOLD = '#d4af37';
+  const GOLD_LIGHT = '#f4e5b0';
+  const GOLD_DARK = '#aa8c2c';
+  const BG_DARK = '#0a0a0a';
 
-  ctx.fillStyle = '#050510';
+  ctx.fillStyle = BG_DARK;
   ctx.fillRect(0, 0, BANNER_W, BANNER_H);
 
-  for (let j = 0; j < 5; j++) {
-    const x = Math.random() * BANNER_W;
-    const y = Math.random() * BANNER_H;
-    const r = 80 + Math.random() * 150;
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, rgba(c1, 0.1));
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  const centerGlow = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 300);
-  centerGlow.addColorStop(0, rgba(ac, 0.08));
-  centerGlow.addColorStop(1, 'transparent');
-  ctx.fillStyle = centerGlow;
-  ctx.beginPath();
-  ctx.arc(BANNER_W / 2, BANNER_H / 2, 300, 0, Math.PI * 2);
-  ctx.fill();
+  const grad = ctx.createRadialGradient(BANNER_W / 2, BANNER_H / 2, 0, BANNER_W / 2, BANNER_H / 2, 350);
+  grad.addColorStop(0, 'rgba(212,175,55,0.06)');
+  grad.addColorStop(0.5, 'rgba(212,175,55,0.02)');
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, BANNER_W, BANNER_H);
 
   ctx.save();
-  ctx.globalAlpha = 0.07;
-  ctx.strokeStyle = ac;
-  ctx.lineWidth = 0.5;
-  for (let y = 20; y < BANNER_H; y += 20) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(BANNER_W, y); ctx.stroke();
-  }
-  for (let x = 20; x < BANNER_W; x += 20) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, BANNER_H); ctx.stroke();
+  ctx.globalAlpha = 0.04;
+  for (let y = 30; y < BANNER_H; y += 30) {
+    ctx.strokeStyle = GOLD;
+    ctx.lineWidth = 0.3;
+    ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(BANNER_W - 40, y); ctx.stroke();
   }
   ctx.restore();
 
-  const neonLine = (y, width) => {
+  const drawCorner = (cx, cy, dx, dy) => {
+    ctx.save();
+    ctx.strokeStyle = GOLD;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + dy * 25);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + dx * 25, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + dx * 6, cy + dy * 6);
+    ctx.lineTo(cx + dx * 6, cy + dy * 18);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + dx * 6, cy + dy * 6);
+    ctx.lineTo(cx + dx * 18, cy + dy * 6);
+    ctx.stroke();
+    ctx.restore();
+  };
+  drawCorner(30, 30, 1, 1);
+  drawCorner(BANNER_W - 30, 30, -1, 1);
+  drawCorner(30, BANNER_H - 30, 1, -1);
+  drawCorner(BANNER_W - 30, BANNER_H - 30, -1, -1);
+
+  const goldLine = (y, width) => {
     const g = ctx.createLinearGradient(BANNER_W / 2 - width, 0, BANNER_W / 2 + width, 0);
     g.addColorStop(0, 'transparent');
-    g.addColorStop(0.15, rgba(ac, 0.25));
-    g.addColorStop(0.5, ac);
-    g.addColorStop(0.85, rgba(ac, 0.25));
+    g.addColorStop(0.2, 'rgba(212,175,55,0.3)');
+    g.addColorStop(0.5, GOLD);
+    g.addColorStop(0.8, 'rgba(212,175,55,0.3)');
     g.addColorStop(1, 'transparent');
-    ctx.save();
-    ctx.shadowColor = ac; ctx.shadowBlur = 15;
     ctx.fillStyle = g;
-    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
-    ctx.shadowBlur = 8;
-    ctx.fillRect(BANNER_W / 2 - width, y - 1, width * 2, 2);
-    ctx.restore();
+    ctx.fillRect(BANNER_W / 2 - width, y, width * 2, 1);
   };
-  neonLine(6, 300);
-  neonLine(BANNER_H - 6, 300);
+  goldLine(8, 250);
+  goldLine(BANNER_H - 8, 250);
 
-  const neonCorner = (cx, cy, flipX, flipY) => {
+  const diamond = (x, y, size) => {
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-    ctx.shadowColor = ac; ctx.shadowBlur = 12;
-    ctx.strokeStyle = ac; ctx.lineWidth = 2;
+    ctx.fillStyle = GOLD;
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
+    ctx.globalAlpha = 0.6;
     ctx.beginPath();
-    ctx.moveTo(0, 30); ctx.lineTo(0, 0); ctx.lineTo(30, 0);
-    ctx.stroke();
-    ctx.shadowBlur = 6; ctx.stroke();
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x + size * 0.7, y);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x - size * 0.7, y);
+    ctx.closePath();
+    ctx.fill();
     ctx.restore();
   };
-  neonCorner(20, 20, false, false);
-  neonCorner(BANNER_W - 20, 20, true, false);
-  neonCorner(20, BANNER_H - 20, false, true);
-  neonCorner(BANNER_W - 20, BANNER_H - 20, true, true);
+  diamond(BANNER_W / 2, BANNER_H / 2 + 42, 5);
 
   const displayName = cleanName || channelName || '';
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 54px "Arabic", sans-serif'
-      : 'bold 54px sans-serif';
+      ? 'bold 48px "Arabic", "Playfair Display", serif'
+      : 'bold 48px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
-    const textY = BANNER_H / 2 - 8;
+    const textY = BANNER_H / 2 - 6;
 
     ctx.save();
-    ctx.shadowColor = ac; ctx.shadowBlur = 60;
-    ctx.fillStyle = rgba(ac, 0.19);
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 40;
+    ctx.fillStyle = 'rgba(212,175,55,0.2)';
     ctx.font = fontName;
     ctx.fillText(displayName, textX, textY);
-    ctx.shadowBlur = 35;
+    ctx.shadowBlur = 20;
     ctx.fillText(displayName, textX, textY);
     ctx.restore();
 
+    const goldGrad = ctx.createLinearGradient(textX - 100, textY - 20, textX + 100, textY + 20);
+    goldGrad.addColorStop(0, GOLD_DARK);
+    goldGrad.addColorStop(0.3, GOLD_LIGHT);
+    goldGrad.addColorStop(0.5, GOLD);
+    goldGrad.addColorStop(0.7, GOLD_LIGHT);
+    goldGrad.addColorStop(1, GOLD_DARK);
     ctx.save();
-    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 8;
-    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 12;
+    ctx.fillStyle = goldGrad;
     ctx.font = fontName;
     ctx.fillText(displayName, textX, textY);
     ctx.restore();
 
-    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 140, 0, BANNER_W / 2 + 140, 0);
+    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
     sepGrad.addColorStop(0, 'transparent');
-    sepGrad.addColorStop(0.2, rgba(ac, 0.19));
-    sepGrad.addColorStop(0.5, ac);
-    sepGrad.addColorStop(0.8, rgba(ac, 0.19));
+    sepGrad.addColorStop(0.3, 'rgba(212,175,55,0.4)');
+    sepGrad.addColorStop(0.5, GOLD);
+    sepGrad.addColorStop(0.7, 'rgba(212,175,55,0.4)');
     sepGrad.addColorStop(1, 'transparent');
-    ctx.save();
-    ctx.shadowColor = ac; ctx.shadowBlur = 10;
     ctx.fillStyle = sepGrad;
-    ctx.fillRect(BANNER_W / 2 - 140, BANNER_H / 2 + 30, 280, 1.5);
-    ctx.restore();
+    ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 28, 240, 1);
   }
 
-  const fontSmall = arabicFontRegistered ? '600 13px "Arabic", sans-serif' : '600 13px sans-serif';
+  const fontSmall = arabicFontRegistered ? '500 11px "Arabic", "Cairo", sans-serif' : '500 11px "Cairo", sans-serif';
   ctx.font = fontSmall;
   ctx.textAlign = 'center';
-  ctx.save();
-  ctx.shadowColor = ac; ctx.shadowBlur = 10;
-  ctx.fillStyle = rgba(ac, 0.5);
-  ctx.fillText('Codex Zone', BANNER_W / 2, BANNER_H - 22);
-  ctx.restore();
+  ctx.fillStyle = 'rgba(212,175,55,0.45)';
+  ctx.fillText('CODEX  ZONE', BANNER_W / 2, BANNER_H - 18);
 
   return Buffer.from(c.toBuffer('image/png'));
 }
@@ -703,39 +705,39 @@ async function cmdSetup(interaction) {
 
   const structure = [
     { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
-      { n: 'store-features', display: '•〢 الخدمات', p: full },
-      { n: 'store-howto', display: '•〢 كيف تطلب', p: noSend },
-      { n: 'store-reviews', display: '•〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
-      { n: 'store-support', display: '•〢 تواصل مع الستاف', p: full },
+      { display: '•〢 الخدمات', p: full },
+      { display: '•〢 كيف تطلب', p: noSend },
+      { display: '•〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
+      { display: '•〢 تواصل مع الستاف', p: full },
     ]},
     { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
-      { n: 'announce-news', display: '•〢 الاخبار والاعلانات', p: noSend },
-      { n: 'announce-rules', display: '•〢 القوانين', p: noSend },
-      { n: 'announce-giveaway', display: '•〢 السحبيات', p: noSend },
+      { display: '•〢 الاخبار والاعلانات', p: noSend },
+      { display: '•〢 القوانين', p: noSend },
+      { display: '•〢 السحوبات', p: noSend },
     ]},
     { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
-      { n: 'chat-general', display: '•〢 الشات العام', p: full },
-      { n: 'chat-bot', display: '•〢 اوامر البوت', p: full },
-      { n: 'chat-ai', display: '•〢 الذكاء الاصطناعي', p: full },
+      { display: '•〢 الشات العام', p: full },
+      { display: '•〢 اوامر البوت', p: full },
+      { display: '•〢 الذكاء الاصطناعي', p: full },
     ]},
     { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
-      { n: 'ticket-open', display: '•〢 فتح تذكرة', p: full },
-      { n: 'ticket-orders', display: '•〢 الطلبات', p: full },
+      { display: '•〢 فتح تذكرة', p: full },
+      { display: '•〢 الطلبات', p: full },
     ]},
     { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
-      { n: 'delivery-status', display: '•〢 حالة التوصيل', p: noSend },
-      { n: 'delivery-completed', display: '•〢 التسليمات', p: noSend },
+      { display: '•〢 حالة التوصيل', p: noSend },
+      { display: '•〢 التسليمات', p: noSend },
     ]},
     { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
-      { n: 'staff-chat', display: '•〢 شات الستاف', p: staffOnly },
-      { n: 'staff-notes', display: '•〢 ملاحظات', p: staffOnly },
-      { n: 'staff-apply', display: '•〢 تقديم للادارة', p: full },
+      { display: '•〢 شات الستاف', p: staffOnly },
+      { display: '•〢 ملاحظات', p: staffOnly },
+      { display: '•〢 تقديم للادارة', p: full },
     ]},
     { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
-      { n: 'logs-main', display: '•〢 السجلات', p: noSend },
+      { display: '•〢 السجلات', p: noSend },
     ]},
     { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
-      { n: 'admin-panel', display: '•〢 لوحة التحكم', p: adminOnly },
+      { display: '•〢 لوحة التحكم', p: adminOnly },
     ]},
   ];
 
@@ -1016,8 +1018,8 @@ async function cmdSetup(interaction) {
       .setTimestamp()
       .setFooter({ text: `🛍️ ${g.name} — ${cat.name}`, iconURL: g.iconURL({ dynamic: true }) });
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel('🛒 اطلب من هذا التصنيف').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setLabel('🛒 المتجر الكامل').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop'),
+      new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel('🛒 اطلب خدمة').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel('🎫 افتح تذكرة').setStyle(ButtonStyle.Primary),
     );
     await ch.send({ embeds: [e], components: [row] }).catch(() => {});
     await sleep(400);
