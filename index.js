@@ -83,6 +83,19 @@ const BANNER_THEMES = {
   'السجلات':         { emoji: '📝', c1: '#668', c2: '#88a', accent: '#99b' },
   'لوحة-التحكم':     { emoji: '🔧', c1: '#f33', c2: '#f66', accent: '#f88' },
   'كيف-تطلب':        { emoji: '📖', c1: '#0a6', c2: '#0c6', accent: '#0f6' },
+  // ═══════════════ ═══════════════
+  // ═══════════════ كاتيجوري الخدم ═══════════════
+  'الذكاء-الاصطناعي': { emoji: '🤖', c1: '#206', c2: '#40a', accent: '#60f' },
+  'اشتراكات-البث':    { emoji: '📺', c1: '#c04', c2: '#f06', accent: '#f48' },
+  'التصميم':          { emoji: '🎨', c1: '#a06', c2: '#c0a', accent: '#e0f' },
+  'المونتاج':         { emoji: '🎬', c1: '#c00', c2: '#f22', accent: '#f44' },
+  'البرمجة':          { emoji: '💻', c1: '#064', c2: '#0a6', accent: '#0f8' },
+  'الأكاديمية':       { emoji: '📚', c1: '#640', c2: '#a60', accent: '#c80' },
+  'عامة':             { emoji: '⚡', c1: '#a60', c2: '#c80', accent: '#fa0' },
+  'بالطلب':           { emoji: '🏗️', c1: '#446', c2: '#668', accent: '#88a' },
+  'الرقمية':          { emoji: '🔑', c1: '#064', c2: '#0a4', accent: '#0f6' },
+  'السوشيال':         { emoji: '📢', c1: '#60a', c2: '#80c', accent: '#a0f' },
+  'جاهزة':            { emoji: '📦', c1: '#066', c2: '#088', accent: '#0aa' },
 };
 
 function hexToRgb(hex) {
@@ -222,7 +235,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   ctx.save();
   ctx.shadowColor = ac; ctx.shadowBlur = 10;
   ctx.fillStyle = rgba(ac, 0.5);
-  ctx.fillText('AI Shop Bot', BANNER_W / 2, BANNER_H - 22);
+  ctx.fillText('Codex Zone', BANNER_W / 2, BANNER_H - 22);
   ctx.restore();
 
   return Buffer.from(c.toBuffer('image/png'));
@@ -733,9 +746,9 @@ async function cmdSetup(interaction) {
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
     const e = new EmbedBuilder()
-      .setTitle('🔥 متجر الذكاء الاصطناعي 🔥')
+      .setTitle('🔥 Codex Zone 🔥')
       .setDescription(
-        '## 🚀 أهلاً بيك في أحسن متجر لخدمات الذكاء الاصطناعي\n\n' +
+        '## 🔥 أهلاً بيك في Codex Zone — كل الخدمات الاحترافية في مكان واحد\n\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💥 ليه تختارنا؟\n\n' +
         '## 🔥 سيرفر خدمات يجمع لك كل شي بمكان واحد\n\n' +
@@ -771,7 +784,7 @@ async function cmdSetup(interaction) {
       .setColor(0xFF0000)
       .setThumbnail(g.iconURL({ dynamic: true }))
       .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name} — متجر الذكاء الاصطناعي`, iconURL: g.iconURL({ dynamic: true }) });
+      .setFooter({ text: `🛍️ ${g.name} — Codex Zone`, iconURL: g.iconURL({ dynamic: true }) });
     const cats = getCategories();
     const services = getServices();
     const catSelect = new StringSelectMenuBuilder()
@@ -924,6 +937,41 @@ async function cmdSetup(interaction) {
   }
   // ── 🔧 لوحة التحكم ──
   const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة-التحكم') && c.isTextBased());
+
+  // ── 🏷️ قنوات الكاتيجوري — اعرض الخدمات في كل قنات كاتيجوري ──
+  const cats = getCategories();
+  const allServices = getServices().filter(s => s.active);
+  for (const cat of cats) {
+    const chName = `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`;
+    const ch = g.channels.cache.find(c => c.name === chName && c.isTextBased());
+    if (!ch) continue;
+    const catServices = allServices.filter(s => s.category === cat.id);
+    const servicesList = catServices.length > 0
+      ? catServices.map((s, i) => `**${i + 1}.** ${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n')
+      : '📭 لا توجد خدمات حالياً في هذا التصنيف';
+    const e = new EmbedBuilder()
+      .setTitle(`${cat.emoji} ${cat.name}`)
+      .setDescription(
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `## ${cat.emoji} ${cat.name}\n\n` +
+        `${catServices.length} خدمة متاحة\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `${servicesList}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `## 💡 عايز تطلب خدمة؟\n\n` +
+        `اضغط الزر تحت عشان تفتح تذكرة طلب مباشرة\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+      )
+      .setColor(0x2ECC71)
+      .setTimestamp()
+      .setFooter({ text: `🛍️ ${g.name} — ${cat.name}`, iconURL: g.iconURL({ dynamic: true }) });
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel('🛒 اطلب من هذا التصنيف').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setLabel('🛒 المتجر الكامل').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop'),
+    );
+    await ch.send({ embeds: [e], components: [row] }).catch(() => {});
+    await sleep(400);
+  }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
 }
@@ -1449,7 +1497,7 @@ async function cmdEnableCommunity(interaction) {
       '🔗 أو ادخل من هنا مباشرة: https://discord.com/guilds/' + g.id + '/onboarding'
     )
     .setColor(0x57F287)
-    .setFooter({ text: 'AI Shop Bot' })
+    .setFooter({ text: 'Codex Zone' })
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
@@ -1508,6 +1556,32 @@ client.on('interactionCreate', async (interaction) => {
       const row1 = new ActionRowBuilder().addComponents(svcSelect);
       const row2 = new ActionRowBuilder().addComponents(backBtn);
       await interaction.reply({ embeds: [embed], components: [row1, row2], ephemeral: true });
+      return;
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId === 'category_svc_select') {
+      const id = parseInt(interaction.values[0]), services = getServices(), svc = services.find(s => s.id === id);
+      if (!svc) return interaction.reply({ content: '❌ الخدمة مش موجودة', ephemeral: true });
+      const embed = new EmbedBuilder()
+        .setTitle(`${svc.emoji || '🛒'} ${svc.name}`)
+        .setDescription(svc.description || 'مفيش وصف')
+        .addFields(
+          { name: '💰 السعر', value: `\`${fmt(svc.price)} كريديت\``, inline: true },
+          { name: '📂 التصنيف', value: svc.category || 'مش محدد', inline: true },
+        )
+        .setColor(0x2ECC71)
+        .setTimestamp()
+        .setFooter({ text: '🛍️ اضغط الزر تحت عشان تطلب الخدمة دي' });
+      const orderBtn = new ButtonBuilder()
+        .setCustomId(`svc_order_${svc.id}`)
+        .setLabel(`🛒 اطلب — ${svc.name}`)
+        .setStyle(ButtonStyle.Success);
+      const shopBtn = new ButtonBuilder()
+        .setLabel('🌐 زيارة المتجر')
+        .setStyle(ButtonStyle.Link)
+        .setURL('https://ai-shop-bot-production.up.railway.app/shop');
+      const row = new ActionRowBuilder().addComponents(orderBtn, shopBtn);
+      await interaction.update({ embeds: [embed], components: [row] });
       return;
     }
 
@@ -1573,7 +1647,26 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
       const cid = interaction.customId;
 
-      if (cid.startsWith('svc_order_')) {
+      if (cid.startsWith('category_order_')) {
+        const catId = cid.replace('category_order_', '');
+        const cats = getCategories();
+        const cat = cats.find(c => c.id === catId);
+        const services = getServices().filter(s => s.category === catId && s.active);
+        if (!services.length) return interaction.reply({ content: '📭 مفيش خدمات في التصنيف ده حالياً', ephemeral: true });
+        const catSelect = new StringSelectMenuBuilder()
+          .setCustomId('category_svc_select')
+          .setPlaceholder(`📂 اختار خدمة من ${cat?.name || catId}...`)
+          .addOptions(services.map(s => ({
+            label: `${s.emoji || '🛒'} ${s.name}`.substring(0, 100),
+            description: `💰 ${fmt(s.price)}`.substring(0, 100),
+            value: String(s.id),
+          })));
+        const row = new ActionRowBuilder().addComponents(catSelect);
+        await interaction.reply({ components: [row], ephemeral: true });
+        return;
+      }
+
+      if (cid === 'svc_order_') {
         await interaction.deferReply({ ephemeral: true });
         const svcId = parseInt(cid.replace('svc_order_', ''));
         const services = getServices();
@@ -2000,7 +2093,7 @@ client.on('interactionCreate', async (interaction) => {
 // ══════════════════════════════════════════════════════════════
 client.on('clientReady', () => {
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
-  client.user.setActivity('AI Shop — متجر الذكاء الاصطناعي', { type: ActivityType.Watching });
+  client.user.setActivity('Codex Zone — خدمات احترافية', { type: ActivityType.Watching });
 });
 
 client.on('guildMemberAdd', async (member) => {
