@@ -187,63 +187,45 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   goldLine(8, 250);
   goldLine(BANNER_H - 8, 250);
 
-  const diamond = (x, y, size) => {
-    ctx.save();
-    ctx.fillStyle = GOLD;
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
-    ctx.globalAlpha = 0.6;
-    ctx.beginPath();
-    ctx.moveTo(x, y - size);
-    ctx.lineTo(x + size * 0.7, y);
-    ctx.lineTo(x, y + size);
-    ctx.lineTo(x - size * 0.7, y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  };
-  diamond(BANNER_W / 2, BANNER_H / 2 + 42, 5);
-
   const displayName = cleanName || channelName || '';
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 48px "Arabic", "Playfair Display", serif'
-      : 'bold 48px "Playfair Display", serif';
+      ? 'bold 34px "Arabic", "Cairo", sans-serif'
+      : 'bold 36px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
-    const textY = BANNER_H / 2 - 6;
+    const textY = BANNER_H / 2 + 2;
+
+    if (emoji) {
+      ctx.save();
+      ctx.font = '42px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      ctx.shadowColor = GOLD; ctx.shadowBlur = 10;
+      ctx.fillStyle = GOLD;
+      ctx.fillText(emoji, textX, textY - 32);
+      ctx.restore();
+    }
 
     ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 40;
-    ctx.fillStyle = 'rgba(212,175,55,0.2)';
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 18;
+    ctx.fillStyle = 'rgba(212,175,55,0.15)';
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY);
-    ctx.shadowBlur = 20;
-    ctx.fillText(displayName, textX, textY);
+    ctx.fillText(displayName, textX, textY + 10);
     ctx.restore();
 
-    const goldGrad = ctx.createLinearGradient(textX - 100, textY - 20, textX + 100, textY + 20);
+    const goldGrad = ctx.createLinearGradient(textX - 100, textY - 6, textX + 100, textY + 26);
     goldGrad.addColorStop(0, GOLD_DARK);
     goldGrad.addColorStop(0.3, GOLD_LIGHT);
     goldGrad.addColorStop(0.5, GOLD);
     goldGrad.addColorStop(0.7, GOLD_LIGHT);
     goldGrad.addColorStop(1, GOLD_DARK);
     ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 12;
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY);
+    ctx.fillText(displayName, textX, textY + 10);
     ctx.restore();
-
-    const sepGrad = ctx.createLinearGradient(BANNER_W / 2 - 120, 0, BANNER_W / 2 + 120, 0);
-    sepGrad.addColorStop(0, 'transparent');
-    sepGrad.addColorStop(0.3, 'rgba(212,175,55,0.4)');
-    sepGrad.addColorStop(0.5, GOLD);
-    sepGrad.addColorStop(0.7, 'rgba(212,175,55,0.4)');
-    sepGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = sepGrad;
-    ctx.fillRect(BANNER_W / 2 - 120, BANNER_H / 2 + 28, 240, 1);
   }
 
   const fontSmall = arabicFontRegistered ? '500 11px "Arabic", "Cairo", sans-serif' : '500 11px "Cairo", sans-serif';
@@ -269,7 +251,7 @@ async function sendBannerToChannel(channel) {
   const theme = getBannerForChannel(channel.name);
   if (!theme) return false;
   try {
-    const buf = generateBanner(channel.name, null, theme.c1, theme.c2, theme.accent);
+    const buf = generateBanner(channel.name, theme.emoji, theme.c1, theme.c2, theme.accent);
     if (!buf) { console.log('⚠️ generateBanner returned null for', channel.name); return false; }
     const { AttachmentBuilder } = require('discord.js');
     const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
