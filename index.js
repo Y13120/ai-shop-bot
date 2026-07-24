@@ -1787,6 +1787,45 @@ client.on('interactionCreate', async (interaction) => {
         return;
       }
 
+      if (cid.startsWith('category_ticket_')) {
+        const catId = cid.replace('category_ticket_', '');
+        const cats = getCategories();
+        const cat = cats.find(c => c.id === catId);
+        await interaction.deferReply({ ephemeral: true });
+        const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
+        const channel = await g.channels.create({
+          name: `${cat?.emoji || '🎫'}-${cat?.name || catId}-${interaction.user.username}`.substring(0, 100),
+          type: ChannelType.GuildText,
+          parent: getTicketCat(g)?.id,
+          permissionOverwrites: getTicketOverwrites(g, interaction.user.id)
+        });
+        orders.push({ id: orderId, type: 'support', serviceName: cat?.name || catId, serviceEmoji: cat?.emoji || '🎫', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
+        save('orders.json', orders);
+        const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+        await channel.send({ embeds: [new EmbedBuilder()
+          .setTitle(`${cat?.emoji || '🎫'} تذكرة ${cat?.name || catId} #${orderId}`)
+          .setDescription(
+            `# أهلاً بيك في تذكرة **${cat?.name || catId}**!\n\n` +
+            `**العميل:** ${interaction.user}\n` +
+            `**رقم التذكرة:** \`${orderId}\`\n` +
+            `**التصنيف:** ${cat?.emoji || ''} ${cat?.name || catId}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 💬 اكتب طلبك هنا\n\n` +
+            `وصف طلبك بالتفصيل عشان نقدر نساعدك بسرعة\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0xd4af37)
+          .setTimestamp()
+          .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
+          )]
+        });
+        await interaction.editReply(`✅ تم فتح تذكرة **${cat?.name || catId}**: ${channel}`);
+        return;
+      }
+
       if (cid === 'svc_order_') {
         await interaction.deferReply({ ephemeral: true });
         const svcId = parseInt(cid.replace('svc_order_', ''));
@@ -2212,9 +2251,23 @@ client.on('interactionCreate', async (interaction) => {
 // ══════════════════════════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════════════════════════
-client.on('clientReady', () => {
+client.on('clientReady', async () => {
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
   client.user.setActivity('Codex Zone — خدمات احترافية', { type: ActivityType.Watching });
+  for (const [, g] of client.guilds.cache) {
+    try {
+      const invites = await g.invites.fetch();
+      inviteCache[g.id] = new Map(invites.map(i => [i.code, i.uses]));
+    } catch {}
+  }
+  console.log(`📡 Cached invites for ${Object.keys(inviteCache).length} guilds`);
+});
+
+const inviteCache = {};
+
+client.on('inviteCreate', (invite) => {
+  if (!inviteCache[invite.guild?.id]) inviteCache[invite.guild.id] = new Map();
+  inviteCache[invite.guild.id].set(invite.code, invite.uses);
 });
 
 client.on('guildMemberAdd', async (member) => {
@@ -2241,6 +2294,34 @@ client.on('guildMemberAdd', async (member) => {
     } catch {}
     await sendLog(member.guild, new EmbedBuilder().setTitle('🚨 RAID DETECTED').setDescription(`${raidData[guildId].joins.length} joins in 1 minute!`).setColor(0xFF0000).setTimestamp());
   }
+
+  // Invite tracking + credit reward
+  try {
+    const g = member.guild;
+    const currentInvites = await g.invites.fetch();
+    const cached = inviteCache[g.id] || new Map();
+    let usedInvite = null;
+    for (const [code, uses] of currentInvites) {
+      const oldUses = cached.get(code) || 0;
+      if (uses > oldUses) { usedInvite = currentInvites.get(code); break; }
+    }
+    inviteCache[g.id] = new Map(currentInvites.map(i => [i.code, i.uses]));
+
+    if (usedInvite && usedInvite.inviterId) {
+      const inviterId = usedInvite.inviterId;
+      if (inviterId !== member.id) {
+        const newBal = addCredits(inviterId, INVITE_REWARD);
+        try {
+          const inviter = await g.members.fetch(inviterId);
+          await inviter.send(`👑 دعوت عضو جديد (**${member.user.username}**) واخدت **${fmt(INVITE_REWARD)} كريديت**! رصيدك الحالي: **${fmt(newBal)}**`).catch(() => {});
+        } catch {}
+        await sendLog(g, new EmbedBuilder()
+          .setTitle('🎁 دعوة جديدة')
+          .setDescription(`**الداعي:** <@${inviterId}>\n**العضو الجديد:** ${member}\n**الكريدت:** +${fmt(INVITE_REWARD)}\n**الرصيد:** ${fmt(newBal)}`)
+          .setColor(0xd4af37).setTimestamp());
+      }
+    }
+  } catch {}
 
   // Welcome
   try {
