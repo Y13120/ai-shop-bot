@@ -97,8 +97,6 @@ const BANNER_THEMES = {
   'السحوبات':         { emoji: '🎁', c1: '#f06', c2: '#f0a', accent: '#f6a' },
   'الحالة':          { emoji: '📊', c1: '#08c', c2: '#0ac', accent: '#0cf' },
   // ═══════════════ كاتيجوري الخدم ═══════════════
-  'الذكاء الاصطناعي': { emoji: '🤖', c1: '#206', c2: '#40a', accent: '#60f' },
-  'اشتراكات البث':    { emoji: '📺', c1: '#c04', c2: '#f06', accent: '#f48' },
   'التصميم':          { emoji: '🎨', c1: '#a06', c2: '#c0a', accent: '#e0f' },
   'المونتاج':         { emoji: '🎬', c1: '#c00', c2: '#f22', accent: '#f44' },
   'البرمجة والتطوير': { emoji: '💻', c1: '#064', c2: '#0a6', accent: '#0f8' },
@@ -274,26 +272,6 @@ save('config.json', CFG);
 const getCategories = () => load('categories.json', DEFAULT_CATEGORIES);
 const saveCategories = (cats) => save('categories.json', cats);
 const DEFAULT_SERVICES = [
-  // 🤖 أدوات الذكاء الاصطناعي
-  { id: 1, name: 'ChatGPT Plus اشتراك شهري', description: 'اشتراك ChatGPT Plus لمدة شهر — GPT-4o — غير محدود', price: 250000000, category: 'ai', emoji: '🤖', active: true },
-  { id: 2, name: 'Claude Pro اشتراك شهري', description: 'اشتراك Claude Pro لمدة شهر — Claude 3.5 Sonnet — 5x أكثر', price: 250000000, category: 'ai', emoji: '🧠', active: true },
-  { id: 3, name: 'Midjourney اشتراك', description: 'اشتراك Midjourney — توليد صور بالذكاء الاصطناعي — 30 ساعة شهرياً', price: 416667000, category: 'ai', emoji: '🖼️', active: true },
-  { id: 4, name: 'Suno AI توليد موسيقى', description: 'توليد موسيقى بالذكاء الاصطناعي — أي جنس — صوت احترافي', price: 125000000, category: 'ai', emoji: '🎵', active: true },
-  { id: 5, name: 'ElevenLabs صوت AI', description: 'تحويل نص لكلام صوتي بالذكاء الاصطناعي — أصوات واقعية — أي لغة', price: 83333000, category: 'ai', emoji: '🔊', active: true },
-  { id: 6, name: 'CapCut Pro اشتراك', description: 'اشتراك CapCut Pro — مونتاج بالذكاء الاصطناعي — ميزات متقدمة', price: 133333000, category: 'ai', emoji: '✂️', active: true },
-  { id: 7, name: 'توليد صور AI', description: 'توليد أي صورة بالذكاء الاصطناعي — DALL-E 3 — 3 صور', price: 16667000, category: 'ai', emoji: '📸', active: true },
-  { id: 8, name: 'صوت AI — نص لكلام', description: 'تحويل أي نص لصوت طبيعي — اختيار الصوت واللغة والسرعة', price: 16667000, category: 'ai', emoji: '🎙️', active: true },
-  { id: 9, name: 'صوت AI — كلام لنص', description: 'تحويل أي تسجيل صوتي لنص مكتوب — بدقة عالية + سرعة', price: 16667000, category: 'ai', emoji: '📝', active: true },
-  { id: 10, name: 'تحليل بيانات AI', description: 'تحليل أي مجموعة بيانات بالذكاء الاصطناعي — رسوم بيانية + تقارير', price: 83333000, category: 'ai', emoji: '📊', active: true },
-  { id: 11, name: 'كتابة محتوى بالـ AI', description: 'كتابة مقالات أو سكريبتات أو محتوى تسويقي بالذكاء الاصطناعي', price: 25000000, category: 'ai', emoji: '✍️', active: true },
-  { id: 12, name: 'تصميم لوجو بالـ AI', description: 'تصميم لوجو بالذكاء الاصطناعي — أي ستايل — تعديلات', price: 25000000, category: 'ai', emoji: '🎨', active: true },
-  // 📺 اشتراكات البث
-  { id: 13, name: 'Netflix اشتراك شهري', description: 'اشتراك Netflix لمدة شهر — فردي أو مشترك — 4K', price: 666667000, category: 'subscriptions', emoji: '🎬', active: true },
-  { id: 14, name: 'Spotify Premium', description: 'اشتراك Spotify Premium لمدة شهر — بدون إعلانات — تحميل', price: 416667000, category: 'subscriptions', emoji: '🎵', active: true },
-  { id: 15, name: 'YouTube Premium', description: 'اشتراك YouTube Premium لمدة شهر — بدون إعلانات — خلف الشاشة', price: 500000000, category: 'subscriptions', emoji: '▶️', active: true },
-  { id: 16, name: 'Disney+ / Prime Video', description: 'اشتراك Disney+ أو Amazon Prime Video لمدة شهر', price: 416667000, category: 'subscriptions', emoji: '🏰', active: true },
-  { id: 17, name: 'Crunchyroll أنمي', description: 'اشتراك Crunchyroll — أنمي بدون إعلانات — ترجمة عربية', price: 333333000, category: 'subscriptions', emoji: '🎌', active: true },
-  { id: 18, name: 'Canva Pro اشتراك', description: 'اشتراك Canva Pro — تصميم بدون حدود — قوالب احترافية', price: 500000000, category: 'subscriptions', emoji: '🎨', active: true },
   // 🎨 التصميم
   { id: 19, name: 'تصميم لوجو احترافي', description: 'تصميم لوجو احترافي — أحجام متعددة — شفاف — أي ستايل', price: 250000000, category: 'design', emoji: '✏️', active: true },
   { id: 20, name: 'تصميم بوستر إعلاني', description: 'تصميم بوستر إعلاني أو ترويجي — جودة عالية + تعديلات', price: 166667000, category: 'design', emoji: '🖼️', active: true },
@@ -361,8 +339,6 @@ const DEFAULT_SERVICES = [
   { id: 74, name: 'خطوط وأصول تصميم', description: 'خطوط عربية وإنجليزية + عناصر تصميم جاهزة', price: 25000000, category: 'products', emoji: '🔤', active: true },
 ];
 const DEFAULT_CATEGORIES = [
-  { id: 'ai', name: 'أدوات الذكاء الاصطناعي', emoji: '🤖' },
-  { id: 'subscriptions', name: 'اشتراكات البث', emoji: '📺' },
   { id: 'design', name: 'التصميم', emoji: '🎨' },
   { id: 'montage', name: 'المونتاج', emoji: '🎬' },
   { id: 'dev', name: 'البرمجة والتطوير', emoji: '💻' },
@@ -691,7 +667,6 @@ async function cmdSetup(interaction) {
     { n: '═════════ 💬 ═════════', chs: [
       { display: '💬•〢الشات العام', p: full, topic: 'دردشة عامة مع جميع أعضاء السيرفر' },
       { display: '🤖•〢اوامر البوت', p: full, topic: 'استخدم أوامر البوت من هنا - اكتب / لعرض الأوامر' },
-      { display: '🤖•〢الذكاء الاصطناعي', p: full, topic: 'مساعد الذكاء الاصطناعي - اسأل أي سؤال' },
     ]},
     { n: '═════════ 🎫 ═════════', chs: [
       { display: '🎫•〢فتح تذكرة', p: full, topic: 'اضغط الزر لفتح تذكرة دعم فني' },
@@ -874,27 +849,53 @@ async function cmdSetup(interaction) {
   const howCh = g.channels.cache.find(c => c.name.includes('كيف تطلب') && c.isTextBased());
   if (howCh) {
     await howCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━ 📝 دليل طلب الخدمة ━━━━━━━━')
+      .setTitle('━━━━━━━━━━ 📝 كيف تطلب ━━━━━━━━━━')
       .setDescription(
-        '## 📝 دليل طلب الخدمة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## اتبع الخطوات دي:\n\n' +
-        '**`1️⃣`** 🛒 اختار الخدمة من قناة **•〢 الخدمات**\n\n' +
-        '**`2️⃣`** 📋 شوف التفاصيل والسعر بتاعها\n\n' +
-        '**`3️⃣`** 💬 اضغط زر **🛒 اطلب دلوقتي** عشان تفتح تذكرة\n\n' +
-        '**`4️⃣`** 💰 ادفع بالطريقة اللي تناسبك\n\n' +
-        '**`5️⃣`** ✅ الستاف هينفّذ طلبك ويسلّملك\n\n' +
-        '**`6️⃣`** ⭐ قيّم تجربتك بـ `/review`\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 📝 دليل طلب الخدمة من Codex Zone\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 🛒 الخطوة الأولى — اختار الخدمة\n\n' +
+        'روح قناة **🛒•〢الخدمات** وشوف كل الخدمات المتاحة\n' +
+        'فيه categorii كتير — اختار اللي يناسبك\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 📋 الخطوة التانية — شوف التفاصيل\n\n' +
+        'كل خدمة ليها وصف كامل وسعر واضح\n' +
+        'اقرأ التفاصيل كويس قبل ما تطلب\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 🎫 الخطوة التالتة — افتح تذكرة\n\n' +
+        'اضغط زر **🎫 افتح تذكرة** اللي تحت كل خدمة\n' +
+        'هيفتحلك تذكرة خاصة بيك مع الستاف\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 💰 الخطوة الرابعة — ادفع\n\n' +
+        'الدفع بيكون من خلال التذكرة\n' +
+        'طرق الدفع: **فودافون كاش / إيزي باي / تحويل بنكي**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## ⏳ الخطوة الخامسة — استنى\n\n' +
+        'الستاف هينفّذ طلبك في أسرع وقت ممكن\n' +
+        'هتتتبع حالة طلبك من قناة **📋•〢الطلبات**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## ✅ الخطوة السادسة — استلم\n\n' +
+        'بعد ما يتنفّذ الطلب، هيوصلك التسليم\n' +
+        'تقدر تتبعه من قناة **🚚•〢حالة التوصيل**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## ⭐ الخطوة السابعة — قيّم\n\n' +
+        'استخدم الأمر **`/review`** عشان تكتب رأيك\n' +
+        'تقييمك بيساعدنا نتحسن ويساعد الزباين الجداد\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 نصايح مهمة\n\n' +
         '• تأكد إنك اختارت الخدمة الصح قبل ما تطلب\n' +
         '• احتفظ بإيصال الدفع\n' +
-        '• لو عندك سؤال، استخدم قناة **•〢 تواصل مع الستاف**\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        '• لو عندك أي سؤال، افتح تذكرة من **🎫•〢فتح تذكرة**\n' +
+        '• لو عندك مشكلة، تواصل مع الستاف من **📞•〢تواصل مع الستاف**\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 🔒 ضماناتك مع Codex Zone\n\n' +
+        '✅ **دفع آمن** — بياناتك محمية 100%\n' +
+        '✅ **تسليم سريع** — في أسرع وقت ممكن\n' +
+        '✅ **دعم مستمر** — معاك من الأول للآخر\n' +
+        '✅ **جودة عالية** — دايماً بنقدم الأفضل'
       )
       .setColor(0x2ECC71)
       .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
+      .setFooter({ text: `🛍️ ${g.name} — كيف تطلب`, iconURL: g.iconURL({ dynamic: true }) })
     ] }).catch(() => {});
   }
 
@@ -1186,39 +1187,6 @@ async function cmdSetup(interaction) {
       .setColor(0xE74C3C)
       .setTimestamp()
       .setFooter({ text: `🔧 ${g.name} — لوحة التحكم`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
-
-  // ── 🤖 الذكاء الاصطناعي ──
-  const aiCh = g.channels.cache.find(c => c.name.includes('الذكاء الاصطناعي') && c.isTextBased());
-  if (aiCh) {
-    await aiCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━━━ 🤖 الذكاء الاصطناعي ━━━━━━━━━━')
-      .setDescription(
-        '## 🤖 روبوت الذكاء الاصطناعي\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 💡 مرحباً بيك في شات الذكاء الاصطناعي\n\n' +
-        'هنا تقدر تتكلم مع الروبوت وتسأله أي سؤال\n' +
-        'هو مساعدك الذكي في كل شيء\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 🎯 إيه اللي تقدر تعمله هنا\n\n' +
-        '📝 **كتابة** — مقالات، شروحات، ترجمة\n' +
-        '💻 **برمجة** — مساعدة في الكود وحل المشاكل\n' +
-        '📚 **تعليم** — شرح مواد وأفكار معقدة\n' +
-        '🎨 **إبداع** — أفكار ومحتوى إبداعي\n' +
-        '💼 **عمل** — مساعدة في الشغل والمشاريع\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📝 مثال\n\n' +
-        '**انت:** اكتبلي مقال عن الذكاء الاصطناعي\n' +
-        '**الروبوت:** [هيكتبلك مقال كامل ومفصّل]\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⚠️ ملاحظات\n\n' +
-        '• ممنوع السبام الرسائل في الشات\n' +
-        '• الروبوت للمساعدات العامة — للطلبات استخدمقنوات الخدمات'
-      )
-      .setColor(0x00D2FF)
-      .setTimestamp()
-      .setFooter({ text: `🤖 ${g.name} — الذكاء الاصطناعي`, iconURL: g.iconURL({ dynamic: true }) })
     ] }).catch(() => {});
   }
 
