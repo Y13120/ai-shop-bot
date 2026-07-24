@@ -771,7 +771,14 @@ async function cmdSetup(interaction) {
   const cats = getCategories();
   const allServices = getServices();
   for (const cat of cats) {
-    const catCh = g.channels.cache.find(c => c.name.includes(cat.name) && c.isTextBased());
+    const catNameDashed = cat.name.replace(/\s+/g, '-');
+    const catCh = g.channels.cache.find(c =>
+      c.isTextBased() && (
+        c.name.includes(cat.name) ||
+        c.name.includes(catNameDashed) ||
+        c.name.includes(cat.emoji)
+      ) && c.parent?.name?.includes('🛍️')
+    );
     if (!catCh) continue;
     const catServices = allServices.filter(s => s.category === cat.id && s.active);
     const svcCount = catServices.length;
@@ -994,36 +1001,6 @@ async function cmdSetup(interaction) {
   }
   // ── 🔧 لوحة التحكم ──
   const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة التحكم') && c.isTextBased());
-
-  // ── 🏷️ قنوات الكاتيجوري — اعرض الخدمات في كل قنات كاتيجوري ──
-  for (const cat of cats) {
-    const chName = `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`;
-    const ch = g.channels.cache.find(c => c.name === chName && c.isTextBased());
-    if (!ch) continue;
-    const catServices = allServices.filter(s => s.category === cat.id && s.active);
-    const svcCount = catServices.length;
-    const e = new EmbedBuilder()
-      .setTitle(`${cat.emoji} ${cat.name}`)
-      .setDescription(
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `## ${cat.emoji} ${cat.name}\n\n` +
-        `**${svcCount}** خدمة متاحة في التصنيف ده\n\n` +
-        `كل الخدمات احترافية وتم تقديمها بأعلى جودة\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `## 🎫 افتح تذكرة\n\n` +
-        `اضغط الزر **🎫 افتح تذكرة** عشان نبدأ نكلمك\n\n` +
-        `الستاف هيرد عليك في أقرب وقت ويساعدك تختار الخدمة المناسبة\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
-      )
-      .setColor(0xd4af37)
-      .setTimestamp()
-      .setFooter({ text: `🛍️ ${g.name} — ${cat.name}`, iconURL: g.iconURL({ dynamic: true }) });
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel('🎫 افتح تذكرة').setStyle(ButtonStyle.Success),
-    );
-    await ch.send({ embeds: [e], components: [row] }).catch(() => {});
-    await sleep(400);
-  }
 
   await interaction.editReply(`✅ تم الإعداد!\n\n${log.join('\n')}`);
 }
