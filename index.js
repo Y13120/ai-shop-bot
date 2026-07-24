@@ -616,6 +616,10 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('banners').setDescription('ولّد بانرات للقنوات وابعتهم'),
   new SlashCommandBuilder().setName('enable-community').setDescription('فعّل وضع Community في السيرفر')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  new SlashCommandBuilder().setName('hide-all').setDescription('اخفاء جميع القنوات والكاتيجوري من الجميع')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  new SlashCommandBuilder().setName('show-all').setDescription('إظهار جميع القنوات والكاتيجوري للجميع')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -1614,6 +1618,80 @@ async function cmdEnableCommunity(interaction) {
 }
 
 // ══════════════════════════════════════════════════════════════
+//  HANDLERS: HIDE / SHOW ALL
+// ══════════════════════════════════════════════════════════════
+async function cmdHideAll(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+  const g = interaction.guild;
+  let hidden = 0, failed = 0;
+
+  for (const [, ch] of g.channels.cache) {
+    try {
+      await ch.permissionOverwrites.edit(g.id, { ViewChannel: false });
+      hidden++;
+    } catch { failed++; }
+  }
+  for (const [, cat] of g.channels.cache) {
+    if (cat.type === ChannelType.GuildCategory) {
+      try {
+        await cat.permissionOverwrites.edit(g.id, { ViewChannel: false });
+      } catch {}
+    }
+  }
+
+  const staffRole = g.roles.cache.find(r => r.name.includes('Staff'));
+  const adminRole = g.roles.cache.find(r => r.name.includes('Admin'));
+  const ownerRole = g.roles.cache.find(r => r.name.includes('Owner'));
+
+  for (const [, ch] of g.channels.cache) {
+    try {
+      const ow = [{ id: g.id, deny: [PermissionFlagsBits.ViewChannel] }];
+      if (staffRole) ow.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+      if (adminRole) ow.push({ id: adminRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+      if (ownerRole) ow.push({ id: ownerRole.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] });
+      await ch.permissionOverwrites.set(ow);
+    } catch {}
+  }
+  for (const [, cat] of g.channels.cache) {
+    if (cat.type === ChannelType.GuildCategory) {
+      try {
+        const ow = [{ id: g.id, deny: [PermissionFlagsBits.ViewChannel] }];
+        if (staffRole) ow.push({ id: staffRole.id, allow: [PermissionFlagsBits.ViewChannel] });
+        if (adminRole) ow.push({ id: adminRole.id, allow: [PermissionFlagsBits.ViewChannel] });
+        if (ownerRole) ow.push({ id: ownerRole.id, allow: [PermissionFlagsBits.ViewChannel] });
+        await cat.permissionOverwrites.set(ow);
+      } catch {}
+    }
+  }
+
+  await interaction.editReply(`✅ تم إخفاء **${hidden}** قناة${failed ? ` — فشل ${failed}` : ''}\n🔒 الآن كل القنوات مخفية عن الأعضاء العاديين\n💡 الستاف والادمن بس هيشوفوها`);
+  await sendLog(g, new EmbedBuilder().setTitle('🔒 تم إخفاء جميع القنوات').setDescription(`**بواسطة:** ${interaction.user}\n**القنوات:** ${hidden}`).setColor(0xE74C3C).setTimestamp());
+}
+
+async function cmdShowAll(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+  const g = interaction.guild;
+  let shown = 0;
+
+  for (const [, ch] of g.channels.cache) {
+    try {
+      await ch.permissionOverwrites.edit(g.id, { ViewChannel: true });
+      shown++;
+    } catch {}
+  }
+  for (const [, cat] of g.channels.cache) {
+    if (cat.type === ChannelType.GuildCategory) {
+      try {
+        await cat.permissionOverwrites.edit(g.id, { ViewChannel: true });
+      } catch {}
+    }
+  }
+
+  await interaction.editReply(`✅ تم إظهار **${shown}** قناة\n🔓 الآن كل القنوات ظاهرة للجميع`);
+  await sendLog(g, new EmbedBuilder().setTitle('🔓 تم إظهار جميع القنوات').setDescription(`**بواسطة:** ${interaction.user}\n**القنوات:** ${shown}`).setColor(0x2ECC71).setTimestamp());
+}
+
+// ══════════════════════════════════════════════════════════════
 //  MAIN INTERACTION ROUTER
 // ══════════════════════════════════════════════════════════════
 client.on('interactionCreate', async (interaction) => {
@@ -1631,6 +1709,7 @@ client.on('interactionCreate', async (interaction) => {
         'server-info': cmdServerInfo, 'user-info': cmdUserInfo, stats: cmdStats, 'ticket-stats': cmdTicketStats,
         'top-customers': cmdTopCustomers, giveaway: cmdGiveaway, 'end-giveaway': cmdEndGiveaway,
         'enable-community': cmdEnableCommunity,
+        'hide-all': cmdHideAll, 'show-all': cmdShowAll,
       };
       const handler = map[interaction.commandName];
       if (handler) return await handler(interaction);
