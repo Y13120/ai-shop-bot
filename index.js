@@ -851,7 +851,9 @@ async function cmdSetup(interaction) {
 
   // ── 👋 من نحن ──
   const aboutCh = g.channels.cache.find(c => c.name.includes('من نحن') && c.isTextBased());
+  console.log('👋 من نحن channel found:', aboutCh ? aboutCh.name : 'NOT FOUND');
   if (aboutCh) {
+    try {
     await aboutCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━━━ 👋 مرحباً بيك في Codex Zone ━━━━━━━━━━')
       .setDescription(
@@ -908,7 +910,9 @@ async function cmdSetup(interaction) {
       .setColor(0xD4AF37)
       .setTimestamp()
       .setFooter({ text: `👑 ${g.name} — القائمة الأولى للخدمات الرقمية`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
+    ] });
+    console.log('✅ من نحن embed sent');
+    } catch (e) { console.error('❌ من نحن embed failed:', e.message); }
   }
 
   // ── 📝 كيف تطلب — Embed محسّن ──
