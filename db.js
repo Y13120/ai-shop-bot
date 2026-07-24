@@ -18,6 +18,11 @@ const warningSchema = new mongoose.Schema({}, { strict: false, minimize: false }
 const giveawaySchema = new mongoose.Schema({}, { strict: false, minimize: false });
 const raidSchema = new mongoose.Schema({}, { strict: false, minimize: false });
 const applicationSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const couponSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const subscriptionSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const blacklistSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const dailyLimitSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const promoGateSchema = new mongoose.Schema({}, { strict: false, minimize: false });
 
 const Config = mongoose.model('Config', configSchema);
 const Service = mongoose.model('Service', serviceSchema);
@@ -29,6 +34,11 @@ const Warning = mongoose.model('Warning', warningSchema);
 const Giveaway = mongoose.model('Giveaway', giveawaySchema);
 const Raid = mongoose.model('Raid', raidSchema);
 const Application = mongoose.model('Application', applicationSchema);
+const Coupon = mongoose.model('Coupon', couponSchema);
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
+const Blacklist = mongoose.model('Blacklist', blacklistSchema);
+const DailyLimit = mongoose.model('DailyLimit', dailyLimitSchema);
+const PromoGate = mongoose.model('PromoGate', promoGateSchema);
 
 // ══════════════════════════════════════════════════════════════
 //  COLLECTION MAP
@@ -45,6 +55,11 @@ const COLLECTIONS = {
   'applications.json':   { model: Application, type: 'array', key: '_id' },
   'credits.json':        { model: Credit,    type: 'map',    key: 'userId', valKey: 'amount' },
   'raid.json':           { model: Raid,      type: 'map',    key: 'guildId', valKey: 'data' },
+  'coupons.json':        { model: Coupon,    type: 'array',  key: 'code' },
+  'subscriptions.json':  { model: Subscription, type: 'array', key: 'userId' },
+  'blacklist.json':      { model: Blacklist, type: 'array',  key: 'userId' },
+  'dailyLimits.json':    { model: DailyLimit, type: 'map',   key: 'userId', valKey: 'data' },
+  'promoGates.json':     { model: PromoGate, type: 'array',  key: 'guildId' },
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -105,6 +120,8 @@ async function flushToMongoDB() {
             await Credit.insertMany(entries.map(([userId, amount]) => ({ userId, amount })));
           } else if (file === 'raid.json') {
             await Raid.insertMany(entries.map(([guildId, d]) => ({ guildId, joins: d.joins || [] })));
+          } else if (file === 'dailyLimits.json') {
+            await DailyLimit.insertMany(entries.map(([userId, data]) => ({ userId, data })));
           }
         }
       }
@@ -154,6 +171,11 @@ async function loadAllFromMongo() {
           const docs = await Raid.find({}).lean();
           const map = {};
           docs.forEach(d => { map[d.guildId] = { joins: d.joins || [] }; });
+          _cache[file] = map;
+        } else if (file === 'dailyLimits.json') {
+          const docs = await DailyLimit.find({}).lean();
+          const map = {};
+          docs.forEach(d => { map[d.userId] = d.data; });
           _cache[file] = map;
         }
       }
@@ -222,5 +244,6 @@ module.exports = {
   connectDB, seedDefaults,
   loadFromCache, saveToCache, scheduleFlush,
   Config, Service, Category, Order, Credit,
-  Review, Warning, Giveaway, Raid, Application
+  Review, Warning, Giveaway, Raid, Application,
+  Coupon, Subscription, Blacklist, DailyLimit, PromoGate
 };

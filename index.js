@@ -763,6 +763,40 @@ async function cmdSetup(interaction) {
     saveCategories(DEFAULT_CATEGORIES);
   }
 
+  // ── 🎫 تكتات كل قناة خدمات ──
+  const cats = getCategories();
+  const allServices = getServices();
+  for (const cat of cats) {
+    const catCh = g.channels.cache.find(c => c.name.includes(cat.name) && c.isTextBased());
+    if (!catCh) continue;
+    const catServices = allServices.filter(s => s.category === cat.id && s.active);
+    const servicesList = catServices.length > 0
+      ? catServices.map(s => `> ${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n')
+      : '> لا توجد خدمات حالياً';
+    const svcEmbed = new EmbedBuilder()
+      .setTitle(`${cat.emoji || '📂'} ${cat.name}`)
+      .setDescription(
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `## 📦 الخدمات المتاحة\n\n` +
+        `${servicesList}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `## 🎫 افتح تذكرة\n\n` +
+        `اضغط الزر **🎫 افتح تذكرة** عشان تطلب أي خدمة في التصنيف ده\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+      )
+      .setColor(0xd4af37)
+      .setTimestamp()
+      .setFooter({ text: `${cat.emoji} ${cat.name} — Codex Zone`, iconURL: g.iconURL({ dynamic: true }) });
+    await catCh.send({
+      embeds: [svcEmbed],
+      components: [new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel(`🎫 افتح تذكرة — ${cat.name}`).setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel(`🛒 طلب مباشر`).setStyle(ButtonStyle.Primary),
+      )]
+    }).catch(() => {});
+    await sleep(500);
+  }
+
   // ── 🛒 الخدمات — Embed + Select Menu (تصنيفات أولاً) ──
   const svcCh = g.channels.cache.find(c => c.name.includes('الخدمات') && c.isTextBased());
   if (svcCh) {
@@ -806,7 +840,6 @@ async function cmdSetup(interaction) {
       .setThumbnail(g.iconURL({ dynamic: true }))
       .setTimestamp()
       .setFooter({ text: `🛍️ ${g.name} — Codex Zone`, iconURL: g.iconURL({ dynamic: true }) });
-    const cats = getCategories();
     const services = getServices();
     const catSelect = new StringSelectMenuBuilder()
       .setCustomId('category_menu')
@@ -960,13 +993,11 @@ async function cmdSetup(interaction) {
   const adminPanelCh = g.channels.cache.find(c => c.name.includes('لوحة التحكم') && c.isTextBased());
 
   // ── 🏷️ قنوات الكاتيجوري — اعرض الخدمات في كل قنات كاتيجوري ──
-  const cats = getCategories();
-  const allServices = getServices().filter(s => s.active);
   for (const cat of cats) {
     const chName = `${cat.emoji}・${cat.name.replace(/\s+/g, '-')}`;
     const ch = g.channels.cache.find(c => c.name === chName && c.isTextBased());
     if (!ch) continue;
-    const catServices = allServices.filter(s => s.category === cat.id);
+    const catServices = allServices.filter(s => s.category === cat.id && s.active);
     const servicesList = catServices.length > 0
       ? catServices.map((s, i) => `**${i + 1}.** ${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n')
       : '📭 لا توجد خدمات حالياً في هذا التصنيف';
