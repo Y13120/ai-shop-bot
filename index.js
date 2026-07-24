@@ -124,7 +124,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
-  const cleanName = (channelName || '').replace(/^[\u{1F300}-\u{1FAFF}\u2600-\u27BF•〢\s]+/u, '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').trim();
+  const cleanName = (channelName || '').replace(/^.*〢\s*/, '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').trim();
   const GOLD = '#d4af37';
   const GOLD_LIGHT = '#f4e5b0';
   const GOLD_DARK = '#aa8c2c';
