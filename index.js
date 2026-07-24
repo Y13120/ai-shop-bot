@@ -191,8 +191,8 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 52px "Arabic", "Cairo", sans-serif'
-      : 'bold 54px "Playfair Display", serif';
+      ? 'bold 62px "Arabic", "Cairo", sans-serif'
+      : 'bold 64px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
@@ -200,47 +200,45 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     if (emoji) {
       ctx.save();
-      ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-      ctx.shadowColor = GOLD; ctx.shadowBlur = 12;
-      ctx.fillText(emoji, textX, textY - 42);
+      ctx.font = '64px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      ctx.shadowColor = GOLD; ctx.shadowBlur = 14;
+      ctx.fillText(emoji, textX, textY - 48);
       ctx.restore();
     }
 
     ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 8;
-    const goldGrad = ctx.createLinearGradient(textX - 140, textY - 8, textX + 140, textY + 34);
+    ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 20;
+    const goldGrad = ctx.createLinearGradient(textX - 160, textY - 10, textX + 160, textY + 40);
     goldGrad.addColorStop(0, GOLD_DARK);
-    goldGrad.addColorStop(0.25, GOLD_LIGHT);
-    goldGrad.addColorStop(0.5, '#ffe9a0');
-    goldGrad.addColorStop(0.75, GOLD_LIGHT);
+    goldGrad.addColorStop(0.2, GOLD_LIGHT);
+    goldGrad.addColorStop(0.4, '#ffe9a0');
+    goldGrad.addColorStop(0.5, '#fff5d0');
+    goldGrad.addColorStop(0.6, '#ffe9a0');
+    goldGrad.addColorStop(0.8, GOLD_LIGHT);
     goldGrad.addColorStop(1, GOLD_DARK);
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY + 14);
+    ctx.fillText(displayName, textX, textY + 16);
     ctx.restore();
 
     ctx.save();
-    const underlineGrad = ctx.createLinearGradient(textX - 120, 0, textX + 120, 0);
+    const underlineGrad = ctx.createLinearGradient(textX - 140, 0, textX + 140, 0);
     underlineGrad.addColorStop(0, 'transparent');
-    underlineGrad.addColorStop(0.15, GOLD);
-    underlineGrad.addColorStop(0.5, GOLD_LIGHT);
-    underlineGrad.addColorStop(0.85, GOLD);
+    underlineGrad.addColorStop(0.1, GOLD);
+    underlineGrad.addColorStop(0.3, GOLD_LIGHT);
+    underlineGrad.addColorStop(0.5, '#fff5d0');
+    underlineGrad.addColorStop(0.7, GOLD_LIGHT);
+    underlineGrad.addColorStop(0.9, GOLD);
     underlineGrad.addColorStop(1, 'transparent');
     ctx.strokeStyle = underlineGrad;
-    ctx.lineWidth = 1.8;
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 5;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 6;
     ctx.beginPath();
-    ctx.moveTo(textX - 120, textY + 34);
-    ctx.lineTo(textX + 120, textY + 34);
+    ctx.moveTo(textX - 140, textY + 38);
+    ctx.lineTo(textX + 140, textY + 38);
     ctx.stroke();
     ctx.restore();
   }
-
-  const fontSmall = arabicFontRegistered ? '500 13px "Arabic", "Cairo", sans-serif' : '500 13px "Cairo", sans-serif';
-  ctx.font = fontSmall;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(212,175,55,0.45)';
-  ctx.fillText('CODEX  ZONE', BANNER_W / 2, BANNER_H - 20);
 
   return Buffer.from(c.toBuffer('image/png'));
 }
