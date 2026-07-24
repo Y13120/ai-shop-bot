@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // ══════════════════════════════════════════════════════════════
 //  SCHEMAS
