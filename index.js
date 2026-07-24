@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const { connectDB, seedDefaults, loadFromCache, saveToCache, scheduleFlush } = require('./db');
 
 let Canvas;
 let arabicFontRegistered = false;
@@ -285,10 +286,16 @@ const DATA = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true });
 
 const load = (file, fb) => {
+  const cached = loadFromCache(file, undefined);
+  if (cached !== undefined) return cached;
   try { return JSON.parse(fs.readFileSync(path.join(DATA, file), 'utf8')); }
   catch { return fb; }
 };
-const save = (file, d) => fs.writeFileSync(path.join(DATA, file), JSON.stringify(d, null, 2), 'utf8');
+const save = (file, d) => {
+  saveToCache(file, d);
+  try { fs.writeFileSync(path.join(DATA, file), JSON.stringify(d, null, 2), 'utf8'); } catch {}
+  scheduleFlush();
+};
 
 const CFG = load('config.json', {});
 if (process.env.BOT_TOKEN) CFG.token = process.env.BOT_TOKEN;
@@ -786,11 +793,11 @@ async function cmdSetup(interaction) {
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
   if (logsCh) { CFG.logsChannel = logsCh.id; save('config.json', CFG); }
 
-  if (!fs.existsSync(path.join(DATA, 'services.json'))) {
+  if (!getServices() || (Array.isArray(getServices()) && getServices().length === 0)) {
     const defaultServices = DEFAULT_SERVICES.map(s => ({ ...s, createdAt: Date.now() }));
     save('services.json', defaultServices);
   }
-  if (!fs.existsSync(path.join(DATA, 'categories.json'))) {
+  if (!getCategories() || (Array.isArray(getCategories()) && getCategories().length === 0)) {
     saveCategories(DEFAULT_CATEGORIES);
   }
 
@@ -2757,6 +2764,24 @@ async function start() {
   }
   console.log('🚀 Starting bot...');
   console.log(`📋 Config: clientId=${CFG.clientId ? 'OK' : 'MISSING'} guildId=${CFG.guildId ? 'OK' : 'MISSING'} token=${CFG.token ? 'OK' : 'MISSING'}`);
+
+  const dbOk = await connectDB();
+  if (dbOk) {
+    await seedDefaults(DEFAULT_SERVICES, DEFAULT_CATEGORIES);
+    const mongoCfg = load('config.json', null);
+    if (mongoCfg) {
+      Object.assign(CFG, mongoCfg);
+      if (process.env.BOT_TOKEN) CFG.token = process.env.BOT_TOKEN;
+      if (process.env.CLIENT_ID) CFG.clientId = process.env.CLIENT_ID;
+      if (process.env.GUILD_ID) CFG.guildId = process.env.GUILD_ID;
+      if (!CFG.autoRoles) CFG.autoRoles = [];
+      if (!CFG.logsChannel) CFG.logsChannel = '';
+      if (!CFG.automod) CFG.automod = { antispam: true, badwords: true, badwordsList: ['كسم', 'نكت', 'xnxx', 'porn', 'sex', 'incest'], antispamLimit: 5, antispamTime: 10 };
+      if (!CFG.welcomeChannel) CFG.welcomeChannel = '';
+      if (!CFG.primaryCurrency) CFG.primaryCurrency = 'usd';
+      if (!CFG.welcomeMessage) CFG.welcomeMessage = 'مرحباً بك {user} في السيرفر! 👋';
+    }
+  }
 
   client.once('clientReady', async () => {
     console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);

@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "canvas": "^3.2.3",
-    "discord.js": "^14.16.3"
+    "discord.js": "^14.16.3",
+    "mongoose": "^9.8.0"
   }
 }
