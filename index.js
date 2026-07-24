@@ -691,39 +691,39 @@ async function cmdSetup(interaction) {
   const full = [{ id: g.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }];
 
   const structure = [
-    { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
+    { n: '═════════ 🛍️ ═════════', chs: [
       { display: '🛒•〢الخدمات', p: full, topic: 'تصفح جميع الخدمات المتاحة في السيرفر' },
       { display: '📖•〢كيف تطلب', p: noSend, topic: 'شرح كيفية طلب أي خدمة خطوة بخطوة' },
       { display: '⭐•〢التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])], topic: 'شارك تجربتك وقيّم الخدمات التي حصلت عليها' },
       { display: '💬•〢تواصل مع الستاف', p: full, topic: 'للتواصل مع فريق العمل للاستفسار أو المساعدة' },
     ]},
-    { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
+    { n: '═════════ 📢 ═════════', chs: [
       { display: '📣•〢الاخبار والاعلانات', p: noSend, topic: 'تابع أحدث الأخبار والعروض والتحديثات' },
       { display: '📋•〢القوانين', p: noSend, topic: 'قوانين السيرفر - يُرجى قراءتها والالتزام بها' },
       { display: '🎁•〢السحوبات', p: noSend, topic: 'العروض والخصومات وال崌ابط المتاحة' },
     ]},
-    { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
+    { n: '═════════ 💬 ═════════', chs: [
       { display: '💬•〢الشات العام', p: full, topic: 'دردشة عامة مع جميع أعضاء السيرفر' },
       { display: '🤖•〢اوامر البوت', p: full, topic: 'استخدم أوامر البوت من هنا - اكتب / لعرض الأوامر' },
       { display: '🤖•〢الذكاء الاصطناعي', p: full, topic: 'مساعد الذكاء الاصطناعي - اسأل أي سؤال' },
     ]},
-    { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
+    { n: '═════════ 🎫 ═════════', chs: [
       { display: '🎫•〢فتح تذكرة', p: full, topic: 'اضغط الزر لفتح تذكرة دعم فني' },
       { display: '📦•〢الطلبات', p: full, topic: 'إدارة طلباتك ومتابعة حالتها' },
     ]},
-    { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
+    { n: '═════════ 📦 ═════════', chs: [
       { display: '🚚•〢حالة التوصيل', p: noSend, topic: 'متابعة حالة التوصيل والشحن' },
       { display: '📦•〢التسليمات', p: noSend, topic: 'قائمة التسليمات المكتملة' },
     ]},
-    { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
+    { n: '═════════ 👑 ═════════', chs: [
       { display: '💼•〢شات الستاف', p: staffOnly, topic: 'قناة خاصة بفريق العمل للتنسيق وال讨论' },
       { display: '📋•〢ملاحظات', p: staffOnly, topic: 'ملاحظات الفريق على الطلبات والعملاء' },
       { display: '📝•〢تقديم للادارة', p: full, topic: 'قدّم للانضمام لفريق العمل - اكتب /apply' },
     ]},
-    { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
+    { n: '═════════ 🛡️ ═════════', chs: [
       { display: '📝•〢السجلات', p: noSend, topic: 'سجلات النشاطات والأوامر في السيرفر' },
     ]},
-    { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
+    { n: '═════════ ⚙️ ═════════', chs: [
       { display: '🔧•〢لوحة التحكم', p: adminOnly, topic: 'لوحة تحكم البوت - للمشرفين فقط' },
     ]},
   ];
@@ -735,7 +735,7 @@ async function cmdSetup(interaction) {
   }));
   if (catChannels.length > 0) {
     structure.push({
-      n: '━━━━━━━━ 🛍️ ━━━━━━━━',
+      n: '═════════ 🛍️ ═════════',
       chs: catChannels,
     });
   }
