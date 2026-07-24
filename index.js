@@ -966,7 +966,7 @@ async function cmdSetup(interaction) {
   }
 
   // ── 📋 القواعد ──
-  const rulesCh = g.channels.cache.find(c => c.name.includes('القواعد') && c.isTextBased());
+  const rulesCh = g.channels.cache.find(c => c.name.includes('القوانين') && c.isTextBased());
   if (rulesCh) {
     await rulesCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━━━ 📋 قواعد السيرفر ━━━━━━━━━━')
@@ -1006,31 +1006,43 @@ async function cmdSetup(interaction) {
   // ── 🎫 فتح تذكرة ──
   const ticketCh = g.channels.cache.find(c => c.name.includes('فتح تذكرة') && c.isTextBased());
   if (ticketCh) {
-    const btn2 = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
-    const btnShop = new ButtonBuilder().setLabel('🛒 زيارة المتجر').setStyle(ButtonStyle.Link).setURL('https://ai-shop-bot-production.up.railway.app/shop');
+    const btnSupport = new ButtonBuilder().setCustomId('open_ticket_support').setLabel('🛠️ دعم فني').setStyle(ButtonStyle.Primary);
+    const btnBuy = new ButtonBuilder().setCustomId('open_ticket_buy').setLabel('🛒 شراء خدمة').setStyle(ButtonStyle.Success);
+    const btnAsk = new ButtonBuilder().setCustomId('open_ticket_ask').setLabel('❓ سؤال واستفسار').setStyle(ButtonStyle.Secondary);
     await ticketCh.send({ embeds: [new EmbedBuilder()
       .setTitle('━━━━━━━━━━ 🎫 افتح تذكرة ━━━━━━━━━━')
       .setDescription(
-        '## 🎫 افتح تذكرة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## محتاج مساعدة؟ افتح تذكرة دعم فني\n\n' +
-        '## 🛠️ الدعم الفني\n' +
-        '• للمساعدة في الطلبات\n' +
-        '• للأسئلة عن الخدمات\n' +
-        '• للشكاوى والاقتراحات\n\n' +
+        '## 🎫 محتاج مساعدة؟ افتح تذكرة\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 🛠️ دعم فني\n' +
+        '• عندك مشكلة في طلبك؟\n' +
+        '• محتاج مساعدة في شيء؟\n' +
+        '• عندك شكوى أو اقتراح؟\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## 🛒 شراء خدمة\n' +
+        '• عايز تطلب خدمة جديدة؟\n' +
+        '• عندك سؤال عن سعر أو تفاصيل؟\n' +
+        '• عايز تتأكد من الخدمة قبل ما تشتري؟\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '## ❓ سؤال واستفسار\n' +
+        '• عندك سؤال عن السيرفر؟\n' +
+        '• عايز تعرف حاجة عن الخدمات؟\n' +
+        '• محتاج معلومات عن طريقة الدفع؟\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## ⏰ وقت الاستجابة\n' +
-        '**من 5 لـ 15 دقيقة**\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        '**من 5 لـ 15 دقيقة** — فريقنا جاهز يساعدك\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
         '## 💡 نصيحة\n\n' +
         'قبل ما تفتح تذكرة، تأكد إن الإجابة موجودة في:\n' +
-        '• قناة **•〢 كيف تطلب** — عشان تعرف تطلب إزاي\n' +
-        '• قناة **•〢 اوامر البوت** — عشان تشوف كل الأوامر\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        '• قناة **👋•〢من نحن** — عشان تعرف عن السيرفر\n' +
+        '• قناة **📖•〢كيف تطلب** — عشان تعرف تطلب إزاي\n' +
+        '• قناة **🤖•〢اوامر البوت** — عشان تشوف كل الأوامر\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
       )
       .setColor(0x9B59B6)
       .setTimestamp()
-      .setFooter({ text: `🎫 ${g.name}`, iconURL: g.iconURL({ dynamic: true }) })
-    ], components: [new ActionRowBuilder().addComponents(btn2, btnShop)] }).catch(() => {});
+      .setFooter({ text: `🎫 ${g.name} — فتح تذكرة`, iconURL: g.iconURL({ dynamic: true }) })
+    ], components: [new ActionRowBuilder().addComponents(btnSupport, btnBuy, btnAsk)] }).catch(() => {});
   }
 
   // ── 📝 تقديم للادارة ──
@@ -1160,34 +1172,6 @@ async function cmdSetup(interaction) {
 
   // ── 💸 السحوبات ──
   const withdrawCh = g.channels.cache.find(c => c.name.includes('السحوبات') && c.isTextBased());
-  if (withdrawCh) {
-    await withdrawCh.send({ embeds: [new EmbedBuilder()
-      .setTitle('━━━━━━━━━━ 💸 السحوبات ━━━━━━━━━━')
-      .setDescription(
-        '## 💸 طلب سحب أرباح\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📋 شروط السحب\n\n' +
-        '✅ **الحد الأدنى للسحب:** 500,000 كريديت\n' +
-        '✅ **طرق الدفع:** فودافون كاش / إיזي باي / تحويل بنكي\n' +
-        '✅ **وقت المعالجة:** من 24 لـ 48 ساعة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## 📝 إزاي تطلب سحب\n\n' +
-        '**1️⃣** افتح تذكرة من قناة **🎫 افتح تذكرة**\n' +
-        '**2️⃣** اختار **💸 طلب سحب**\n' +
-        '**3️⃣** اكتب المبلغ وطريقة الدفع\n' +
-        '**4️⃣** استنى الموافقة من الادارة\n' +
-        '**5️⃣** هيوصلك المبلغ خلال 24-48 ساعة\n\n' +
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-        '## ⚠️ تنبيهات مهمة\n\n' +
-        '• ممنوع التلاعب بالسحوبات\n' +
-        '• تأكد إن بيانات الدفع صحيحة\n' +
-        '• لو عندك مشكلة، افتح تذكرة دعم فني'
-      )
-      .setColor(0x2ECC71)
-      .setTimestamp()
-      .setFooter({ text: `💸 ${g.name} — السحوبات`, iconURL: g.iconURL({ dynamic: true }) })
-    ] }).catch(() => {});
-  }
 
   // ── 📞 تواصل مع الستاف ──
   const contactCh = g.channels.cache.find(c => c.name.includes('تواصل مع الستاف') && c.isTextBased());
@@ -1984,7 +1968,7 @@ async function cmdEnableCommunity(interaction) {
 
   // 3. Create community channels if missing
   try {
-    let rulesChannel = g.channels.cache.find(c => c.name.includes('القواعد') && c.type === ChannelType.GuildText);
+    let rulesChannel = g.channels.cache.find(c => c.name.includes('القوانين') && c.type === ChannelType.GuildText);
     let updatesChannel = g.channels.cache.find(c => c.name.includes('الإعلانات') && c.type === ChannelType.GuildText);
 
     if (!rulesChannel) {
@@ -2409,6 +2393,64 @@ client.on('interactionCreate', async (interaction) => {
           )]
         });
         await interaction.editReply(`✅ تم فتح تذكرة الدعم: ${channel}`);
+        return;
+      }
+
+      if (cid === 'open_ticket_buy') {
+        await interaction.deferReply({ ephemeral: true });
+        const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
+        const channel = await g.channels.create({ name: `buy-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
+        orders.push({ id: orderId, type: 'buy', serviceName: 'شراء خدمة', serviceEmoji: '🛒', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
+        save('orders.json', orders);
+        await channel.send({ embeds: [new EmbedBuilder()
+          .setTitle(`🛒 تذكرة شراء #${orderId}`)
+          .setDescription(
+            `# أهلاً بيك! عايز تشتري خدمة؟\n\n` +
+            `**العميل:** ${interaction.user}\n` +
+            `**رقم التذكرة:** \`${orderId}\`\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 📝 اكتب اسم الخدمة اللي عايزها\n\n` +
+            `قولنا إيه الخدمة اللي محتاجها وهنرد عليك في أسرع وقت\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0x2ECC71)
+          .setTimestamp()
+          .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
+          )]
+        });
+        await interaction.editReply(`✅ تم فتح تذكرة الشراء: ${channel}`);
+        return;
+      }
+
+      if (cid === 'open_ticket_ask') {
+        await interaction.deferReply({ ephemeral: true });
+        const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
+        const channel = await g.channels.create({ name: `ask-${orderId}-${interaction.user.username}`.substring(0, 100), type: ChannelType.GuildText, parent: getTicketCat(g)?.id, permissionOverwrites: getTicketOverwrites(g, interaction.user.id) });
+        orders.push({ id: orderId, type: 'ask', serviceName: 'سؤال واستفسار', serviceEmoji: '❓', userId: interaction.user.id, username: interaction.user.username, channelId: channel.id, status: 'open', createdAt: Date.now() });
+        save('orders.json', orders);
+        await channel.send({ embeds: [new EmbedBuilder()
+          .setTitle(`❓ تذكرة استفسار #${orderId}`)
+          .setDescription(
+            `# أهلاً بيك! عندك سؤال؟\n\n` +
+            `**العميل:** ${interaction.user}\n` +
+            `**رقم التذكرة:** \`${orderId}\`\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `## 💬 اكتب سؤالك هنا\n\n` +
+            `قولنا إيه سؤالك وهنرد عليك في أسرع وقت\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          )
+          .setColor(0xF39C12)
+          .setTimestamp()
+          .setFooter({ text: `🎫 ${g.name} — التذاكر`, iconURL: g.iconURL({ dynamic: true }) })],
+          components: [new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`ticket_complete_${orderId}`).setLabel('✅ تم الاستلام').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`ticket_close_${orderId}`).setLabel('🗑️ اقفل التذكرة').setStyle(ButtonStyle.Danger),
+          )]
+        });
+        await interaction.editReply(`✅ تم فتح تذكرة الاستفسار: ${channel}`);
         return;
       }
 
