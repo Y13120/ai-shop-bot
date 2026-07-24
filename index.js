@@ -196,15 +196,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
-    const textY = BANNER_H / 2 + 2;
-
-    if (emoji) {
-      ctx.save();
-      ctx.font = '64px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-      ctx.shadowColor = GOLD; ctx.shadowBlur = 14;
-      ctx.fillText(emoji, textX, textY - 48);
-      ctx.restore();
-    }
+    const textY = BANNER_H / 2;
 
     ctx.save();
     ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 20;
@@ -218,7 +210,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     goldGrad.addColorStop(1, GOLD_DARK);
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY + 16);
+    ctx.fillText(displayName, textX, textY + 8);
     ctx.restore();
 
     ctx.save();
@@ -234,8 +226,8 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     ctx.lineWidth = 2;
     ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 6;
     ctx.beginPath();
-    ctx.moveTo(textX - 140, textY + 38);
-    ctx.lineTo(textX + 140, textY + 38);
+    ctx.moveTo(textX - 140, textY + 32);
+    ctx.lineTo(textX + 140, textY + 32);
     ctx.stroke();
     ctx.restore();
   }
