@@ -191,8 +191,8 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 62px "Arabic", "Cairo", sans-serif'
-      : 'bold 64px "Playfair Display", serif';
+      ? 'bold 72px "Arabic", "Cairo", sans-serif'
+      : 'bold 74px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
@@ -200,7 +200,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     ctx.save();
     ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 20;
-    const goldGrad = ctx.createLinearGradient(textX - 160, textY - 10, textX + 160, textY + 40);
+    const goldGrad = ctx.createLinearGradient(textX - 180, textY - 12, textX + 180, textY + 44);
     goldGrad.addColorStop(0, GOLD_DARK);
     goldGrad.addColorStop(0.2, GOLD_LIGHT);
     goldGrad.addColorStop(0.4, '#ffe9a0');
@@ -211,24 +211,6 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
     ctx.fillText(displayName, textX, textY + 8);
-    ctx.restore();
-
-    ctx.save();
-    const underlineGrad = ctx.createLinearGradient(textX - 140, 0, textX + 140, 0);
-    underlineGrad.addColorStop(0, 'transparent');
-    underlineGrad.addColorStop(0.1, GOLD);
-    underlineGrad.addColorStop(0.3, GOLD_LIGHT);
-    underlineGrad.addColorStop(0.5, '#fff5d0');
-    underlineGrad.addColorStop(0.7, GOLD_LIGHT);
-    underlineGrad.addColorStop(0.9, GOLD);
-    underlineGrad.addColorStop(1, 'transparent');
-    ctx.strokeStyle = underlineGrad;
-    ctx.lineWidth = 2;
-    ctx.shadowColor = '#ffe9a0'; ctx.shadowBlur = 6;
-    ctx.beginPath();
-    ctx.moveTo(textX - 140, textY + 32);
-    ctx.lineTo(textX + 140, textY + 32);
-    ctx.stroke();
     ctx.restore();
   }
 
