@@ -770,18 +770,18 @@ async function cmdSetup(interaction) {
     const catCh = g.channels.cache.find(c => c.name.includes(cat.name) && c.isTextBased());
     if (!catCh) continue;
     const catServices = allServices.filter(s => s.category === cat.id && s.active);
-    const servicesList = catServices.length > 0
-      ? catServices.map(s => `> ${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n')
-      : '> لا توجد خدمات حالياً';
+    const svcCount = catServices.length;
     const svcEmbed = new EmbedBuilder()
       .setTitle(`${cat.emoji || '📂'} ${cat.name}`)
       .setDescription(
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `## 📦 الخدمات المتاحة\n\n` +
-        `${servicesList}\n\n` +
+        `## ${cat.emoji || '📂'} ${cat.name}\n\n` +
+        `**${svcCount}** خدمة متاحة في التصنيف ده\n\n` +
+        `كل الخدمات احترافية وتم تقديمها بأعلى جودة\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
         `## 🎫 افتح تذكرة\n\n` +
-        `اضغط الزر **🎫 افتح تذكرة** عشان تطلب أي خدمة في التصنيف ده\n\n` +
+        `اضغط الزر **🎫 افتح تذكرة** عشان نبدأ نكلمك\n\n` +
+        `الستاف هيرد عليك في أقرب وقت ويساعدك تختار الخدمة المناسبة\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
       )
       .setColor(0xd4af37)
@@ -790,8 +790,7 @@ async function cmdSetup(interaction) {
     await catCh.send({
       embeds: [svcEmbed],
       components: [new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel(`🎫 افتح تذكرة — ${cat.name}`).setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel(`🛒 طلب مباشر`).setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel(`🎫 افتح تذكرة`).setStyle(ButtonStyle.Success),
       )]
     }).catch(() => {});
     await sleep(500);
@@ -998,28 +997,25 @@ async function cmdSetup(interaction) {
     const ch = g.channels.cache.find(c => c.name === chName && c.isTextBased());
     if (!ch) continue;
     const catServices = allServices.filter(s => s.category === cat.id && s.active);
-    const servicesList = catServices.length > 0
-      ? catServices.map((s, i) => `**${i + 1}.** ${s.emoji || '🛒'} **${s.name}** — \`${fmt(s.price)}\``).join('\n')
-      : '📭 لا توجد خدمات حالياً في هذا التصنيف';
+    const svcCount = catServices.length;
     const e = new EmbedBuilder()
       .setTitle(`${cat.emoji} ${cat.name}`)
       .setDescription(
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
         `## ${cat.emoji} ${cat.name}\n\n` +
-        `${catServices.length} خدمة متاحة\n\n` +
+        `**${svcCount}** خدمة متاحة في التصنيف ده\n\n` +
+        `كل الخدمات احترافية وتم تقديمها بأعلى جودة\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `${servicesList}\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `## 💡 عايز تطلب خدمة؟\n\n` +
-        `اضغط الزر تحت عشان تفتح تذكرة طلب مباشرة\n\n` +
+        `## 🎫 افتح تذكرة\n\n` +
+        `اضغط الزر **🎫 افتح تذكرة** عشان نبدأ نكلمك\n\n` +
+        `الستاف هيرد عليك في أقرب وقت ويساعدك تختار الخدمة المناسبة\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
       )
-      .setColor(0x2ECC71)
+      .setColor(0xd4af37)
       .setTimestamp()
       .setFooter({ text: `🛍️ ${g.name} — ${cat.name}`, iconURL: g.iconURL({ dynamic: true }) });
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`category_order_${cat.id}`).setLabel('🛒 اطلب خدمة').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel('🎫 افتح تذكرة').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId(`category_ticket_${cat.id}`).setLabel('🎫 افتح تذكرة').setStyle(ButtonStyle.Success),
     );
     await ch.send({ embeds: [e], components: [row] }).catch(() => {});
     await sleep(400);
@@ -1787,7 +1783,7 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.deferReply({ ephemeral: true });
         const g = interaction.guild, orders = getOrders(), orderId = nextId(orders);
         const channel = await g.channels.create({
-          name: `${cat?.emoji || '🎫'}-${cat?.name || catId}-${interaction.user.username}`.substring(0, 100),
+          name: `${cat?.name || catId} #${orderId}`.substring(0, 100),
           type: ChannelType.GuildText,
           parent: getTicketCat(g)?.id,
           permissionOverwrites: getTicketOverwrites(g, interaction.user.id)
