@@ -63,7 +63,7 @@ try {
 // ══════════════════════════════════════════════════════════════
 //  BANNER GENERATOR
 // ══════════════════════════════════════════════════════════════
-const BANNER_W = 1024, BANNER_H = 300;
+const BANNER_W = 1200, BANNER_H = 350;
 const BANNER_SCALE = 2;
 const BANNER_THEMES = {
   'الخدمات':          { emoji: '🛒', c1: '#0a4', c2: '#0f6', accent: '#0fa' },
@@ -124,7 +124,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
-  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').replace(/^.\u25CC\s*/, '').replace(/^[^\w\s]\u25CC\s*/, '').trim();
+  const cleanName = (channelName || '').replace(/^[\u{1F300}-\u{1FAFF}\u2600-\u27BF•〢\s]+/u, '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').trim();
   const GOLD = '#d4af37';
   const GOLD_LIGHT = '#f4e5b0';
   const GOLD_DARK = '#aa8c2c';
@@ -184,15 +184,15 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     ctx.fillStyle = g;
     ctx.fillRect(BANNER_W / 2 - width, y, width * 2, 1);
   };
-  goldLine(8, 250);
-  goldLine(BANNER_H - 8, 250);
+  goldLine(8, 300);
+  goldLine(BANNER_H - 8, 300);
 
   const displayName = cleanName || channelName || '';
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 34px "Arabic", "Cairo", sans-serif'
-      : 'bold 36px "Playfair Display", serif';
+      ? 'bold 44px "Arabic", "Cairo", sans-serif'
+      : 'bold 46px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
@@ -200,48 +200,47 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     if (emoji) {
       ctx.save();
-      ctx.font = '42px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-      ctx.shadowColor = GOLD; ctx.shadowBlur = 10;
-      ctx.fillStyle = GOLD;
-      ctx.fillText(emoji, textX, textY - 32);
+      ctx.font = '52px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      ctx.shadowColor = GOLD; ctx.shadowBlur = 12;
+      ctx.fillText(emoji, textX, textY - 38);
       ctx.restore();
     }
 
     ctx.save();
     ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
-    const goldGrad = ctx.createLinearGradient(textX - 100, textY - 6, textX + 100, textY + 26);
-    goldGrad.addColorStop(0, GOLD_DARK);
-    goldGrad.addColorStop(0.3, GOLD_LIGHT);
-    goldGrad.addColorStop(0.5, GOLD);
-    goldGrad.addColorStop(0.7, GOLD_LIGHT);
-    goldGrad.addColorStop(1, GOLD_DARK);
+    const goldGrad = ctx.createLinearGradient(textX - 120, textY - 6, textX + 120, textY + 30);
+    goldGrad.addColorStop(0, '#ffffff');
+    goldGrad.addColorStop(0.3, '#f0f0f0');
+    goldGrad.addColorStop(0.5, '#ffffff');
+    goldGrad.addColorStop(0.7, '#f0f0f0');
+    goldGrad.addColorStop(1, '#ffffff');
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY + 10);
+    ctx.fillText(displayName, textX, textY + 12);
     ctx.restore();
 
     ctx.save();
-    const underlineGrad = ctx.createLinearGradient(textX - 80, 0, textX + 80, 0);
+    const underlineGrad = ctx.createLinearGradient(textX - 100, 0, textX + 100, 0);
     underlineGrad.addColorStop(0, 'transparent');
     underlineGrad.addColorStop(0.15, GOLD);
     underlineGrad.addColorStop(0.5, GOLD_LIGHT);
     underlineGrad.addColorStop(0.85, GOLD);
     underlineGrad.addColorStop(1, 'transparent');
     ctx.strokeStyle = underlineGrad;
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1.5;
     ctx.shadowColor = GOLD; ctx.shadowBlur = 4;
     ctx.beginPath();
-    ctx.moveTo(textX - 80, textY + 26);
-    ctx.lineTo(textX + 80, textY + 26);
+    ctx.moveTo(textX - 100, textY + 30);
+    ctx.lineTo(textX + 100, textY + 30);
     ctx.stroke();
     ctx.restore();
   }
 
-  const fontSmall = arabicFontRegistered ? '500 11px "Arabic", "Cairo", sans-serif' : '500 11px "Cairo", sans-serif';
+  const fontSmall = arabicFontRegistered ? '500 13px "Arabic", "Cairo", sans-serif' : '500 13px "Cairo", sans-serif';
   ctx.font = fontSmall;
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(212,175,55,0.45)';
-  ctx.fillText('CODEX  ZONE', BANNER_W / 2, BANNER_H - 18);
+  ctx.fillText('CODEX  ZONE', BANNER_W / 2, BANNER_H - 20);
 
   return Buffer.from(c.toBuffer('image/png'));
 }
@@ -703,39 +702,39 @@ async function cmdSetup(interaction) {
 
   const structure = [
     { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
-      { display: '🛒〢 الخدمات', p: full },
-      { display: '📖〢 كيف تطلب', p: noSend },
-      { display: '⭐〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
-      { display: '💬〢 تواصل مع الستاف', p: full },
+      { display: '🛒•〢الخدمات', p: full, topic: 'تصفح جميع الخدمات المتاحة في السيرفر' },
+      { display: '📖•〢كيف تطلب', p: noSend, topic: 'شرح كيفية طلب أي خدمة خطوة بخطوة' },
+      { display: '⭐•〢التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])], topic: 'شارك تجربتك وقيّم الخدمات التي حصلت عليها' },
+      { display: '💬•〢تواصل مع الستاف', p: full, topic: 'للتواصل مع فريق العمل للاستفسار أو المساعدة' },
     ]},
     { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
-      { display: '📣〢 الاخبار والاعلانات', p: noSend },
-      { display: '📋〢 القوانين', p: noSend },
-      { display: '🎁〢 السحوبات', p: noSend },
+      { display: '📣•〢الاخبار والاعلانات', p: noSend, topic: 'تابع أحدث الأخبار والعروض والتحديثات' },
+      { display: '📋•〢القوانين', p: noSend, topic: 'قوانين السيرفر - يُرجى قراءتها والالتزام بها' },
+      { display: '🎁•〢السحوبات', p: noSend, topic: 'العروض والخصومات وال崌ابط المتاحة' },
     ]},
     { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
-      { display: '💬〢 الشات العام', p: full },
-      { display: '🤖〢 اوامر البوت', p: full },
-      { display: '🤖〢 الذكاء الاصطناعي', p: full },
+      { display: '💬•〢الشات العام', p: full, topic: 'دردشة عامة مع جميع أعضاء السيرفر' },
+      { display: '🤖•〢اوامر البوت', p: full, topic: 'استخدم أوامر البوت من هنا - اكتب / لعرض الأوامر' },
+      { display: '🤖•〢الذكاء الاصطناعي', p: full, topic: 'مساعد الذكاء الاصطناعي - اسأل أي سؤال' },
     ]},
     { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
-      { display: '🎫〢 فتح تذكرة', p: full },
-      { display: '📦〢 الطلبات', p: full },
+      { display: '🎫•〢فتح تذكرة', p: full, topic: 'اضغط الزر لفتح تذكرة دعم فني' },
+      { display: '📦•〢الطلبات', p: full, topic: 'إدارة طلباتك ومتابعة حالتها' },
     ]},
     { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
-      { display: '🚚〢 حالة التوصيل', p: noSend },
-      { display: '📦〢 التسليمات', p: noSend },
+      { display: '🚚•〢حالة التوصيل', p: noSend, topic: 'متابعة حالة التوصيل والشحن' },
+      { display: '📦•〢التسليمات', p: noSend, topic: 'قائمة التسليمات المكتملة' },
     ]},
     { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
-      { display: '💼〢 شات الستاف', p: staffOnly },
-      { display: '📋〢 ملاحظات', p: staffOnly },
-      { display: '📝〢 تقديم للادارة', p: full },
+      { display: '💼•〢شات الستاف', p: staffOnly, topic: 'قناة خاصة بفريق العمل للتنسيق وال讨论' },
+      { display: '📋•〢ملاحظات', p: staffOnly, topic: 'ملاحظات الفريق على الطلبات والعملاء' },
+      { display: '📝•〢تقديم للادارة', p: full, topic: 'قدّم للانضمام لفريق العمل - اكتب /apply' },
     ]},
     { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
-      { display: '📝〢 السجلات', p: noSend },
+      { display: '📝•〢السجلات', p: noSend, topic: 'سجلات النشاطات والأوامر في السيرفر' },
     ]},
     { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
-      { display: '🔧〢 لوحة التحكم', p: adminOnly },
+      { display: '🔧•〢لوحة التحكم', p: adminOnly, topic: 'لوحة تحكم البوت - للمشرفين فقط' },
     ]},
   ];
 
