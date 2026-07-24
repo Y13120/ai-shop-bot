@@ -124,7 +124,7 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   const ctx = c.getContext('2d');
   ctx.scale(S, S);
 
-  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').replace(/•〢\s*/, '').trim();
+  const cleanName = (channelName || '').replace(/^.+?[・·]\s*/, '').replace(/-/g, ' ').replace(/^.\u25CC\s*/, '').replace(/^[^\w\s]\u25CC\s*/, '').trim();
   const GOLD = '#d4af37';
   const GOLD_LIGHT = '#f4e5b0';
   const GOLD_DARK = '#aa8c2c';
@@ -208,23 +208,32 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
     }
 
     ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 18;
-    ctx.fillStyle = 'rgba(212,175,55,0.15)';
-    ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY + 10);
-    ctx.restore();
-
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
     const goldGrad = ctx.createLinearGradient(textX - 100, textY - 6, textX + 100, textY + 26);
     goldGrad.addColorStop(0, GOLD_DARK);
     goldGrad.addColorStop(0.3, GOLD_LIGHT);
     goldGrad.addColorStop(0.5, GOLD);
     goldGrad.addColorStop(0.7, GOLD_LIGHT);
     goldGrad.addColorStop(1, GOLD_DARK);
-    ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
     ctx.fillText(displayName, textX, textY + 10);
+    ctx.restore();
+
+    ctx.save();
+    const underlineGrad = ctx.createLinearGradient(textX - 80, 0, textX + 80, 0);
+    underlineGrad.addColorStop(0, 'transparent');
+    underlineGrad.addColorStop(0.15, GOLD);
+    underlineGrad.addColorStop(0.5, GOLD_LIGHT);
+    underlineGrad.addColorStop(0.85, GOLD);
+    underlineGrad.addColorStop(1, 'transparent');
+    ctx.strokeStyle = underlineGrad;
+    ctx.lineWidth = 1.2;
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 4;
+    ctx.beginPath();
+    ctx.moveTo(textX - 80, textY + 26);
+    ctx.lineTo(textX + 80, textY + 26);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -694,39 +703,39 @@ async function cmdSetup(interaction) {
 
   const structure = [
     { n: '━━━━━━━━ 🛍️ ━━━━━━━━', chs: [
-      { display: '•〢 الخدمات', p: full },
-      { display: '•〢 كيف تطلب', p: noSend },
-      { display: '•〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
-      { display: '•〢 تواصل مع الستاف', p: full },
+      { display: '🛒〢 الخدمات', p: full },
+      { display: '📖〢 كيف تطلب', p: noSend },
+      { display: '⭐〢 التقييمات', p: [{ id: g.id, deny: [PermissionFlagsBits.SendMessages] }, ...(roles.customer ? [{ id: roles.customer.id, allow: [PermissionFlagsBits.SendMessages] }] : [])] },
+      { display: '💬〢 تواصل مع الستاف', p: full },
     ]},
     { n: '━━━━━━━━ 📢 ━━━━━━━━', chs: [
-      { display: '•〢 الاخبار والاعلانات', p: noSend },
-      { display: '•〢 القوانين', p: noSend },
-      { display: '•〢 السحوبات', p: noSend },
+      { display: '📣〢 الاخبار والاعلانات', p: noSend },
+      { display: '📋〢 القوانين', p: noSend },
+      { display: '🎁〢 السحوبات', p: noSend },
     ]},
     { n: '━━━━━━━━ 💬 ━━━━━━━━', chs: [
-      { display: '•〢 الشات العام', p: full },
-      { display: '•〢 اوامر البوت', p: full },
-      { display: '•〢 الذكاء الاصطناعي', p: full },
+      { display: '💬〢 الشات العام', p: full },
+      { display: '🤖〢 اوامر البوت', p: full },
+      { display: '🤖〢 الذكاء الاصطناعي', p: full },
     ]},
     { n: '━━━━━━━━ 🎫 ━━━━━━━━', chs: [
-      { display: '•〢 فتح تذكرة', p: full },
-      { display: '•〢 الطلبات', p: full },
+      { display: '🎫〢 فتح تذكرة', p: full },
+      { display: '📦〢 الطلبات', p: full },
     ]},
     { n: '━━━━━━━━ 📦 ━━━━━━━━', chs: [
-      { display: '•〢 حالة التوصيل', p: noSend },
-      { display: '•〢 التسليمات', p: noSend },
+      { display: '🚚〢 حالة التوصيل', p: noSend },
+      { display: '📦〢 التسليمات', p: noSend },
     ]},
     { n: '━━━━━━━━ 👑 ━━━━━━━━', chs: [
-      { display: '•〢 شات الستاف', p: staffOnly },
-      { display: '•〢 ملاحظات', p: staffOnly },
-      { display: '•〢 تقديم للادارة', p: full },
+      { display: '💼〢 شات الستاف', p: staffOnly },
+      { display: '📋〢 ملاحظات', p: staffOnly },
+      { display: '📝〢 تقديم للادارة', p: full },
     ]},
     { n: '━━━━━━━━ 🛡️ ━━━━━━━━', chs: [
-      { display: '•〢 السجلات', p: noSend },
+      { display: '📝〢 السجلات', p: noSend },
     ]},
     { n: '━━━━━━━━ ⚙️ ━━━━━━━━', chs: [
-      { display: '•〢 لوحة التحكم', p: adminOnly },
+      { display: '🔧〢 لوحة التحكم', p: adminOnly },
     ]},
   ];
 
