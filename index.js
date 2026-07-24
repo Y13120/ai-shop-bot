@@ -191,8 +191,8 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   if (displayName) {
     const isArabic = /[\u0600-\u06FF]/.test(displayName);
     const fontName = isArabic && arabicFontRegistered
-      ? 'bold 44px "Arabic", "Cairo", sans-serif'
-      : 'bold 46px "Playfair Display", serif';
+      ? 'bold 52px "Arabic", "Cairo", sans-serif'
+      : 'bold 54px "Playfair Display", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const textX = BANNER_W / 2;
@@ -200,38 +200,38 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 
     if (emoji) {
       ctx.save();
-      ctx.font = '52px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      ctx.font = '58px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
       ctx.shadowColor = GOLD; ctx.shadowBlur = 12;
-      ctx.fillText(emoji, textX, textY - 38);
+      ctx.fillText(emoji, textX, textY - 42);
       ctx.restore();
     }
 
     ctx.save();
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 6;
-    const goldGrad = ctx.createLinearGradient(textX - 120, textY - 6, textX + 120, textY + 30);
-    goldGrad.addColorStop(0, '#ffffff');
-    goldGrad.addColorStop(0.3, '#f0f0f0');
-    goldGrad.addColorStop(0.5, '#ffffff');
-    goldGrad.addColorStop(0.7, '#f0f0f0');
-    goldGrad.addColorStop(1, '#ffffff');
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 8;
+    const goldGrad = ctx.createLinearGradient(textX - 140, textY - 8, textX + 140, textY + 34);
+    goldGrad.addColorStop(0, GOLD_DARK);
+    goldGrad.addColorStop(0.25, GOLD_LIGHT);
+    goldGrad.addColorStop(0.5, '#ffe9a0');
+    goldGrad.addColorStop(0.75, GOLD_LIGHT);
+    goldGrad.addColorStop(1, GOLD_DARK);
     ctx.fillStyle = goldGrad;
     ctx.font = fontName;
-    ctx.fillText(displayName, textX, textY + 12);
+    ctx.fillText(displayName, textX, textY + 14);
     ctx.restore();
 
     ctx.save();
-    const underlineGrad = ctx.createLinearGradient(textX - 100, 0, textX + 100, 0);
+    const underlineGrad = ctx.createLinearGradient(textX - 120, 0, textX + 120, 0);
     underlineGrad.addColorStop(0, 'transparent');
     underlineGrad.addColorStop(0.15, GOLD);
     underlineGrad.addColorStop(0.5, GOLD_LIGHT);
     underlineGrad.addColorStop(0.85, GOLD);
     underlineGrad.addColorStop(1, 'transparent');
     ctx.strokeStyle = underlineGrad;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = GOLD; ctx.shadowBlur = 4;
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = GOLD; ctx.shadowBlur = 5;
     ctx.beginPath();
-    ctx.moveTo(textX - 100, textY + 30);
-    ctx.lineTo(textX + 100, textY + 30);
+    ctx.moveTo(textX - 120, textY + 34);
+    ctx.lineTo(textX + 120, textY + 34);
     ctx.stroke();
     ctx.restore();
   }
