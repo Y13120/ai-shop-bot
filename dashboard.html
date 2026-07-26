@@ -185,6 +185,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
       <button onclick="showPage('sales')" data-page="sales"><span class="nav-icon">📈</span>المبيعات</button>
       <button onclick="showPage('announce')" data-page="announce"><span class="nav-icon">📢</span>إعلان</button>
       <button onclick="showPage('shortcuts')" data-page="shortcuts"><span class="nav-icon">⚡</span>الاختصارات</button>
+      <button onclick="showPage('commands')" data-page="commands"><span class="nav-icon">🎮</span>الأوامر</button>
       <button onclick="showPage('giveaways')" data-page="giveaways"><span class="nav-icon">🎉</span>السحوبات</button>
       <button onclick="showPage('settings')" data-page="settings"><span class="nav-icon">⚙️</span>الإعدادات</button>
     </div>
@@ -394,6 +395,24 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
           <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addShortcutForm').style.display='none'">إلغاء</button></div>
         </div>
       </div>
+      <div class="page" id="page-commands">
+        <div class="card" style="margin-bottom:18px">
+          <h3 style="margin-bottom:8px">🎮 أوامر البوت</h3>
+          <p style="color:var(--dim);font-size:13px;margin-bottom:16px">نفّذ أي أمر من بوت الديسكورد مباشرة من هنا</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+            <input id="cmdSearch" placeholder="🔍 بحث عن أمر..." oninput="filterCommands()" style="flex:1;min-width:200px;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-family:var(--font-ar)" />
+          </div>
+          <div id="cmdCategories"></div>
+        </div>
+        <div id="cmdResults" style="display:none">
+          <div class="card" style="max-width:700px;margin:0 auto">
+            <div id="cmdResultIcon" style="font-size:40px;text-align:center;margin-bottom:10px"></div>
+            <div id="cmdResultText" style="text-align:center;font-size:14px;line-height:1.8"></div>
+            <div style="text-align:center;margin-top:14px"><button class="btn btn-purple btn-sm" onclick="document.getElementById('cmdResults').style.display='none'">↩️ رجوع</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-giveaways">
         <div class="card" style="max-width:800px;margin:0 auto"><h3>🎉 السحوبات</h3><div id="giveawaysList"><div class="empty">جاري التحميل...</div></div></div>
       </div>
       <div class="page" id="page-settings">
@@ -492,6 +511,7 @@ function showPage(name){
   if(name==='settings')loadSettings();
   if(name==='sales')loadSalesCharts();
   if(name==='shortcuts')loadShortcuts();
+  if(name==='commands')loadCommands();
 }
 
 const CREDITS_TO_EGP_D=0.6/1000000;
@@ -1229,6 +1249,95 @@ document.addEventListener('keydown',(e)=>{
     document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'));
   }
 });
+
+// ═══ COMMANDS PAGE ═══
+const COMMANDS = [
+  { name: 'ban', icon: '🔨', cat: 'إدارة', desc: 'حظر عضو', fields: [{id:'target',label:'العضو (ID)',req:true},{id:'reason',label:'السبب'}] },
+  { name: 'kick', icon: '👢', cat: 'إدارة', desc: 'طرد عضو', fields: [{id:'target',label:'العضو (ID)',req:true},{id:'reason',label:'السبب'}] },
+  { name: 'mute', icon: '🔇', cat: 'إدارة', desc: 'كتم عضو', fields: [{id:'target',label:'العضو (ID)',req:true},{id:'duration',label:'المدة (دقائق)',val:'60'},{id:'reason',label:'السبب'}] },
+  { name: 'unmute', icon: '🔊', cat: 'إدارة', desc: 'فك كتم عضو', fields: [{id:'target',label:'العضو (ID)',req:true}] },
+  { name: 'warn', icon: '⚠️', cat: 'إدارة', desc: 'تحذير عضو', fields: [{id:'target',label:'العضو (ID)',req:true},{id:'reason',label:'السبب',req:true}] },
+  { name: 'warnings', icon: '📋', cat: 'إدارة', desc: 'عرض تحذيرات عضو', fields: [{id:'target',label:'العضو (ID)',req:true}] },
+  { name: 'clear-warnings', icon: '🗑️', cat: 'إدارة', desc: 'مسح تحذيرات عضو', fields: [{id:'target',label:'العضو (ID)',req:true}] },
+  { name: 'purge', icon: '🧹', cat: 'إدارة', desc: 'مسح رسائل', fields: [{id:'amount',label:'العدد',val:'10'},{id:'target',label:'العضو (اختياري)'}] },
+  { name: 'clear', icon: '🧹', cat: 'إدارة', desc: 'مسح متقدم', fields: [{id:'amount',label:'العدد',val:'50'},{id:'target',label:'العضو (اختياري)'}] },
+  { name: 'give-credits', icon: '💎', cat: 'إدارة', desc: 'إعطاء كريديت', fields: [{id:'target',label:'العضو (ID)',req:true},{id:'amount',label:'العدد',req:true}] },
+  { name: 'announce', icon: '📢', cat: 'servery', desc: 'إرسال إعلان', fields: [{id:'channel',label:'القناة (ID)',req:true},{id:'title',label:'العنوان',req:true},{id:'content',label:'المحتوى',req:true}] },
+  { name: 'auto-role', icon: '🤖', cat: 'servery', desc: 'إضافة رول تلقائي', fields: [{id:'role',label:'الرول (ID)',req:true}] },
+  { name: 'set-logs', icon: '📝', cat: 'servery', desc: 'تحديد قناة السجلات', fields: [{id:'channel',label:'القناة (ID)',req:true}] },
+  { name: 'server-info', icon: '🏠', cat: 'معلومات', desc: 'معلومات السيرفر', fields: [] },
+  { name: 'user-info', icon: '👤', cat: 'معلومات', desc: 'معلومات عضو', fields: [{id:'target',label:'العضو (ID)',req:true}] },
+  { name: 'stats', icon: '📊', cat: 'معلومات', desc: 'إحصائيات البوت', fields: [] },
+  { name: 'ticket-stats', icon: '🎫', cat: 'معلومات', desc: 'إحصائيات التذاكر', fields: [] },
+  { name: 'leaderboard', icon: '🏆', cat: 'معلومات', desc: 'ترتيب التقييمات', fields: [] },
+  { name: 'credits-leaderboard', icon: '💎', cat: 'معلومات', desc: 'ترتيب الكريديت', fields: [] },
+  { name: 'balance', icon: '💰', cat: 'معلومات', desc: 'رصيدك من الكريديت', fields: [] },
+  { name: 'top-customers', icon: '👑', cat: 'معلومات', desc: 'أفضل الزبائن', fields: [] },
+  { name: 'help', icon: '❓', cat: 'معلومات', desc: 'كل الأوامر', fields: [] },
+  { name: 'services', icon: '🛒', cat: 'الخدمات', desc: 'عرض الخدمات', fields: [] },
+  { name: 'add-service', icon: '➕', cat: 'الخدمات', desc: 'إضافة خدمة', fields: [{id:'name',label:'الاسم',req:true},{id:'price',label:'السعر',req:true},{id:'category',label:'التصنيف',req:true},{id:'emoji',label:'الإيموجي',val:'⭐'},{id:'description',label:'الوصف'}] },
+  { name: 'edit-service', icon: '✏️', cat: 'الخدمات', desc: 'تعديل خدمة', fields: [{id:'id',label:'رقم الخدمة',req:true},{id:'name',label:'الاسم الجديد'},{id:'price',label:'السعر الجديد'},{id:'description',label:'الوصف الجديد'}] },
+  { name: 'remove-service', icon: '❌', cat: 'الخدمات', desc: 'حذف خدمة', fields: [{id:'id',label:'رقم الخدمة',req:true}] },
+  { name: 'add-category', icon: '📂', cat: 'الخدمات', desc: 'إضافة تصنيف', fields: [{id:'id',label:'الرقم',req:true},{id:'name',label:'الاسم',req:true},{id:'emoji',label:'الإيموجي',val:'📂'}] },
+  { name: 'remove-category', icon: '🗑️', cat: 'الخدمات', desc: 'حذف تصنيف', fields: [{id:'id',label:'الرقم',req:true}] },
+  { name: 'list-categories', icon: '📋', cat: 'الخدمات', desc: 'عرض التصنيفات', fields: [] },
+  { name: 'giveaway', icon: '🎉', cat: 'سحبية', desc: 'عمل سحبية', fields: [{id:'prize',label:'الجائزة',req:true},{id:'winners',label:'عدد الفائزين',val:'1'},{id:'duration',label:'المدة (دقائق)',val:'60'}] },
+  { name: 'end-giveaway', icon: '🏁', cat: 'سحبية', desc: 'إنهاء السحبية', fields: [{id:'id',label:'رقم السحبية',req:true}] },
+  { name: 'setup', icon: '⚡', cat: 'Servery', desc: 'تجهيز السيرفر', fields: [] },
+  { name: 'banners', icon: '🖼️', cat: 'Servery', desc: 'ولّد بانرات', fields: [] },
+  { name: 'invite-link', icon: '🔗', cat: 'حسابات', desc: 'رابط الانفايت', fields: [] },
+  { name: 'invites', icon: '📨', cat: 'حسابات', desc: 'عدد الانفايتات', fields: [] },
+];
+function loadCommands(){
+  const cats={};
+  COMMANDS.forEach(c=>{if(!cats[c.cat])cats[c.cat]=[];cats[c.cat].push(c);});
+  const catLabels={'إدارة':'🛡️ إدارة','servery':'🏠 Servery','Servery':'🏠 Servery','معلومات':'📊 معلومات','الخدمات':'🛒 الخدمات','سحبية':'🎉 سحبية','حسابات':'🔗 حسابات'};
+  let h='';
+  Object.entries(cats).forEach(([cat,cmds])=>{
+    h+=`<div class="cmd-cat" data-cat="${cat}"><div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--accent)">${catLabels[cat]||cat}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
+    cmds.forEach(c=>{
+      h+=`<div class="cmd-card" data-cmd="${c.name}" onclick="showCmdForm('${c.name}')" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''"><div style="font-size:20px;margin-bottom:4px">${c.icon}</div><div style="font-weight:600;font-size:13px">/${c.name}</div><div style="color:var(--dim);font-size:11px">${c.desc}</div></div>`;
+    });
+    h+=`</div></div>`;
+  });
+  document.getElementById('cmdCategories').innerHTML=h;
+  document.getElementById('cmdResults').style.display='none';
+}
+function filterCommands(){
+  const q=document.getElementById('cmdSearch').value.toLowerCase();
+  document.querySelectorAll('.cmd-cat').forEach(cat=>{
+    let vis=false;
+    cat.querySelectorAll('.cmd-card').forEach(card=>{
+      const match=card.dataset.cmd.includes(q)||card.textContent.toLowerCase().includes(q);
+      card.style.display=match?'':'none';
+      if(match)vis=true;
+    });
+    cat.style.display=vis?'':'none';
+  });
+}
+function showCmdForm(name){
+  const c=COMMANDS.find(x=>x.name===name);if(!c)return;
+  let h=`<div style="text-align:center;margin-bottom:14px">${c.icon} <strong>/${c.name}</strong> — ${c.desc}</div>`;
+  c.fields.forEach(f=>{
+    h+=`<div style="margin-bottom:10px"><label style="display:block;font-size:12px;color:var(--dim);margin-bottom:4px">${f.label}${f.req?' *':''}</label><input id="cmdf_${f.id}" value="${f.val||''}" placeholder="${f.label}" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--font-ar)" /></div>`;
+  });
+  h+=`<div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn btn-purple" onclick="execCmd('${c.name}')">🚀 تنفيذ</button><button class="btn btn-red btn-sm" onclick="loadCommands()">↩️ رجوع</button></div>`;
+  document.getElementById('cmdCategories').innerHTML=`<div class="card" style="max-width:500px;margin:0 auto">${h}</div>`;
+}
+async function execCmd(name){
+  const c=COMMANDS.find(x=>x.name===name);if(!c)return;
+  const params={};
+  c.fields.forEach(f=>{const v=document.getElementById('cmdf_'+f.id)?.value;if(v)params[f.id]=v;});
+  document.getElementById('cmdResultIcon').textContent=c.icon;
+  document.getElementById('cmdResultText').innerHTML='⏳ جاري تنفيذ...';
+  document.getElementById('cmdResults').style.display='block';
+  document.getElementById('cmdCategories').style.display='none';
+  const r=await api('api/exec-command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:name,params})});
+  document.getElementById('cmdResultIcon').textContent=r.error?'❌':c.icon;
+  document.getElementById('cmdResultText').innerHTML=r.error?`<span style="color:#ef4444">${r.error}</span>`:r.content||r.text||`✅ تم تنفيذ **/${name}** بنجاح`;
+  document.getElementById('cmdResults').style.display='block';
+  document.getElementById('cmdCategories').style.display='none';
+}
 
 console.log('%c💜 Codex Zone Dashboard', 'font-size:20px;color:#8b5cf6;font-weight:bold');
 console.log('%cDashboard loaded successfully', 'color:#a78bfa');

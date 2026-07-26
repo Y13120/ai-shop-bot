@@ -3464,6 +3464,182 @@ const apiServer = http.createServer(async (req, res) => {
       return jsonRes(res, 200, { ok: true });
     }
 
+    // ── POST: Execute command from dashboard ──
+    if (req.method === 'POST' && p === '/api/exec-command') {
+      const d = await parseBody(req);
+      const { command, params } = d;
+      if (!command) return jsonRes(res, 400, { error: 'Missing command' });
+
+      const memberById = async (id) => { if (!id) return null; try { return await guild.members.fetch(id); } catch { return null; } };
+      const channelById = (id) => { if (!id) return null; return guild.channels.cache.get(id); };
+
+      try {
+        if (command === 'ban') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          await m.ban({ reason: params.reason || 'ogradan via dashboard' });
+          return jsonRes(res, 200, { content: `🔨 تم حظر **${m.user.username}**` });
+        }
+        if (command === 'kick') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          await m.kick(params.reason || 'ogradan via dashboard');
+          return jsonRes(res, 200, { content: `👢 تم طرد **${m.user.username}**` });
+        }
+        if (command === 'mute') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          const dur = (parseInt(params.duration) || 60) * 60000;
+          await m.timeout(dur, params.reason || 'ogradan via dashboard');
+          return jsonRes(res, 200, { content: `🔇 تم كتم **${m.user.username}** لمدة ${params.duration || 60} دقيقة` });
+        }
+        if (command === 'unmute') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          await m.timeout(null, 'ogradan via dashboard');
+          return jsonRes(res, 200, { content: `🔊 تم فك الكتم عن **${m.user.username}**` });
+        }
+        if (command === 'warn') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          if (!params.reason) return jsonRes(res, 400, { error: 'اكتب السبب' });
+          const warnings = getWarnings();
+          warnings.push({ id: nextId(warnings), userId: m.id, username: m.user.username, reason: params.reason, moderator: 'dashboard', createdAt: Date.now() });
+          save('warnings.json', warnings);
+          return jsonRes(res, 200, { content: `⚠️ تم تحذير **${m.user.username}** — السبب: ${params.reason}` });
+        }
+        if (command === 'warnings') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          const warns = getWarnings().filter(w => w.userId === m.id);
+          return jsonRes(res, 200, { content: `📋 **${warns.length}** تحذير لـ **${m.user.username}**${warns.length ? '\n' + warns.map((w,i)=>`${i+1}. ${w.reason} — ${w.createdAt ? new Date(w.createdAt).toLocaleDateString('ar-SA') : '—'}`).join('\n') : ''}` });
+        }
+        if (command === 'clear-warnings') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          let warnings = getWarnings(); const before = warnings.length;
+          warnings = warnings.filter(w => w.userId !== m.id);
+          save('warnings.json', warnings);
+          return jsonRes(res, 200, { content: `🗑️ تم مسح **${before - warnings.length}** تحذير من **${m.user.username}**` });
+        }
+        if (command === 'purge' || command === 'clear') {
+          const amt = parseInt(params.amount) || 50;
+          let msgs = await guild.channels.cache.get(params.channel || guild.systemChannelId)?.messages.fetch({ limit: Math.min(amt, 200) });
+          if (!msgs) return jsonRes(res, 400, { error: 'قناة غير موجودة' });
+          if (params.target) { const m = await memberById(params.target); if (m) msgs = msgs.filter(msg => msg.author.id === m.id); }
+          const deleted = await guild.channels.cache.get(params.channel || guild.systemChannelId).bulkDelete(msgs, true);
+          return jsonRes(res, 200, { content: `🧹 تم مسح **${deleted.size}** رسالة` });
+        }
+        if (command === 'give-credits') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          const amt = parseInt(params.amount); if (!amt || amt <= 0) return jsonRes(res, 400, { error: 'حدد عدد صحيح' });
+          addCredits(m.id, amt);
+          return jsonRes(res, 200, { content: `💎 تم إعطاء **${fmt(amt)}** كريديت لـ **${m.user.username}**` });
+        }
+        if (command === 'user-info') {
+          const m = await memberById(params.target); if (!m) return jsonRes(res, 400, { error: 'عضو غير موجود' });
+          const warns = getWarnings().filter(w => w.userId === m.id).length;
+          const credits = getCreditsFor(m.id);
+          return jsonRes(res, 200, { content: `👤 **${m.user.username}**\n📅 دخل: ${m.joinedAt?.toLocaleDateString('ar-SA')}\n⚠️ تحذيرات: ${warns}\n💎 كريديت: ${fmt(credits)}\n🎭 أدوار: ${m.roles.cache.size}` });
+        }
+        if (command === 'server-info') {
+          return jsonRes(res, 200, { content: `🏠 **${guild.name}**\n👥 ${guild.memberCount} عضو\n📆 تم الإنشاء: ${guild.createdAt?.toLocaleDateString('ar-SA')}\n🚀 Boosts: ${guild.premiumSubscriptionCount || 0}\n👑 المالك: <@${guild.ownerId}>` });
+        }
+        if (command === 'announce') {
+          const ch = channelById(params.channel); if (!ch) return jsonRes(res, 400, { error: 'قناة غير موجودة' });
+          const embed = new EmbedBuilder().setTitle(params.title || '📢 إعلان').setDescription(params.content || '').setColor(0x8b5cf6).setTimestamp();
+          await ch.send({ embeds: [embed] });
+          return jsonRes(res, 200, { content: `📢 تم إرسال الإعلان في <#${ch.id}>` });
+        }
+        if (command === 'auto-role') {
+          if (!params.role) return jsonRes(res, 400, { error: 'حدد الرول' });
+          if (!CFG.autoRoles) CFG.autoRoles = [];
+          if (!CFG.autoRoles.includes(params.role)) CFG.autoRoles.push(params.role);
+          save('config.json', CFG);
+          return jsonRes(res, 200, { content: `🤖 تمت إضافة الرول التلقائي` });
+        }
+        if (command === 'set-logs') {
+          if (!params.channel) return jsonRes(res, 400, { error: 'حدد القناة' });
+          CFG.logsChannel = params.channel;
+          save('config.json', CFG);
+          return jsonRes(res, 200, { content: `📝 تم تعيين قناة السجلات` });
+        }
+        if (command === 'giveaway') {
+          if (!params.prize) return jsonRes(res, 400, { error: 'حدد الجائزة' });
+          const ch = guild.systemChannel || guild.channels.cache.find(c => c.isTextBased());
+          if (!ch) return jsonRes(res, 400, { error: 'لا يوجد قناة نصية' });
+          const dur = (parseInt(params.duration) || 60) * 60000;
+          const embed = new EmbedBuilder().setTitle('🎉 سحبية جديدة!').setDescription(`**الجائزة:** ${params.prize}\n**عدد الفائزين:** ${params.winners || 1}\n**تنتهي بعد:** ${params.duration || 60} دقيقة\n\nReact 🎉 للمشاركة!`).setColor(0xFFD700).setTimestamp(Date.now() + dur);
+          const msg = await ch.send({ embeds: [embed] });
+          await msg.react('🎉');
+          const giveaways = getGiveaways();
+          giveaways.push({ id: msg.id, prize: params.prize, winners: parseInt(params.winners) || 1, endAt: Date.now() + dur, participants: [], guildId: guild.id, channelId: ch.id, ended: false });
+          save('giveaways.json', giveaways);
+          return jsonRes(res, 200, { content: `🎉 تم بدء السحبية في <#${ch.id}>` });
+        }
+        if (command === 'end-giveaway') {
+          if (!params.id) return jsonRes(res, 400, { error: 'حدد رقم السحبية' });
+          const giveaways = getGiveaways();
+          const g = giveaways.find(x => x.id === params.id && !x.ended);
+          if (!g) return jsonRes(res, 400, { error: 'سحبية غير موجودة أو منتهية' });
+          g.ended = true;
+          save('giveaways.json', giveaways);
+          return jsonRes(res, 200, { content: `🏁 تم إنهاء السحبية` });
+        }
+        if (command === 'services') {
+          const svcs = getServices().filter(s => s.active);
+          return jsonRes(res, 200, { content: `🛒 **${svcs.length}** خدمة متاحة\n${svcs.map(s=>`${s.emoji} ${s.name} — ${fmt(s.price)}`).join('\n')}` });
+        }
+        if (command === 'add-service') {
+          if (!params.name || !params.price || !params.category) return jsonRes(res, 400, { error: 'اكتب الاسم والسعر والتصنيف' });
+          const svcs = getServices();
+          svcs.push({ id: nextId(svcs), name: params.name, emoji: params.emoji || '⭐', price: parseInt(params.price), category: params.category, description: params.description || '', active: true, createdAt: Date.now() });
+          save('services.json', svcs);
+          return jsonRes(res, 200, { content: `✅ تمت إضافة خدمة **${params.name}**` });
+        }
+        if (command === 'edit-service') {
+          const svcs = getServices(); const svc = svcs.find(s => s.id === parseInt(params.id));
+          if (!svc) return jsonRes(res, 400, { error: 'خدمة غير موجودة' });
+          if (params.name) svc.name = params.name;
+          if (params.price) svc.price = parseInt(params.price);
+          if (params.description) svc.description = params.description;
+          save('services.json', svcs);
+          return jsonRes(res, 200, { content: `✏️ تم تعديل الخدمة **${svc.name}**` });
+        }
+        if (command === 'remove-service') {
+          let svcs = getServices(); const before = svcs.length;
+          svcs = svcs.filter(s => s.id !== parseInt(params.id));
+          if (svcs.length === before) return jsonRes(res, 400, { error: 'خدمة غير موجودة' });
+          save('services.json', svcs);
+          return jsonRes(res, 200, { content: `🗑️ تم حذف الخدمة` });
+        }
+        if (command === 'add-category') {
+          if (!params.id || !params.name) return jsonRes(res, 400, { error: 'اكتب الرقم والاسم' });
+          const cats = getCategories();
+          cats.push({ id: parseInt(params.id), name: params.name, emoji: params.emoji || '📂' });
+          save('categories.json', cats);
+          return jsonRes(res, 200, { content: `📂 تمت إضافة التصنيف **${params.name}**` });
+        }
+        if (command === 'remove-category') {
+          let cats = getCategories(); const before = cats.length;
+          cats = cats.filter(c => c.id !== parseInt(params.id));
+          if (cats.length === before) return jsonRes(res, 400, { error: 'تصنيف غير موجود' });
+          save('categories.json', cats);
+          return jsonRes(res, 200, { content: `🗑️ تم حذف التصنيف` });
+        }
+        if (command === 'list-categories') {
+          const cats = getCategories();
+          return jsonRes(res, 200, { content: `📂 **${cats.length}** تصنيف\n${cats.map(c=>`${c.emoji} ${c.name} (${c.id})`).join('\n')}` });
+        }
+        if (command === 'setup') {
+          return jsonRes(res, 200, { content: `⚡ استخدم الأمر في السيرفر مباشرة: \`/setup\`` });
+        }
+        if (command === 'banners') {
+          return jsonRes(res, 200, { content: `🖼️ استخدم الأمر في السيرفر مباشرة: \`/banners\`` });
+        }
+        if (command === 'balance' || command === 'invite-link' || command === 'invites' || command === 'stats' || command === 'ticket-stats' || command === 'leaderboard' || command === 'credits-leaderboard' || command === 'top-customers' || command === 'help') {
+          return jsonRes(res, 200, { content: `ℹ️ أمر **/${command}** — استخدمه مباشرة في السيرفر للحصول على النتيجة الكاملة` });
+        }
+
+        return jsonRes(res, 400, { error: `أمر **/${command}** غير مدعوم في البانل` });
+      } catch (e) {
+        return jsonRes(res, 500, { error: `❌ خطأ: ${e.message}` });
+      }
+    }
+
     // ── POST: Send to channel ──
     if (req.method === 'POST' && p === '/api/channels/send') {
       const d = await parseBody(req);
