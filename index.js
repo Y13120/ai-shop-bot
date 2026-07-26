@@ -1731,6 +1731,7 @@ async function cmdClear(interaction) {
 // ══════════════════════════════════════════════════════════════
 function loadShortcuts() {
   const data = load('shortcuts.json', { shortcuts: [], allowedRoles: [], deniedRoles: [], allowedChannels: [], deniedChannels: [] });
+  if (!data || typeof data !== 'object') return { shortcuts: [], allowedRoles: [], deniedRoles: [], allowedChannels: [], deniedChannels: [] };
   if (!data.shortcuts) data.shortcuts = [];
   if (!Array.isArray(data.allowedRoles)) data.allowedRoles = [];
   if (!Array.isArray(data.deniedRoles)) data.deniedRoles = [];

@@ -1010,15 +1010,17 @@ async function saveWelcomeConfig(){
 // ═══ SHORTCUTS ═══
 let _scData={shortcuts:[],allowedRoles:[],deniedRoles:[],allowedChannels:[],deniedChannels:[]};
 async function loadShortcuts(){
-  _scData=await api('api/shortcuts');
+  try{
+    const sc=await api('api/shortcuts');
+    if(sc&&!sc.error)_scData=sc;
+  }catch(e){}
   if(!_scData.shortcuts)_scData.shortcuts=[];
   if(!Array.isArray(_scData.allowedRoles))_scData.allowedRoles=[];
   if(!Array.isArray(_scData.deniedRoles))_scData.deniedRoles=[];
   if(!Array.isArray(_scData.allowedChannels))_scData.allowedChannels=[];
   if(!Array.isArray(_scData.deniedChannels))_scData.deniedChannels=[];
-  const rolesData=await api('api/roles');
-  if(Array.isArray(rolesData))window._rolesCache=rolesData;
-  if(!Array.isArray(allChannels)||!allChannels.length){const ch=await api('api/channels');if(Array.isArray(ch))allChannels=ch;}
+  try{const rolesData=await api('api/roles');if(Array.isArray(rolesData))window._rolesCache=rolesData;}catch(e){}
+  try{if(!Array.isArray(allChannels)||!allChannels.length){const ch=await api('api/channels');if(Array.isArray(ch))allChannels=ch;}}catch(e){}
   renderShortcutsList();
   renderShortcutRoles();
   renderShortcutChannels();
@@ -1092,10 +1094,16 @@ async function addShortcut(){
   if(d.type==='embed'){d.title=document.getElementById('scTitle').value;d.color=parseInt(document.getElementById('scColor').value.replace('#',''),16);}
   if(d.type==='announce'){d.pingRole=document.getElementById('scPingRole').value;d.title=document.getElementById('scTitle')?.value||'';}
   if(d.type==='action'){d.action=document.getElementById('scAction').value;d.amount=parseInt(document.getElementById('scAmount').value)||50;d.content=document.getElementById('scActionContent').value||'';}
+  toast('⏳ جاري الإضافة...');
   const r=await api('api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-  if(r.error)return toast('❌ '+r.error);
+  if(r.error){toast('❌ '+r.error);return;}
   document.getElementById('addShortcutForm').style.display='none';
-  toast('✅ تمت إضافة الاختصار');loadShortcuts();
+  toast('✅ تمت إضافة الاختصار');
+  // Reset form
+  document.getElementById('scName').value='';
+  document.getElementById('scEmoji').value='⚡';
+  document.getElementById('scContent').value='';
+  loadShortcuts();
 }
 async function deleteShortcut(id){
   if(!confirm('حذف الاختصار؟'))return;

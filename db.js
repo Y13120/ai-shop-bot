@@ -74,7 +74,7 @@ let _dbConnected = false;
 let _dirty = new Set();
 
 function loadFromCache(file, fb) {
-  if (file in _cache) return _cache[file];
+  if (file in _cache && _cache[file] !== null) return _cache[file];
   return fb;
 }
 
