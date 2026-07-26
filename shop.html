@@ -536,6 +536,18 @@ async function init(){
   allCategories=await api('api/categories');
   const cfg=await api('api/config');
   if(cfg&&cfg.primaryCurrency)primaryCurrency=cfg.primaryCurrency;
+  const shopCfg=await api('api/shop-config');
+  if(shopCfg&&!shopCfg.error){
+    const r=document.documentElement;
+    if(shopCfg.accentColor){r.style.setProperty('--accent',shopCfg.accentColor);r.style.setProperty('--gold',shopCfg.accentColor);r.style.setProperty('--accent2',shopCfg.accentColor+'cc');r.style.setProperty('--gold-light',shopCfg.accentColor+'dd');r.style.setProperty('--accent3',shopCfg.accentColor+'44');}
+    if(shopCfg.bgColor){r.style.setProperty('--bg',shopCfg.bgColor);r.style.setProperty('background',shopCfg.bgColor);}
+    if(shopCfg.surfaceColor)r.style.setProperty('--surface',shopCfg.surfaceColor);
+    if(shopCfg.textColor){r.style.setProperty('--text',shopCfg.textColor);r.style.setProperty('color',shopCfg.textColor);}
+    if(shopCfg.siteTitle){document.querySelector('.hero h1').innerHTML=`<span class="gradient">${shopCfg.siteTitle}</span>`;}
+    if(shopCfg.siteSub)document.querySelector('.hero-sub').textContent=shopCfg.siteSub;
+    if(shopCfg.siteBadge)document.querySelector('.hero-badge').textContent=shopCfg.siteBadge;
+    if(shopCfg.primaryCurrency)primaryCurrency=shopCfg.primaryCurrency;
+  }
   if(!Array.isArray(allServices))allServices=[];
   if(!Array.isArray(allCategories))allCategories=[];
   const active=allServices.filter(s=>s.active);

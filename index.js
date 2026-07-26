@@ -3640,6 +3640,20 @@ const apiServer = http.createServer(async (req, res) => {
       }
     }
 
+    // ── SHOP CONFIG API ──
+    if (req.method === 'GET' && p === '/api/shop-config') {
+      return jsonRes(res, 200, load('shopConfig.json', {
+        siteTitle: 'Codex Zone', siteSub: 'خدمات احترافية', siteBadge: '👑 Codex Zone',
+        accentColor: '#d4af37', bgColor: '#0a0a0a', surfaceColor: '#111111', textColor: '#e8e4d8',
+        heroImage: '', orderBtnText: '', primaryCurrency: 'usd', coupons: { WELCOME10: { type: 'percent', value: 10 }, SAVE5: { type: 'fixed', value: 5 }, AI2024: { type: 'percent', value: 15 }, FIVESTAR: { type: 'percent', value: 20 }, NEWUSER: { type: 'percent', value: 10 } }
+      }));
+    }
+    if (req.method === 'POST' && p === '/api/shop-config') {
+      const d = await parseBody(req);
+      save('shopConfig.json', d);
+      return jsonRes(res, 200, { ok: true });
+    }
+
     // ── POST: Send to channel ──
     if (req.method === 'POST' && p === '/api/channels/send') {
       const d = await parseBody(req);
