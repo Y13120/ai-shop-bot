@@ -481,7 +481,15 @@ async function connect(){
 
 async function loadAll(){
   const [guild,stats]=await Promise.all([api('api/guild'),api('api/stats')]);
-  if(guild.error){toast('⚠️ البوت لسه مش متصل — حاول تاني بعد شوية');document.getElementById('guildName').textContent='—';document.getElementById('memberCount').textContent='⏳';}
+  if(guild.error){
+    document.getElementById('guildName').textContent='⏳';
+    document.getElementById('memberCount').textContent='البوت لسه بيتصل...';
+    document.getElementById('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">⏳ البوت لسه مش متصل — هيتم الاتصال تلقائياً...</div>';
+    document.getElementById('recentTickets').innerHTML='<div class="empty">—</div>';
+    document.getElementById('recentReviews').innerHTML='<div class="empty">—</div>';
+    setTimeout(()=>loadAll(),5000);
+    return;
+  }
   else{document.getElementById('guildName').textContent=guild.name||'—';document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;}
   document.getElementById('statsGrid').innerHTML=`
     <div class="stat-card"><div class="stat-icon">🎫</div><div class="num">${stats.orders}</div><div class="label">الطلبات</div></div>
