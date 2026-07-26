@@ -216,24 +216,55 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
   return Buffer.from(c.toBuffer('image/png'));
 }
 
-function getBannerForChannel(channelName) {
-  for (const [key, theme] of Object.entries(BANNER_THEMES)) {
+const BANNER_FILES_DIR = path.join(__dirname, 'data', 'banners');
+
+const CHANNEL_BANNER_MAP = {
+  'من نحن': 'الترحيب.png',
+  'الخدمات': 'الخدمات.png',
+  'كيف تطلب': 'كيف تطلب.png',
+  'التقييمات': 'التقييمات.png',
+  'تواصل مع الستاف': 'تواصل مع الستاف.png',
+  'القوانين': 'القوانين.png',
+  'السحوبات': 'السحوبات.png',
+  'الشات العام': 'الشات.png',
+  'اوامر البوت': 'اوامر.png',
+  'الطلبات': 'الطلبات.png',
+  'حالة التوصيل': 'حالة التوصيل.png',
+  'التسليمات': 'التسليمات.png',
+  'شات الستاف': 'شات الستاف.png',
+  'ملاحظات': 'ملاحظات.png',
+  'تقديم': 'تقديم ادارة.png',
+  'السجلات': 'السجلات.png',
+  'لوحة التحكم': 'لوحة التحكم.png',
+  'التصميم': 'التصميم.png',
+  'المونتاج': 'المونتاج.png',
+  'البرمجة': 'البرمجة.png',
+  'الأكاديمية': 'الخدمات الاكاديمية.png',
+  'خدمات عامة': 'الخدمات العامة.png',
+  'بروجيكتات': 'بروجيكتات.png',
+  'الرقمية': 'حسابات واشتراكات رقمية.png',
+  'السوشيال': 'خدمات السوشيال ميديا.png',
+  'جاهزة': 'منتجات رقمية جاهزة.png',
+};
+
+function getBannerFile(channelName) {
+  for (const [key, file] of Object.entries(CHANNEL_BANNER_MAP)) {
     if (channelName.includes(key)) {
-      return { ...theme, name: key };
+      const filePath = path.join(BANNER_FILES_DIR, file);
+      if (fs.existsSync(filePath)) return filePath;
     }
   }
   return null;
 }
 
 async function sendBannerToChannel(channel) {
-  if (!Canvas) { console.log('⚠️ Canvas not available for banner'); return false; }
-  const theme = getBannerForChannel(channel.name);
-  if (!theme) return false;
   try {
-    const buf = generateBanner(channel.name, theme.emoji, theme.c1, theme.c2, theme.accent);
-    if (!buf) { console.log('⚠️ generateBanner returned null for', channel.name); return false; }
+    const bannerPath = getBannerFile(channel.name);
+    if (!bannerPath) return false;
     const { AttachmentBuilder } = require('discord.js');
-    const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name}.png` });
+    const buf = fs.readFileSync(bannerPath);
+    const fileName = path.basename(bannerPath);
+    const attachment = new AttachmentBuilder(buf, { name: fileName });
     await channel.send({ files: [attachment] });
     console.log('✅ Banner sent to', channel.name);
     return true;
@@ -721,19 +752,15 @@ async function cmdSetup(interaction) {
   await sleep(1500);
   try { await g.channels.fetch(); } catch {}
 
-  if (Canvas) {
-    console.log('🎨 Canvas available, sending banners...');
-    let bannerCount = 0;
-    for (const [, ch] of g.channels.cache) {
-      if (!ch.isTextBased()) continue;
-      const ok = await sendBannerToChannel(ch);
-      if (ok) bannerCount++;
-      await sleep(800);
-    }
-    console.log(`🎨 Banners done: ${bannerCount} sent`);
-  } else {
-    console.log('⚠️ Canvas not available — no banners will be sent');
+  console.log('🎨 Sending banners...');
+  let bannerCount = 0;
+  for (const [, ch] of g.channels.cache) {
+    if (!ch.isTextBased()) continue;
+    const ok = await sendBannerToChannel(ch);
+    if (ok) bannerCount++;
+    await sleep(800);
   }
+  console.log(`🎨 Banners done: ${bannerCount} sent`);
 
   const logsCh = g.channels.cache.find(c => c.name.includes('السجلات') && c.isTextBased());
   if (logsCh) { CFG.logsChannel = logsCh.id; save('config.json', CFG); }
@@ -850,7 +877,7 @@ async function cmdSetup(interaction) {
   }
 
   // ── 👋 من نحن ──
-  const aboutCh = g.channels.cache.find(c => c.name.includes('من نحن') && c.isTextBased());
+  const aboutCh = g.channels.cache.find(c => (c.name.includes('من نحن') || c.name.includes('من-نحن')) && c.isTextBased());
   console.log('👋 من نحن channel found:', aboutCh ? aboutCh.name : 'NOT FOUND');
   if (aboutCh) {
     try {
@@ -1937,19 +1964,18 @@ async function cmdHelp(interaction) {
 }
 
 async function cmdBanners(interaction) {
-  if (!Canvas) return interaction.reply({ content: '❌ مكتبة `canvas` مش متوفرة — البانرات مش هتتولّد', ephemeral: true });
   await interaction.deferReply();
   const g = interaction.guild;
   let sent = 0, skipped = 0, failed = 0;
   for (const [, ch] of g.channels.cache) {
     if (!ch.isTextBased()) continue;
-    const theme = getBannerForChannel(ch.name);
-    if (!theme) { skipped++; continue; }
+    const bannerPath = getBannerFile(ch.name);
+    if (!bannerPath) { skipped++; continue; }
     try {
-      const buf = generateBanner(ch.name, null, theme.c1, theme.c2, theme.accent);
-      if (!buf) { skipped++; continue; }
       const { AttachmentBuilder } = require('discord.js');
-      const attachment = new AttachmentBuilder(buf, { name: `banner-${theme.name || 'ch'}.png` });
+      const buf = fs.readFileSync(bannerPath);
+      const fileName = path.basename(bannerPath);
+      const attachment = new AttachmentBuilder(buf, { name: fileName });
       await ch.send({ files: [attachment] });
       sent++;
     } catch (e) { console.error('❌ Banner failed for', ch.name, ':', e.message); failed++; }
