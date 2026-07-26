@@ -123,7 +123,7 @@ textarea{min-height:80px;resize:vertical}
 label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weight:500}
 .form-row{display:flex;gap:14px}.form-row>*{flex:1}
 
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;padding:14px 32px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:9999;display:none;animation:toastIn .35s ease;box-shadow:0 12px 32px rgba(124,58,237,.35);font-family:var(--font-ar)}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(0);background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;padding:14px 32px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:9999;display:none;transition:all .3s ease;box-shadow:0 12px 32px rgba(124,58,237,.35);font-family:var(--font-ar)}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 .empty{text-align:center;color:var(--dim);padding:52px 24px;font-size:14px}
@@ -185,7 +185,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
       <button onclick="showPage('sales')" data-page="sales"><span class="nav-icon">📈</span>المبيعات</button>
       <button onclick="showPage('announce')" data-page="announce"><span class="nav-icon">📢</span>إعلان</button>
       <button onclick="showPage('shortcuts')" data-page="shortcuts"><span class="nav-icon">⚡</span>الاختصارات</button>
-      <button onclick="showPage('giveaways')" data-page="giveaways"><span class="nav-icon">🎉</span>السحبيات</button>
+      <button onclick="showPage('giveaways')" data-page="giveaways"><span class="nav-icon">🎉</span>السحوبات</button>
       <button onclick="showPage('settings')" data-page="settings"><span class="nav-icon">⚙️</span>الإعدادات</button>
     </div>
     <div class="main">
@@ -393,7 +393,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
           <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addShortcutForm').style.display='none'">إلغاء</button></div>
         </div>
       </div>
-        <div class="card" style="max-width:800px;margin:0 auto"><h3>🎉 السحبيات</h3><div id="giveawaysList"><div class="empty">جاري التحميل...</div></div></div>
+        <div class="card" style="max-width:800px;margin:0 auto"><h3>🎉 السحوبات</h3><div id="giveawaysList"><div class="empty">جاري التحميل...</div></div></div>
       </div>
       <div class="page" id="page-settings">
         <div class="settings-grid">
@@ -435,7 +435,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
 <script>
 let API='',allMembers=[],allChannels=[];
 async function api(path,opts={}){try{const r=await fetch(API+path,opts);return await r.json();}catch(e){return{error:e.message}}}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3000)}
+let _toastTimer;function toast(msg){clearTimeout(_toastTimer);const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';t.style.opacity='0';requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)'});_toastTimer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';setTimeout(()=>t.style.display='none',300)},3000)}
 function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toLocaleString()}
 function statusBadge(s){const m={pending:['بانتظار القبول','yellow'],open:['مفتوحة','blue'],progress:['قيد التنفيذ','purple'],completed:['مكتملة','green'],closed:['مغلقة','red']};const[n,c]=m[s]||[s,'blue'];return`<span class="badge badge-${c}">${n}</span>`}
 function timeAgo(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('ar-SA')}
@@ -459,7 +459,7 @@ async function loadAll(){
     <div class="stat-card"><div class="stat-icon">🛒</div><div class="num">${stats.services}</div><div class="label">الخدمات</div></div>
     <div class="stat-card"><div class="stat-icon">⭐</div><div class="num">${stats.reviews}</div><div class="label">التقييمات</div></div>
     <div class="stat-card"><div class="stat-icon">👥</div><div class="num">${stats.members}</div><div class="label">الأعضاء</div></div>
-    <div class="stat-card"><div class="stat-icon">🎉</div><div class="num">${stats.giveaways}</div><div class="label">السحبيات</div></div>
+    <div class="stat-card"><div class="stat-icon">🎉</div><div class="num">${stats.giveaways}</div><div class="label">السحوبات</div></div>
   `;
   const tickets=await api('api/tickets');
   if(Array.isArray(tickets)){

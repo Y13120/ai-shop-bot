@@ -1898,7 +1898,7 @@ async function cmdStats(interaction) {
       { name: '⭐ التقييمات', value: `**إجمالي:** ${reviews.length}\n**متوسط التقييم:** ⭐ ${avgRating}/5`, inline: true },
       { name: '🛒 الخدمات', value: `**إجمالي:** ${services.length}`, inline: true },
       { name: '👥 الأعضاء', value: `**${interaction.guild.memberCount}** عضو`, inline: true },
-      { name: '🎫 السحبيات', value: `**${getGiveaways().length}** سحبية`, inline: true },
+      { name: '🎫 السحوبات', value: `**${getGiveaways().length}** سحبية`, inline: true },
       { name: '📈 معدل التسليم', value: orders.length ? `**${((completed / orders.length) * 100).toFixed(0)}%**` : '**0%**', inline: true },
     )
     .setColor(0x3498DB).setTimestamp()
