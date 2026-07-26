@@ -2925,7 +2925,9 @@ client.on('interactionCreate', async (interaction) => {
 // ══════════════════════════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════════════════════════
+let botReady = false;
 client.on('clientReady', async () => {
+  botReady = true;
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
   client.user.setActivity('Codex Zone — خدمات احترافية', { type: ActivityType.Watching });
   for (const [, g] of client.guilds.cache) {
@@ -3067,7 +3069,14 @@ const apiServer = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(200); return res.end(); }
   const url = new URL(req.url, 'http://localhost'), p = url.pathname;
   try {
-    if (req.method === 'GET' && (p === '/api/health' || p === '/')) return jsonRes(res, 200, { status: 'ok', uptime: process.uptime(), canvas: !!Canvas, arabicFont: arabicFontRegistered });
+    if (req.method === 'GET' && (p === '/api/health' || p === '/')) {
+      if (p === '/') {
+        const html = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8');
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(html);
+      }
+      return jsonRes(res, 200, { status: 'ok', uptime: process.uptime(), canvas: !!Canvas, arabicFont: arabicFontRegistered });
+    }
 
     // ── GET: Favicon ──
     if (req.method === 'GET' && p === '/favicon.png') {
@@ -3078,8 +3087,8 @@ const apiServer = http.createServer(async (req, res) => {
       } catch { res.writeHead(404); return res.end(); }
     }
 
-    const guild = client.guilds.cache.first();
-    if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild' });
+    const guild = (CFG.guildId && client.guilds.cache.get(CFG.guildId)) || client.guilds.cache.first();
+    if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild — bot not connected yet' });
 
     // ── GET ──
     if (req.method === 'GET' && p === '/api/bot') return jsonRes(res, 200, { id: client.user?.id, username: client.user?.username, avatar: client.user?.displayAvatarURL({ dynamic: true, size: 256 }) });

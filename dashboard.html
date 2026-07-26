@@ -451,8 +451,8 @@ async function connect(){
 
 async function loadAll(){
   const [guild,stats]=await Promise.all([api('api/guild'),api('api/stats')]);
-  document.getElementById('guildName').textContent=guild.name||'—';
-  document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;
+  if(guild.error){toast('⚠️ البوت لسه مش متصل — حاول تاني بعد شوية');document.getElementById('guildName').textContent='—';document.getElementById('memberCount').textContent='⏳';}
+  else{document.getElementById('guildName').textContent=guild.name||'—';document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;}
   document.getElementById('statsGrid').innerHTML=`
     <div class="stat-card"><div class="stat-icon">🎫</div><div class="num">${stats.orders}</div><div class="label">الطلبات</div></div>
     <div class="stat-card"><div class="stat-icon">✅</div><div class="num">${stats.completed}</div><div class="label">مكتملة</div></div>
