@@ -265,8 +265,8 @@ async function sendBannerToChannel(channel) {
     const buf = fs.readFileSync(bannerPath);
     const fileName = path.basename(bannerPath);
     const attachment = new AttachmentBuilder(buf, { name: fileName });
-    await channel.send({ files: [attachment] });
-    console.log('✅ Banner sent to', channel.name);
+    await channel.setBanner({ attachment });
+    console.log('✅ Banner set for', channel.name);
     return true;
   } catch (e) { console.log('❌ Banner failed for', channel.name, ':', e.message); return false; }
 }
@@ -1976,12 +1976,12 @@ async function cmdBanners(interaction) {
       const buf = fs.readFileSync(bannerPath);
       const fileName = path.basename(bannerPath);
       const attachment = new AttachmentBuilder(buf, { name: fileName });
-      await ch.send({ files: [attachment] });
+      await ch.setBanner({ attachment });
       sent++;
     } catch (e) { console.error('❌ Banner failed for', ch.name, ':', e.message); failed++; }
     await sleep(800);
   }
-  await interaction.editReply(`✅ تم إرسال **${sent}** بانر${skipped ? ` — تم تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}`);
+  await interaction.editReply(`✅ تم تغيير **${sent}** بانر${skipped ? ` — تم تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}`);
 }
 
 async function cmdEnableCommunity(interaction) {
