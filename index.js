@@ -3114,8 +3114,17 @@ const apiServer = http.createServer(async (req, res) => {
       const d = await parseBody(req);
       const ch = guild.channels.cache.get(d.channelId);
       if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      const msgPayload = { content: d.content || undefined };
+      if (d.file) {
+        const { AttachmentBuilder } = require('discord.js');
+        const base64Data = d.file.replace(/^data:[^;]+;base64,/, '');
+        const buf = Buffer.from(base64Data, 'base64');
+        const attachment = new AttachmentBuilder(buf, { name: d.fileName || 'file.png' });
+        msgPayload.files = [attachment];
+      }
       const embed = d.title ? new EmbedBuilder().setTitle(d.title).setDescription(d.content || '').setColor(d.color || 0x3498DB).setTimestamp() : null;
-      await ch.send({ content: d.content || undefined, embeds: embed ? [embed] : undefined });
+      if (embed) msgPayload.embeds = [embed];
+      await ch.send(msgPayload);
       return jsonRes(res, 200, { ok: true });
     }
 
