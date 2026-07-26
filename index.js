@@ -1729,11 +1729,16 @@ async function cmdClear(interaction) {
 //  SHORTCUTS SYSTEM
 // ══════════════════════════════════════════════════════════════
 function loadShortcuts() {
-  try { return JSON.parse(fs.readFileSync(path.join(DATA, 'shortcuts.json'), 'utf8')); }
-  catch { return { shortcuts: [], allowedRoles: [], deniedRoles: [], allowedChannels: [], deniedChannels: [] }; }
+  const data = load('shortcuts.json', { shortcuts: [], allowedRoles: [], deniedRoles: [], allowedChannels: [], deniedChannels: [] });
+  if (!data.shortcuts) data.shortcuts = [];
+  if (!Array.isArray(data.allowedRoles)) data.allowedRoles = [];
+  if (!Array.isArray(data.deniedRoles)) data.deniedRoles = [];
+  if (!Array.isArray(data.allowedChannels)) data.allowedChannels = [];
+  if (!Array.isArray(data.deniedChannels)) data.deniedChannels = [];
+  return data;
 }
 function saveShortcuts(data) {
-  try { fs.writeFileSync(path.join(DATA, 'shortcuts.json'), JSON.stringify(data, null, 2), 'utf8'); } catch {}
+  save('shortcuts.json', data);
 }
 
 function canUseShortcut(interaction, scData) {

@@ -23,6 +23,7 @@ const subscriptionSchema = new mongoose.Schema({}, { strict: false, minimize: fa
 const blacklistSchema = new mongoose.Schema({}, { strict: false, minimize: false });
 const dailyLimitSchema = new mongoose.Schema({}, { strict: false, minimize: false });
 const promoGateSchema = new mongoose.Schema({}, { strict: false, minimize: false });
+const shortcutSchema = new mongoose.Schema({}, { strict: false, minimize: false });
 
 const Config = mongoose.model('Config', configSchema);
 const Service = mongoose.model('Service', serviceSchema);
@@ -39,6 +40,7 @@ const Subscription = mongoose.model('Subscription', subscriptionSchema);
 const Blacklist = mongoose.model('Blacklist', blacklistSchema);
 const DailyLimit = mongoose.model('DailyLimit', dailyLimitSchema);
 const PromoGate = mongoose.model('PromoGate', promoGateSchema);
+const Shortcut = mongoose.model('Shortcut', shortcutSchema);
 
 // ══════════════════════════════════════════════════════════════
 //  COLLECTION MAP
@@ -60,6 +62,7 @@ const COLLECTIONS = {
   'blacklist.json':      { model: Blacklist, type: 'array',  key: 'userId' },
   'dailyLimits.json':    { model: DailyLimit, type: 'map',   key: 'userId', valKey: 'data' },
   'promoGates.json':     { model: PromoGate, type: 'array',  key: 'guildId' },
+  'shortcuts.json':      { model: Shortcut, type: 'single', key: 'key', idVal: 'main' },
 };
 
 // ══════════════════════════════════════════════════════════════
