@@ -586,7 +586,8 @@ const COMMANDS = [
 
   // ── Shortcuts ──
   new SlashCommandBuilder().setName('shortcut').setDescription('نفّذ اختصار')
-    .addStringOption(o => o.setName('name').setDescription('اسم الاختصار').setRequired(true).setAutocomplete(true)),
+    .addStringOption(o => o.setName('name').setDescription('اسم الاختصار').setRequired(true).setAutocomplete(true))
+    .addUserOption(o => o.setName('target').setDescription('العضو المستهدف (للإجراءات)')),
   new SlashCommandBuilder().setName('shortcuts').setDescription('قائمة الاختصارات المتاحة'),
 
   // ── Shop ──
@@ -1751,6 +1752,8 @@ function canUseShortcut(interaction, scData) {
 
 async function cmdShortcut(interaction) {
   const name = interaction.options.getString('name');
+  const targetUser = interaction.options.getUser('target');
+  const targetMember = targetUser ? await interaction.guild.members.fetch(targetUser.id).catch(() => null) : null;
   const scData = loadShortcuts();
   const sc = scData.shortcuts.find(s => s.name === name || s.id === name);
   if (!sc) return interaction.reply({ content: '❌ الاختصار مش موجود', ephemeral: true });
@@ -1779,6 +1782,33 @@ async function cmdShortcut(interaction) {
       await interaction.editReply({ content: `🧹 تم مسح ${deleted.size} رسالة` });
       return;
     }
+    const member = targetMember;
+    if (!member) { await interaction.editReply({ content: '❌ حدد عضو مع `/shortcut name:${sc.name} @user`' }); return; }
+    const ms = (sc.amount || 60) * 60000;
+    const reason = sc.content || 'اختصار سريع';
+    if (sc.action === 'ban') {
+      await member.ban({ reason });
+      await interaction.editReply({ content: `🔨 تم حظر **${member.user.username}**` });
+    } else if (sc.action === 'kick') {
+      await member.kick(reason);
+      await interaction.editReply({ content: `👢 تم طرد **${member.user.username}**` });
+    } else if (sc.action === 'mute') {
+      await member.timeout(ms, reason);
+      await interaction.editReply({ content: `🔇 تم كتم **${member.user.username}** لمدة ${sc.amount || 60} دقيقة` });
+    } else if (sc.action === 'unmute') {
+      await member.timeout(null, reason);
+      await interaction.editReply({ content: `🔊 تم فك الكتم عن **${member.user.username}**` });
+    } else if (sc.action === 'warn') {
+      const warnings = getWarnings();
+      const warnId = nextId(warnings);
+      warnings.push({ id: warnId, userId: member.id, username: member.user.username, reason, moderator: interaction.user.id, createdAt: Date.now() });
+      save('warnings.json', warnings);
+      await interaction.editReply({ content: `⚠️ تم تحذير **${member.user.username}** — السبب: ${reason}` });
+    } else if (sc.action === 'slowmode') {
+      await interaction.channel.setRateLimitPerUser(Math.floor(ms / 60000), reason);
+      await interaction.editReply({ content: `🐌 تم تعيين السلو مود على **${Math.floor(ms / 60000)}** دقيقة` });
+    }
+    return;
   }
   await interaction.editReply({ content: `✅ تم تنفيذ الاختصار **${sc.name}**` }).catch(() => {});
 }
@@ -3588,6 +3618,21 @@ async function start() {
   const dbOk = await connectDB();
   if (dbOk) {
     await seedDefaults(DEFAULT_SERVICES, DEFAULT_CATEGORIES);
+    const scData = loadShortcuts();
+    if (!scData.shortcuts || scData.shortcuts.length === 0) {
+      const defaults = [
+        { id: 'd-clear', name: 'مسح', emoji: '🧹', type: 'action', action: 'clear', amount: 50, content: '', description: 'مسح 50 رسالة من القناة', createdAt: Date.now() },
+        { id: 'd-ban', name: 'حظر', emoji: '🔨', type: 'action', action: 'ban', amount: 0, content: 'حظر عبر اختصار', description: 'حظر عضو من السيرفر', createdAt: Date.now() },
+        { id: 'd-kick', name: 'طرد', emoji: '👢', type: 'action', action: 'kick', amount: 0, content: 'طرد عبر اختصار', description: 'طرد عضو من السيرفر', createdAt: Date.now() },
+        { id: 'd-mute', name: 'كتم', emoji: '🔇', type: 'action', action: 'mute', amount: 60, content: 'كتم عبر اختصار', description: 'كتم عضو لمدة 60 دقيقة', createdAt: Date.now() },
+        { id: 'd-unmute', name: 'فك-كتم', emoji: '🔊', type: 'action', action: 'unmute', amount: 0, content: 'فك كتم عبر اختصار', description: 'فك الكتم عن عضو', createdAt: Date.now() },
+        { id: 'd-warn', name: 'تحذير', emoji: '⚠️', type: 'action', action: 'warn', amount: 0, content: 'تحذير عبر اختصار', description: 'تحذير عضو', createdAt: Date.now() },
+        { id: 'd-slowmode', name: 'سلومود', emoji: '🐌', type: 'action', action: 'slowmode', amount: 5, content: 'سلومود عبر اختصار', description: 'تفعيل سلو مود 5 دقائق', createdAt: Date.now() },
+      ];
+      scData.shortcuts = defaults;
+      saveShortcuts(scData);
+      console.log(`⚡ Seeded ${defaults.length} default shortcuts`);
+    }
     const mongoCfg = load('config.json', null);
     if (mongoCfg) {
       Object.assign(CFG, mongoCfg);

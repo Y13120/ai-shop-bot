@@ -386,9 +386,10 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
           </div>
           <div id="scActionFields" style="display:none">
             <div class="form-row">
-              <div><label>الإجراء</label><select id="scAction"><option value="clear">🧹 مسح رسائل</option></select></div>
-              <div><label>العدد (لمسح)</label><input id="scAmount" type="number" value="50" /></div>
+              <div><label>الإجراء</label><select id="scAction"><option value="clear">🧹 مسح رسائل</option><option value="ban">🔨 حظر</option><option value="kick">👢 طرد</option><option value="mute">🔇 كتم</option><option value="unmute">🔊 فك كتم</option><option value="warn">⚠️ تحذير</option><option value="slowmode">🐌 سلو مود</option></select></div>
+              <div><label>العدد / الدقائق</label><input id="scAmount" type="number" value="50" /></div>
             </div>
+            <label>السبب / المحتوى (اختياري)</label><input id="scActionContent" placeholder="سبب الإجراء..." />
           </div>
           <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addShortcutForm').style.display='none'">إلغاء</button></div>
         </div>
@@ -1051,7 +1052,7 @@ async function addShortcut(){
   if(!d.name)return toast('❌ اكتب اسم الاختصار');
   if(d.type==='embed'){d.title=document.getElementById('scTitle').value;d.color=parseInt(document.getElementById('scColor').value.replace('#',''),16);}
   if(d.type==='announce'){d.pingRole=document.getElementById('scPingRole').value;d.title=document.getElementById('scTitle')?.value||'';}
-  if(d.type==='action'){d.action=document.getElementById('scAction').value;d.amount=parseInt(document.getElementById('scAmount').value)||50;}
+  if(d.type==='action'){d.action=document.getElementById('scAction').value;d.amount=parseInt(document.getElementById('scAmount').value)||50;d.content=document.getElementById('scActionContent').value||'';}
   const r=await api('api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
   if(r.error)return toast('❌ '+r.error);
   document.getElementById('addShortcutForm').style.display='none';
