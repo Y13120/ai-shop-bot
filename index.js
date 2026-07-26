@@ -579,6 +579,15 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('purge').setDescription('امسح رسائل')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addNumberOption(o => o.setName('amount').setDescription('العدد').setRequired(true)),
+  new SlashCommandBuilder().setName('clear').setDescription('مسح متقدم للرسائل')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    .addNumberOption(o => o.setName('amount').setDescription('عدد الرسائل (1-200)').setRequired(false))
+    .addUserOption(o => o.setName('user').setDescription('مسح رسائل عضو معين').setRequired(false)),
+
+  // ── Shortcuts ──
+  new SlashCommandBuilder().setName('shortcut').setDescription('نفّذ اختصار')
+    .addStringOption(o => o.setName('name').setDescription('اسم الاختصار').setRequired(true).setAutocomplete(true)),
+  new SlashCommandBuilder().setName('shortcuts').setDescription('قائمة الاختصارات المتاحة'),
 
   // ── Shop ──
   new SlashCommandBuilder().setName('services').setDescription('شوف الخدمات'),
@@ -1687,8 +1696,95 @@ async function cmdPurge(interaction) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  HANDLERS: REVIEW / LEADERBOARD
+//  HANDLERS: CLEAR (advanced purge)
 // ══════════════════════════════════════════════════════════════
+async function cmdClear(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+  const amount = interaction.options.getNumber('amount') || 50;
+  const user = interaction.options.getUser('user');
+  if (amount < 1 || amount > 200) return interaction.editReply('❌ العدد من 1 لـ 200');
+  const ch = interaction.channel;
+  let deleted = 0, fetched;
+  let remaining = Math.min(amount, 200);
+  while (remaining > 0) {
+    const limit = Math.min(remaining, 100);
+    fetched = await ch.messages.fetch({ limit });
+    if (user) fetched = fetched.filter(m => m.author.id === user.id);
+    if (fetched.size === 0) break;
+    const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const deletable = fetched.filter(m => m.createdTimestamp > twoWeeksAgo);
+    if (deletable.size > 0) {
+      const r = await ch.bulkDelete(deletable, true);
+      deleted += r.size;
+    }
+    remaining -= fetched.size;
+    if (fetched.size < limit) break;
+  }
+  const desc = user ? `تم مسح **${deleted}** رسالة${user ? ` من ${user}` : ''}` : `تم مسح **${deleted}** رسالة`;
+  await interaction.editReply({ embeds: [new EmbedBuilder().setTitle('🧹 مسح متقدم').setDescription(desc).setColor(0x8b5cf6).setTimestamp()] });
+  await sendLog(interaction.guild, new EmbedBuilder().setTitle('🧹 مسح متقدم').setDescription(`**بواسطة:** ${interaction.user}\n**القناة:** ${ch}\n**العدد:** ${deleted}${user ? `\n**العضو:** ${user}` : ''}`).setColor(0x8b5cf6).setTimestamp());
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SHORTCUTS SYSTEM
+// ══════════════════════════════════════════════════════════════
+function loadShortcuts() {
+  try { return JSON.parse(fs.readFileSync(path.join(DATA, 'shortcuts.json'), 'utf8')); }
+  catch { return { shortcuts: [], allowedRoles: [], deniedRoles: [], allowedChannels: [], deniedChannels: [] }; }
+}
+function saveShortcuts(data) {
+  try { fs.writeFileSync(path.join(DATA, 'shortcuts.json'), JSON.stringify(data, null, 2), 'utf8'); } catch {}
+}
+
+function canUseShortcut(interaction, scData) {
+  if (scData.allowedRoles?.length > 0 && !interaction.member.roles.cache.some(r => scData.allowedRoles.includes(r.id))) return false;
+  if (scData.deniedRoles?.length > 0 && interaction.member.roles.cache.some(r => scData.deniedRoles.includes(r.id))) return false;
+  if (scData.allowedChannels?.length > 0 && !scData.allowedChannels.includes(interaction.channel.id)) return false;
+  if (scData.deniedChannels?.length > 0 && scData.deniedChannels.includes(interaction.channel.id)) return false;
+  return true;
+}
+
+async function cmdShortcut(interaction) {
+  const name = interaction.options.getString('name');
+  const scData = loadShortcuts();
+  const sc = scData.shortcuts.find(s => s.name === name || s.id === name);
+  if (!sc) return interaction.reply({ content: '❌ الاختصار مش موجود', ephemeral: true });
+  if (!canUseShortcut(interaction, scData)) return interaction.reply({ content: '❌ مسمحلكش تستخدم الاختصار ده', ephemeral: true });
+  await interaction.reply({ content: '⏳ جاري تنفيذ الاختصار...', ephemeral: true });
+  if (sc.type === 'message') {
+    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
+    if (ch) await ch.send({ content: sc.content || '—' });
+  } else if (sc.type === 'embed') {
+    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
+    if (ch) {
+      const embed = new EmbedBuilder().setTitle(sc.title || '').setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
+      await ch.send({ embeds: [embed] });
+    }
+  } else if (sc.type === 'announce') {
+    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
+    if (ch) {
+      const embed = new EmbedBuilder().setTitle(`${sc.emoji || '📣'} ${sc.title || ''}`).setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
+      const pingRole = sc.pingRole ? `<@&${sc.pingRole}>` : '';
+      await ch.send({ content: pingRole || undefined, embeds: [embed] });
+    }
+  } else if (sc.type === 'action') {
+    if (sc.action === 'clear') {
+      const amt = sc.amount || 50;
+      const deleted = await interaction.channel.bulkDelete(amt, true);
+      await interaction.editReply({ content: `🧹 تم مسح ${deleted.size} رسالة` });
+      return;
+    }
+  }
+  await interaction.editReply({ content: `✅ تم تنفيذ الاختصار **${sc.name}**` }).catch(() => {});
+}
+
+async function cmdShortcuts(interaction) {
+  const scData = loadShortcuts();
+  const available = scData.shortcuts.filter(sc => canUseShortcut(interaction, scData));
+  if (!available.length) return interaction.reply({ content: '📋 لا توجد اختصارات متاحة لك', ephemeral: true });
+  const embed = new EmbedBuilder().setTitle('⚡ الاختصارات المتاحة').setDescription(available.map(sc => `**${sc.emoji || '⚡'} ${sc.name}** — ${sc.description || sc.type}`).join('\n\n')).setColor(0x8b5cf6).setTimestamp();
+  await interaction.reply({ embeds: [embed], ephemeral: true });
+}
 async function cmdReview(interaction) {
   const id = parseInt(interaction.options.getString('service')), rating = interaction.options.getNumber('rating'), comment = interaction.options.getString('comment') || '';
   const services = getServices(), svc = services.find(s => s.id === id);
@@ -1959,8 +2055,9 @@ async function cmdHelp(interaction) {
   await interaction.reply({ embeds: [new EmbedBuilder().setTitle('🤖 أوامر البوت').addFields(
     { name: '📦 عامة', value: '`/services` `/order` `/support` `/close` `/review` `/leaderboard` `/server-info` `/user-info` `/stats` `/ticket-stats` `/top-customers` `/help`' },
     { name: '🛡️ إدارية', value: '`/setup` `/banners` `/add-service` `/edit-service` `/remove-service` `/add-category` `/remove-category` `/list-categories` `/announce` `/auto-role` `/set-logs` `/automod` `/giveaway` `/end-giveaway`' },
-        { name: '🔨 الإدارة والضبط', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge`' },
-  ).setColor(0xFF0000).setTimestamp()], ephemeral: true });
+        { name: '🔨 الإدارة والضبط', value: '`/ban` `/kick` `/mute` `/unmute` `/warn` `/warnings` `/clear-warnings` `/purge` `/clear`' },
+        { name: '⚡ الاختصارات', value: '`/shortcut` `/shortcuts` — اختصارات مخصصة من البانل' },
+  ).setColor(0x7c3aed).setTimestamp()], ephemeral: true });
 }
 
 async function cmdBanners(interaction) {
@@ -2153,9 +2250,17 @@ client.on('interactionCreate', async (interaction) => {
         'top-customers': cmdTopCustomers, giveaway: cmdGiveaway, 'end-giveaway': cmdEndGiveaway,
         'enable-community': cmdEnableCommunity,
         'hide-all': cmdHideAll, 'show-all': cmdShowAll,
+        clear: cmdClear, shortcut: cmdShortcut, shortcuts: cmdShortcuts,
       };
       const handler = map[interaction.commandName];
       if (handler) return await handler(interaction);
+    }
+
+    if (interaction.isAutocomplete()) {
+      const scData = loadShortcuts();
+      const focused = interaction.options.getFocused();
+      const filtered = (scData.shortcuts || []).filter(s => s.name.toLowerCase().includes(focused.toLowerCase())).slice(0, 25);
+      return interaction.respond(filtered.map(s => ({ name: `${s.emoji || '⚡'} ${s.name}`, value: s.name })));
     }
 
     if (interaction.isStringSelectMenu() && interaction.customId === 'category_menu') {
@@ -3270,6 +3375,48 @@ const apiServer = http.createServer(async (req, res) => {
       if (d.welcomeMessage !== undefined) CFG.welcomeMessage = d.welcomeMessage;
       if (d.welcomeChannel !== undefined) CFG.welcomeChannel = d.welcomeChannel;
       save('config.json', CFG);
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ═══ SHORTCUTS API ═══
+    if (req.method === 'GET' && p === '/api/shortcuts') {
+      return jsonRes(res, 200, loadShortcuts());
+    }
+    if (req.method === 'PUT' && p === '/api/shortcuts') {
+      const d = await parseBody(req);
+      const scData = loadShortcuts();
+      if (d.shortcuts !== undefined) scData.shortcuts = d.shortcuts;
+      if (d.allowedRoles !== undefined) scData.allowedRoles = d.allowedRoles;
+      if (d.deniedRoles !== undefined) scData.deniedRoles = d.deniedRoles;
+      if (d.allowedChannels !== undefined) scData.allowedChannels = d.allowedChannels;
+      if (d.deniedChannels !== undefined) scData.deniedChannels = d.deniedChannels;
+      saveShortcuts(scData);
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/shortcuts') {
+      const d = await parseBody(req);
+      const scData = loadShortcuts();
+      const id = Date.now().toString(36);
+      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount || 50, createdAt: Date.now() };
+      scData.shortcuts.push(sc);
+      saveShortcuts(scData);
+      return jsonRes(res, 200, { ok: true, shortcut: sc });
+    }
+    if (req.method === 'DELETE' && p.match(/^\/api\/shortcuts\/.+$/)) {
+      const id = decodeURIComponent(p.split('/').pop());
+      const scData = loadShortcuts();
+      scData.shortcuts = scData.shortcuts.filter(s => s.id !== id && s.name !== id);
+      saveShortcuts(scData);
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'PUT' && p.match(/^\/api\/shortcuts\/.+$/)) {
+      const id = decodeURIComponent(p.split('/').pop());
+      const d = await parseBody(req);
+      const scData = loadShortcuts();
+      const sc = scData.shortcuts.find(s => s.id === id || s.name === id);
+      if (!sc) return jsonRes(res, 404, { error: 'Not found' });
+      Object.assign(sc, { name: d.name ?? sc.name, emoji: d.emoji ?? sc.emoji, type: d.type ?? sc.type, description: d.description ?? sc.description, content: d.content ?? sc.content, title: d.title ?? sc.title, color: d.color ?? sc.color, targetChannel: d.targetChannel ?? sc.targetChannel, pingRole: d.pingRole ?? sc.pingRole, action: d.action ?? sc.action, amount: d.amount ?? sc.amount });
+      saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true });
     }
 

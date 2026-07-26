@@ -11,37 +11,39 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0a0e;--surface:rgba(14,14,22,.85);--card:rgba(18,18,30,.75);--card2:rgba(22,22,36,.6);
-  --border:rgba(139,92,246,.12);--text:#e8e4f0;--dim:#8a85a0;--accent:#8b5cf6;
+  --bg:#06060a;--surface:rgba(10,10,18,.9);--card:rgba(14,14,24,.8);--card2:rgba(18,18,30,.6);
+  --border:rgba(139,92,246,.1);--text:#e0dff0;--dim:#706e8a;--accent:#7c3aed;
   --green:#3fb950;--red:#f85149;--yellow:#e3b341;--purple:#a78bfa;--orange:#f0883e;--gold:#a78bfa;
-  --hover:rgba(30,25,50,.5);--glow:0 0 30px rgba(139,92,246,.08);
+  --hover:rgba(24,20,44,.6);--glow:0 0 30px rgba(124,58,237,.08);
   --radius:12px;--radius-lg:16px;--radius-xl:20px;
   --font-ar:'Noto Kufi Arabic',sans-serif;
   --font-en:'Inter',sans-serif;
   --mouse-x:50%;--mouse-y:50%;
 }
 body{font-family:var(--font-ar);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(139,92,246,.05),transparent),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(124,58,237,.03),transparent),radial-gradient(ellipse 50% 30% at 10% 60%,rgba(139,92,246,.02),transparent);pointer-events:none;z-index:0}
-body::after{content:'';position:fixed;inset:0;background:radial-gradient(circle 300px at var(--mouse-x) var(--mouse-y),rgba(139,92,246,.04),transparent);pointer-events:none;z-index:0;transition:background .4s}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(124,58,237,.06),transparent),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(88,28,135,.04),transparent),radial-gradient(ellipse 50% 30% at 10% 60%,rgba(139,92,246,.03),transparent);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(circle 300px at var(--mouse-x) var(--mouse-y),rgba(124,58,237,.05),transparent);pointer-events:none;z-index:0;transition:background .4s}
+body::before{animation:purplePulse 8s ease-in-out infinite alternate}
+@keyframes purplePulse{0%{opacity:.8;filter:hue-rotate(0deg)}50%{opacity:1;filter:hue-rotate(15deg)}100%{opacity:.8;filter:hue-rotate(-15deg)}}
 #particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.6}
 
 .login{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:20px;position:relative;z-index:1;padding:20px}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:48px 40px;text-align:center;width:100%;max-width:440px;backdrop-filter:blur(40px) saturate(1.5);box-shadow:0 24px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);position:relative;overflow:hidden}
+.login-card{background:rgba(10,10,18,.95);border:1px solid rgba(139,92,246,.12);border-radius:var(--radius-xl);padding:48px 40px;text-align:center;width:100%;max-width:440px;backdrop-filter:blur(40px) saturate(1.5);box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 60px rgba(124,58,237,.05),inset 0 1px 0 rgba(139,92,246,.08);position:relative;overflow:hidden}
 .login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.3),transparent)}
-.login-card::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(139,92,246,.03),transparent,rgba(170,140,44,.03),transparent);animation:loginSpin 20s linear infinite}
+.login-card::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(124,58,237,.04),transparent,rgba(139,92,246,.03),transparent);animation:loginSpin 20s linear infinite}
 @keyframes loginSpin{to{transform:rotate(360deg)}}
 .login-card .logo{font-size:56px;margin-bottom:12px;position:relative;z-index:1;filter:drop-shadow(0 4px 20px rgba(139,92,246,.2))}
 .login-card h1{font-size:22px;font-weight:800;margin-bottom:6px;background:linear-gradient(135deg,#fff,var(--gold),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;z-index:1;font-family:var(--font-en)}
 .login-card p{color:var(--dim);font-size:13px;margin-bottom:28px;position:relative;z-index:1}
 .login-card input{padding:14px 18px;border:1px solid rgba(139,92,246,.12);border-radius:var(--radius);background:rgba(10,10,10,.6);color:var(--text);width:100%;font-size:14px;transition:all .3s;margin-bottom:16px;position:relative;z-index:1;font-family:var(--font-en)}
 .login-card input:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(139,92,246,.1);outline:none}
-.login-card button{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--gold),var(--accent));color:#0a0a0a;font-size:15px;cursor:pointer;font-weight:700;transition:all .3s;letter-spacing:.5px;position:relative;z-index:1;font-family:var(--font-ar);box-shadow:0 4px 20px rgba(139,92,246,.25)}
+.login-card button{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;font-size:15px;cursor:pointer;font-weight:700;transition:all .3s;letter-spacing:.5px;position:relative;z-index:1;font-family:var(--font-ar);box-shadow:0 4px 20px rgba(124,58,237,.3)}
 .login-card button:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(139,92,246,.35)}
 .login-card button:active{transform:scale(.98)}
 
 .app{display:none;position:relative;z-index:1}
 
-.topbar{background:rgba(10,10,10,.8);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.topbar{background:rgba(6,6,10,.9);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(40px) saturate(1.5);box-shadow:0 1px 0 rgba(124,58,237,.06)}
 .topbar-left{display:flex;align-items:center;gap:14px}
 .topbar-left .logo{font-size:26px;filter:drop-shadow(0 2px 8px rgba(139,92,246,.15))}
 .topbar-left h2{font-size:17px;font-weight:800;background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:var(--font-en)}
@@ -51,11 +53,11 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(circle 
 
 .layout{display:flex;min-height:calc(100vh - 53px)}
 
-.sidebar{width:250px;background:rgba(10,14,24,.7);border-left:1px solid var(--border);padding:12px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;flex-shrink:0;backdrop-filter:blur(30px) saturate(1.5)}
+.sidebar{width:250px;background:rgba(8,8,16,.8);border-left:1px solid var(--border);padding:12px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;flex-shrink:0;backdrop-filter:blur(30px) saturate(1.5)}
 .sidebar .nav-label{padding:20px 22px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--dim);font-family:var(--font-en)}
 .sidebar button{width:100%;text-align:right;padding:11px 22px;background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .25s;border-right:3px solid transparent;font-weight:500;border-radius:0 10px 10px 0;margin:2px 0;position:relative;font-family:var(--font-ar)}
-.sidebar button:hover{background:rgba(139,92,246,.06);color:var(--text)}
-.sidebar button.active{background:rgba(139,92,246,.08);color:var(--accent);border-right-color:var(--accent);font-weight:700}
+.sidebar button:hover{background:rgba(124,58,237,.1);color:var(--text)}
+.sidebar button.active{background:rgba(124,58,237,.15);color:var(--accent);border-right-color:var(--accent);font-weight:700}
 .sidebar button.active::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:2px;height:60%;background:var(--accent);border-radius:1px;opacity:.5}
 .sidebar button .nav-icon{font-size:17px;width:24px;text-align:center;flex-shrink:0}
 .sidebar .sidebar-footer{padding:14px 22px;border-top:1px solid var(--border);margin-top:auto;position:absolute;bottom:0;width:100%;background:rgba(10,14,24,.8)}
@@ -64,24 +66,26 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(circle 
 .main{flex:1;padding:28px;overflow-y:auto;max-height:calc(100vh - 53px);display:flex;flex-direction:column;align-items:center}
 .page{display:none;animation:pageIn .4s ease;width:100%;max-width:1140px;margin:0 auto}
 .page.active{display:block}
-@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px 20px;text-align:center;transition:all .35s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;backdrop-filter:blur(20px)}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .4s}
-.stat-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(139,92,246,.06),transparent 70%);opacity:0;transition:opacity .4s}
-.stat-card:hover{transform:translateY(-6px);border-color:rgba(139,92,246,.2);box-shadow:0 12px 40px rgba(0,0,0,.3),0 0 0 1px rgba(139,92,246,.08)}
+.stat-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(124,58,237,.08),transparent 70%);opacity:0;transition:opacity .4s}
+.stat-card:hover{transform:translateY(-6px) scale(1.02);border-color:rgba(139,92,246,.25);box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px rgba(139,92,246,.1),0 0 60px rgba(124,58,237,.08)}
 .stat-card:hover::before,.stat-card:hover::after{opacity:1}
 .stat-card .stat-icon{font-size:30px;margin-bottom:12px;display:block;position:relative;z-index:1}
 .stat-card .num{font-size:30px;font-weight:900;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;z-index:1;font-family:var(--font-en)}
 .stat-card .label{color:var(--dim);font-size:12px;margin-top:6px;position:relative;z-index:1;font-weight:500}
 .stat-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--accent),transparent)}.stat-card:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
-.stat-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--orange),transparent)}.stat-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
-.stat-card:nth-child(5)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}.stat-card:nth-child(6)::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}.stat-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.stat-card:nth-child(5)::before{background:linear-gradient(90deg,transparent,#818cf8,transparent)}.stat-card:nth-child(6)::before{background:linear-gradient(90deg,transparent,#c084fc,transparent)}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:18px;transition:all .35s;backdrop-filter:blur(20px);position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
-.card:hover{border-color:rgba(139,92,246,.18);box-shadow:0 4px 24px rgba(0,0,0,.2)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:18px;transition:all .4s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(24px);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.18),transparent)}
+.card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle 200px at var(--mouse-x) var(--mouse-y),rgba(124,58,237,.04),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.card:hover{border-color:rgba(139,92,246,.25);box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 50px rgba(124,58,237,.06)}
+.card:hover::after{opacity:1}
 .card h3{margin-bottom:18px;font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px}
 .card h3::before{content:'';width:3px;height:20px;background:linear-gradient(180deg,var(--accent),var(--purple));border-radius:2px;display:inline-block}
 
@@ -111,15 +115,15 @@ tr:last-child td{border-bottom:none}
 .btn-purple{background:linear-gradient(135deg,#6e40c9,#a371f7);color:#fff;box-shadow:0 2px 12px rgba(163,113,247,.2)}
 .btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
 .btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:var(--accent);background:rgba(139,92,246,.06)}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent);background:rgba(124,58,237,.1)}
 
 input,select,textarea{padding:11px 16px;border:1px solid rgba(139,92,246,.1);border-radius:var(--radius);background:rgba(10,10,10,.5);color:var(--text);font-size:13px;width:100%;margin-bottom:12px;transition:all .25s;font-family:var(--font-ar);backdrop-filter:blur(10px)}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(139,92,246,.08);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,58,237,.12),0 0 20px rgba(124,58,237,.05);outline:none}
 textarea{min-height:80px;resize:vertical}
 label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weight:500}
 .form-row{display:flex;gap:14px}.form-row>*{flex:1}
 
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a6b2a,#2ea043);color:#fff;padding:14px 32px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:9999;display:none;animation:toastIn .35s ease;box-shadow:0 12px 32px rgba(46,160,67,.3);font-family:var(--font-ar)}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;padding:14px 32px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:9999;display:none;animation:toastIn .35s ease;box-shadow:0 12px 32px rgba(124,58,237,.35);font-family:var(--font-ar)}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 .empty{text-align:center;color:var(--dim);padding:52px 24px;font-size:14px}
@@ -133,7 +137,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
 .toggle input{opacity:0;width:0;height:0;position:absolute}
 .toggle .slider{position:absolute;inset:0;background:rgba(139,92,246,.15);border-radius:12px;transition:.3s}
 .toggle .slider:before{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.toggle input:checked+.slider{background:linear-gradient(135deg,#1a6b2a,#2ea043);box-shadow:0 0 12px rgba(63,185,80,.2)}
+.toggle input:checked+.slider{background:linear-gradient(135deg,#5b21b6,#7c3aed);box-shadow:0 0 12px rgba(124,58,237,.3)}
 .toggle input:checked+.slider:before{transform:translateX(20px)}
 
 .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
@@ -180,6 +184,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
       <button onclick="showPage('members')" data-page="members"><span class="nav-icon">👥</span>الأعضاء</button>
       <button onclick="showPage('sales')" data-page="sales"><span class="nav-icon">📈</span>المبيعات</button>
       <button onclick="showPage('announce')" data-page="announce"><span class="nav-icon">📢</span>إعلان</button>
+      <button onclick="showPage('shortcuts')" data-page="shortcuts"><span class="nav-icon">⚡</span>الاختصارات</button>
       <button onclick="showPage('giveaways')" data-page="giveaways"><span class="nav-icon">🎉</span>السحبيات</button>
       <button onclick="showPage('settings')" data-page="settings"><span class="nav-icon">⚙️</span>الإعدادات</button>
     </div>
@@ -313,7 +318,81 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
         </div>
         </div>
       </div>
-      <div class="page" id="page-giveaways">
+      <div class="page" id="page-shortcuts">
+        <div class="settings-grid">
+        <div class="card" style="grid-column:1/-1">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <h3 style="margin:0">⚡ الاختصارات</h3>
+            <button class="btn btn-purple" onclick="showAddShortcut()">+ إضافة اختصار</button>
+          </div>
+          <div id="shortcutsList"><div class="empty">جاري التحميل...</div></div>
+        </div>
+        </div>
+        <div class="settings-grid">
+        <div class="card">
+          <h3>🔐 الأدوار المسموحة</h3>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">الأدوار اللي تقدر تستخدم الاختصارات (اتركها فاضية للسماح للكل)</p>
+          <div id="shortcutsAllowedRoles"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <select id="addAllowedRole" style="flex:1;margin:0"><option value="">اختر رول...</option></select>
+            <button class="btn btn-green btn-sm" onclick="addShortcutRole('allowed')">+</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🚫 الأدوار الممنوعة</h3>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">الأدوار اللي مش هتقدر تستخدم الاختصارات</p>
+          <div id="shortcutsDeniedRoles"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <select id="addDeniedRole" style="flex:1;margin:0"><option value="">اختر رول...</option></select>
+            <button class="btn btn-red btn-sm" onclick="addShortcutRole('denied')">+</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>✅ القنوات المسموحة</h3>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي ينفع تتنفذ فيها الاختصارات</p>
+          <div id="shortcutsAllowedChannels"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <select id="addAllowedChannel" style="flex:1;margin:0"><option value="">اختر قناة...</option></select>
+            <button class="btn btn-green btn-sm" onclick="addShortcutChannel('allowed')">+</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>⛔ القنوات الممنوعة</h3>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي مش هتتنفذ فيها الاختصارات</p>
+          <div id="shortcutsDeniedChannels"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <select id="addDeniedChannel" style="flex:1;margin:0"><option value="">اختر قناة...</option></select>
+            <button class="btn btn-red btn-sm" onclick="addShortcutChannel('denied')">+</button>
+          </div>
+        </div>
+        </div>
+        <div class="card" id="addShortcutForm" style="display:none">
+          <h3>⚡ إضافة اختصار جديد</h3>
+          <div class="form-row"><div><label>الاسم</label><input id="scName" placeholder="مثال: say-hello" /></div><div><label>الإيموجي</label><input id="scEmoji" value="⚡" /></div></div>
+          <div class="form-row">
+            <div><label>النوع</label><select id="scType" onchange="updateShortcutForm()">
+              <option value="message">📝 رسالة</option><option value="embed">💎 Embed</option><option value="announce">📣 إعلان</option><option value="action">🔧 إجراء</option>
+            </select></div>
+            <div><label>القناة المستهدفة</label><select id="scTargetChannel"><option value="">القناة الحالية</option></select></div>
+          </div>
+          <div id="scMessageFields">
+            <label>المحتوى</label><textarea id="scContent" placeholder="محتوى الرسالة..."></textarea>
+          </div>
+          <div id="scEmbedFields" style="display:none">
+            <div class="form-row"><div><label>العنوان</label><input id="scTitle" /></div><div><label>اللون (hex)</label><input id="scColor" value="#8b5cf6" /></div></div>
+          </div>
+          <div id="scAnnounceFields" style="display:none">
+            <label>الرول المُشار (@everyone / ID رول)</label><input id="scPingRole" placeholder="اتركه فاضي بدون ping" />
+          </div>
+          <div id="scActionFields" style="display:none">
+            <div class="form-row">
+              <div><label>الإجراء</label><select id="scAction"><option value="clear">🧹 مسح رسائل</option></select></div>
+              <div><label>العدد (لمسح)</label><input id="scAmount" type="number" value="50" /></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addShortcutForm').style.display='none'">إلغاء</button></div>
+        </div>
+      </div>
         <div class="card" style="max-width:800px;margin:0 auto"><h3>🎉 السحبيات</h3><div id="giveawaysList"><div class="empty">جاري التحميل...</div></div></div>
       </div>
       <div class="page" id="page-settings">
@@ -411,6 +490,7 @@ function showPage(name){
   if(name==='giveaways')loadGiveaways();
   if(name==='settings')loadSettings();
   if(name==='sales')loadSalesCharts();
+  if(name==='shortcuts')loadShortcuts();
 }
 
 const CREDITS_TO_EGP_D=0.6/1000000;
@@ -887,6 +967,102 @@ async function saveWelcomeConfig(){
   toast('✅ تم حفظ إعدادات الترحيب');
 }
 
+// ═══ SHORTCUTS ═══
+let _scData={shortcuts:[],allowedRoles:[],deniedRoles:[],allowedChannels:[],deniedChannels:[]};
+async function loadShortcuts(){
+  _scData=await api('api/shortcuts');
+  if(!_scData.shortcuts)_scData.shortcuts=[];
+  renderShortcutsList();
+  renderShortcutRoles();
+  renderShortcutChannels();
+  populateShortcutSelects();
+}
+function renderShortcutsList(){
+  const types={message:'📝 رسالة',embed:'💎 Embed',announce:'📣 إعلان',action:'🔧 إجراء'};
+  document.getElementById('shortcutsList').innerHTML=_scData.shortcuts.length?`<table><tr><th>الاسم</th><th>النوع</th><th>الوصف</th><th>إجراءات</th></tr>${_scData.shortcuts.map(s=>`<tr><td>${s.emoji||'⚡'} <strong>${s.name}</strong></td><td>${types[s.type]||s.type}</td><td style="color:var(--dim)">${(s.description||'—').substring(0,40)}</td><td><button class="btn btn-purple btn-sm" onclick="editShortcut('${s.id}')">✏️</button> <button class="btn btn-red btn-sm" onclick="deleteShortcut('${s.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد اختصارات — أضف اختصار جديد</div>';
+}
+function renderShortcutRoles(){
+  const rolesEl=(arr,type)=>{
+    if(!arr||!arr.length)return'<span style="color:var(--dim);font-size:12px">لا يوجد</span>';
+    return arr.map(id=>`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">R:${id} <button onclick="removeShortcutRole('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`).join('');
+  };
+  document.getElementById('shortcutsAllowedRoles').innerHTML=rolesEl(_scData.allowedRoles,'allowed');
+  document.getElementById('shortcutsDeniedRoles').innerHTML=rolesEl(_scData.deniedRoles,'denied');
+}
+function renderShortcutChannels(){
+  const chEl=(arr,type)=>{
+    if(!arr||!arr.length)return'<span style="color:var(--dim);font-size:12px">لا يوجد</span>';
+    return arr.map(id=>`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">C:${id} <button onclick="removeShortcutChannel('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`).join('');
+  };
+  document.getElementById('shortcutsAllowedChannels').innerHTML=chEl(_scData.allowedChannels,'allowed');
+  document.getElementById('shortcutsDeniedChannels').innerHTML=chEl(_scData.deniedChannels,'denied');
+}
+function populateShortcutSelects(){
+  const roles=Array.isArray(allMembers)?[]:(window._rolesCache||[]);
+  const chs=Array.isArray(allChannels)?allChannels.filter(c=>c.type===0):[];
+  ['addAllowedRole','addDeniedRole'].forEach(id=>{const sel=document.getElementById(id);if(sel)sel.innerHTML='<option value="">اختر رول...</option>'+(window._rolesCache||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');});
+  ['addAllowedChannel','addDeniedChannel','scTargetChannel'].forEach(id=>{const sel=document.getElementById(id);if(sel){const cur=sel.querySelector('option');sel.innerHTML=chs.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');if(cur)sel.prepend(cur);}});
+}
+async function addShortcutRole(type){
+  const sel=document.getElementById(type==='allowed'?'addAllowedRole':'addDeniedRole');
+  const id=sel.value;if(!id)return;
+  _scData[type==='allowed'?'allowedRoles':'deniedRoles']=_scData[type==='allowed'?'allowedRoles':'deniedRoles']||[];
+  _scData[type==='allowed'?'allowedRoles':'deniedRoles'].push(id);
+  await api('api/shortcuts',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(_scData)});
+  toast('✅ تمت إضافة الرول');loadShortcuts();
+}
+async function removeShortcutRole(type,id){
+  _scData[type==='allowed'?'allowedRoles':'deniedRoles']=(_scData[type==='allowed'?'allowedRoles':'deniedRoles']||[]).filter(r=>r!==id);
+  await api('api/shortcuts',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(_scData)});
+  toast('✅ تمت إزالة الرول');loadShortcuts();
+}
+async function addShortcutChannel(type){
+  const sel=document.getElementById(type==='allowed'?'addAllowedChannel':'addDeniedChannel');
+  const id=sel.value;if(!id)return;
+  _scData[type==='allowed'?'allowedChannels':'deniedChannels']=_scData[type==='allowed'?'allowedChannels':'deniedChannels']||[];
+  _scData[type==='allowed'?'allowedChannels':'deniedChannels'].push(id);
+  await api('api/shortcuts',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(_scData)});
+  toast('✅ تمت إضافة القناة');loadShortcuts();
+}
+async function removeShortcutChannel(type,id){
+  _scData[type==='allowed'?'allowedChannels':'deniedChannels']=(_scData[type==='allowed'?'allowedChannels':'deniedChannels']||[]).filter(c=>c!==id);
+  await api('api/shortcuts',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(_scData)});
+  toast('✅ تمت إزالة القناة');loadShortcuts();
+}
+function showAddShortcut(){document.getElementById('addShortcutForm').style.display='block';}
+function updateShortcutForm(){
+  const t=document.getElementById('scType').value;
+  document.getElementById('scMessageFields').style.display=(t==='message'||t==='announce')?'block':'none';
+  document.getElementById('scEmbedFields').style.display=(t==='embed')?'block':'none';
+  document.getElementById('scAnnounceFields').style.display=(t==='announce')?'block':'none';
+  document.getElementById('scActionFields').style.display=(t==='action')?'block':'none';
+}
+async function addShortcut(){
+  const d={name:document.getElementById('scName').value,emoji:document.getElementById('scEmoji').value,type:document.getElementById('scType').value,content:document.getElementById('scContent').value,targetChannel:document.getElementById('scTargetChannel').value};
+  if(!d.name)return toast('❌ اكتب اسم الاختصار');
+  if(d.type==='embed'){d.title=document.getElementById('scTitle').value;d.color=parseInt(document.getElementById('scColor').value.replace('#',''),16);}
+  if(d.type==='announce'){d.pingRole=document.getElementById('scPingRole').value;d.title=document.getElementById('scTitle')?.value||'';}
+  if(d.type==='action'){d.action=document.getElementById('scAction').value;d.amount=parseInt(document.getElementById('scAmount').value)||50;}
+  const r=await api('api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  if(r.error)return toast('❌ '+r.error);
+  document.getElementById('addShortcutForm').style.display='none';
+  toast('✅ تمت إضافة الاختصار');loadShortcuts();
+}
+async function deleteShortcut(id){
+  if(!confirm('حذف الاختصار؟'))return;
+  await api('api/shortcuts/'+encodeURIComponent(id),{method:'DELETE'});
+  toast('✅ تم الحذف');loadShortcuts();
+}
+function editShortcut(id){
+  const sc=_scData.shortcuts.find(s=>s.id===id);if(!sc)return;
+  document.getElementById('addShortcutForm').style.display='block';
+  document.getElementById('scName').value=sc.name||'';
+  document.getElementById('scEmoji').value=sc.emoji||'⚡';
+  document.getElementById('scType').value=sc.type||'message';
+  document.getElementById('scContent').value=sc.content||'';
+  updateShortcutForm();
+}
+
 let revenueChartInstance=null,statusChartInstance=null,topServicesChartInstance=null,monthlyChartInstance=null;
 const CREDITS_TO_EGP=0.6/1000000,EGP_TO_USD=1/50.5;
 function fmtCredits(n){return(n*CREDITS_TO_EGP*EGP_TO_USD).toFixed(1)+'$'}
@@ -974,7 +1150,7 @@ class Particle{
     ctx.fill();
   }
 }
-for(let i=0;i<50;i++)particles.push(new Particle());
+for(let i=0;i<60;i++)particles.push(new Particle());
 
 function connectParticles(){
   for(let a=0;a<particles.length;a++){
@@ -984,8 +1160,12 @@ function connectParticles(){
       const dist=Math.sqrt(dx*dx+dy*dy);
       if(dist<120){
         ctx.beginPath();
-        ctx.strokeStyle=`rgba(139,92,246,${.06*(1-dist/120)})`;
-        ctx.lineWidth=.4;
+        const gradient=ctx.createLinearGradient(particles[a].x,particles[a].y,particles[b].x,particles[b].y);
+        gradient.addColorStop(0,`rgba(124,58,237,${.08*(1-dist/120)})`);
+        gradient.addColorStop(.5,`rgba(139,92,246,${.12*(1-dist/120)})`);
+        gradient.addColorStop(1,`rgba(167,139,250,${.06*(1-dist/120)})`);
+        ctx.strokeStyle=gradient;
+        ctx.lineWidth=.6;
         ctx.moveTo(particles[a].x,particles[a].y);
         ctx.lineTo(particles[b].x,particles[b].y);
         ctx.stroke();
@@ -994,8 +1174,26 @@ function connectParticles(){
   }
 }
 
+let _glowTime=0;
+function drawGlowOrbs(){
+  _glowTime+=.005;
+  const orbs=[
+    {x:canvas.width*(0.2+Math.sin(_glowTime)*0.1),y:canvas.height*(0.3+Math.cos(_glowTime*0.7)*0.15),r:150,color:'124,58,237'},
+    {x:canvas.width*(0.8+Math.cos(_glowTime*0.5)*0.1),y:canvas.height*(0.7+Math.sin(_glowTime*0.8)*0.15),r:120,color:'88,28,135'},
+    {x:canvas.width*(0.5+Math.sin(_glowTime*0.3)*0.15),y:canvas.height*(0.5+Math.cos(_glowTime*0.6)*0.1),r:180,color:'139,92,246'},
+  ];
+  orbs.forEach(o=>{
+    const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,`rgba(${o.color},0.025)`);
+    g.addColorStop(1,`rgba(${o.color},0)`);
+    ctx.fillStyle=g;
+    ctx.fillRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2);
+  });
+}
+
 function animateParticles(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawGlowOrbs();
   particles.forEach(p=>{p.update();p.draw()});
   connectParticles();
   requestAnimationFrame(animateParticles);
@@ -1023,7 +1221,32 @@ document.addEventListener('keydown',(e)=>{
 });
 
 console.log('%c💜 Codex Zone Dashboard', 'font-size:20px;color:#8b5cf6;font-weight:bold');
-console.log('%cDashboard loaded successfully', 'color:#3fb950');
+console.log('%cDashboard loaded successfully', 'color:#a78bfa');
+
+document.addEventListener('click',(e)=>{
+  const btn=e.target.closest('.btn');
+  if(!btn)return;
+  const ripple=document.createElement('span');
+  ripple.style.cssText='position:absolute;border-radius:50%;background:rgba(255,255,255,.15);transform:scale(0);animation:rippleAnim .6s ease-out;pointer-events:none;z-index:10';
+  const rect=btn.getBoundingClientRect();
+  const size=Math.max(rect.width,rect.height);
+  ripple.style.width=ripple.style.height=size+'px';
+  ripple.style.left=(e.clientX-rect.left-size/2)+'px';
+  ripple.style.top=(e.clientY-rect.top-size/2)+'px';
+  btn.style.position='relative';btn.style.overflow='hidden';
+  btn.appendChild(ripple);
+  setTimeout(()=>ripple.remove(),600);
+});
+
+document.querySelectorAll('.stat-card').forEach(card=>{
+  card.addEventListener('mousemove',(e)=>{
+    const rect=card.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width-.5;
+    const y=(e.clientY-rect.top)/rect.height-.5;
+    card.style.transform=`translateY(-6px) perspective(600px) rotateX(${-y*6}deg) rotateY(${x*6}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform='';});
+});
 </script>
 
 <div class="modal-overlay" id="editServiceModal" onclick="if(event.target===this)this.classList.remove('show')">
