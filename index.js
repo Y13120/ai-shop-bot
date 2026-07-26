@@ -1777,9 +1777,17 @@ async function cmdShortcut(interaction) {
     }
   } else if (sc.type === 'action') {
     if (sc.action === 'clear') {
-      const amt = sc.amount || 50;
-      const deleted = await interaction.channel.bulkDelete(amt, true);
-      await interaction.editReply({ content: `🧹 تم مسح ${deleted.size} رسالة` });
+      const amt = Math.min(sc.amount || 50, 200);
+      let totalDeleted = 0;
+      let remaining = amt;
+      while (remaining > 0) {
+        const batch = Math.min(remaining, 100);
+        const deleted = await interaction.channel.bulkDelete(batch, true);
+        totalDeleted += deleted.size;
+        if (deleted.size < batch) break;
+        remaining -= deleted.size;
+      }
+      await interaction.editReply({ content: `🧹 تم مسح **${totalDeleted}** رسالة` });
       return;
     }
     const member = targetMember;
@@ -3811,6 +3819,7 @@ async function start() {
     const scData = loadShortcuts();
     if (!scData.shortcuts || scData.shortcuts.length === 0) {
       const defaults = [
+        { id: 'd-clear-chat', name: 'مسح-الشات', emoji: '🗑️', type: 'action', action: 'clear', amount: 200, content: '', description: 'مسح 200 رسالة من الشات', createdAt: Date.now() },
         { id: 'd-clear', name: 'مسح', emoji: '🧹', type: 'action', action: 'clear', amount: 50, content: '', description: 'مسح 50 رسالة من القناة', createdAt: Date.now() },
         { id: 'd-ban', name: 'حظر', emoji: '🔨', type: 'action', action: 'ban', amount: 0, content: 'حظر عبر اختصار', description: 'حظر عضو من السيرفر', createdAt: Date.now() },
         { id: 'd-kick', name: 'طرد', emoji: '👢', type: 'action', action: 'kick', amount: 0, content: 'طرد عبر اختصار', description: 'طرد عضو من السيرفر', createdAt: Date.now() },
