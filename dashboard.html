@@ -471,7 +471,7 @@ async function loadAll(){
     const recent=reviews.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
     document.getElementById('recentReviews').innerHTML=recent.length?`<table><tr><th>الخدمة</th><th>المستخدم</th><th>التقييم</th><th>التعليق</th><th>الصور</th></tr>${recent.map(r=>`<tr><td>${r.serviceEmoji||'⭐'} ${r.serviceName}</td><td>${r.username}</td><td style="color:#e3b341;font-weight:700">${'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)}</td><td>${r.comment||'—'}</td><td>${r.images&&r.images.length?`<div style="display:flex;gap:4px;flex-wrap:wrap">${r.images.map(img=>`<img src="${img}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border);cursor:pointer" onclick="window.open('${img}','_blank')">`).join('')}</div>`:'<span style="color:var(--dim)">—</span>'}</td></tr>`).join('')}</table>`:'<div class="empty">لا توجد تقييمات</div>';
   }
-  [allChannels,allMembers]=await Promise.all([api('api/channels'),api('api/members')]);
+  [allChannels,allMembers,window._rolesCache]=await Promise.all([api('api/channels'),api('api/members'),api('api/roles')]);
   const chSelect=document.getElementById('sendChannel');
   if(Array.isArray(allChannels)){chSelect.innerHTML=allChannels.filter(c=>c.type===0).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');}
   startOrdersAutoRefresh();
@@ -972,6 +972,13 @@ let _scData={shortcuts:[],allowedRoles:[],deniedRoles:[],allowedChannels:[],deni
 async function loadShortcuts(){
   _scData=await api('api/shortcuts');
   if(!_scData.shortcuts)_scData.shortcuts=[];
+  if(!Array.isArray(_scData.allowedRoles))_scData.allowedRoles=[];
+  if(!Array.isArray(_scData.deniedRoles))_scData.deniedRoles=[];
+  if(!Array.isArray(_scData.allowedChannels))_scData.allowedChannels=[];
+  if(!Array.isArray(_scData.deniedChannels))_scData.deniedChannels=[];
+  const rolesData=await api('api/roles');
+  if(Array.isArray(rolesData))window._rolesCache=rolesData;
+  if(!Array.isArray(allChannels)||!allChannels.length){const ch=await api('api/channels');if(Array.isArray(ch))allChannels=ch;}
   renderShortcutsList();
   renderShortcutRoles();
   renderShortcutChannels();
@@ -984,7 +991,8 @@ function renderShortcutsList(){
 function renderShortcutRoles(){
   const rolesEl=(arr,type)=>{
     if(!arr||!arr.length)return'<span style="color:var(--dim);font-size:12px">لا يوجد</span>';
-    return arr.map(id=>`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">R:${id} <button onclick="removeShortcutRole('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`).join('');
+    const rc=window._rolesCache||[];
+    return arr.map(id=>{const r=rc.find(x=>x.id===id);const name=r?r.name:id;return`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">${name} <button onclick="removeShortcutRole('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`;}).join('');
   };
   document.getElementById('shortcutsAllowedRoles').innerHTML=rolesEl(_scData.allowedRoles,'allowed');
   document.getElementById('shortcutsDeniedRoles').innerHTML=rolesEl(_scData.deniedRoles,'denied');
@@ -992,7 +1000,8 @@ function renderShortcutRoles(){
 function renderShortcutChannels(){
   const chEl=(arr,type)=>{
     if(!arr||!arr.length)return'<span style="color:var(--dim);font-size:12px">لا يوجد</span>';
-    return arr.map(id=>`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">C:${id} <button onclick="removeShortcutChannel('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`).join('');
+    const chs=Array.isArray(allChannels)?allChannels:[];
+    return arr.map(id=>{const c=chs.find(x=>x.id===id);const name=c?c.name:id;return`<span class="badge badge-${type==='allowed'?'green':'red'}" style="display:inline-flex;align-items:center;gap:6px;margin:3px">${name} <button onclick="removeShortcutChannel('${type}','${id}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px">✕</button></span>`;}).join('');
   };
   document.getElementById('shortcutsAllowedChannels').innerHTML=chEl(_scData.allowedChannels,'allowed');
   document.getElementById('shortcutsDeniedChannels').innerHTML=chEl(_scData.deniedChannels,'denied');
