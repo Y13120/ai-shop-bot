@@ -168,6 +168,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
 select[multiple]{height:80px;min-height:60px}
 select[multiple] option{padding:6px 10px;margin:2px 0;border-radius:6px;cursor:pointer;font-size:12px}
 select[multiple] option:checked{background:rgba(124,58,237,.15);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(139,92,246,.15)}
+@keyframes spinner{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -527,15 +528,17 @@ async function connect(){
 async function loadAll(){
   const [guild,stats]=await Promise.all([api('api/guild'),api('api/stats')]);
   if(guild.error){
-    document.getElementById('guildName').textContent='⏳';
-    document.getElementById('memberCount').textContent='البوت لسه بيتصل...';
-    document.getElementById('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">⏳ البوت لسه مش متصل — هيتم الاتصال تلقائياً...</div>';
+    document.getElementById('guildName').textContent='⏳ جاري الاتصال...';
+    document.getElementById('memberCount').textContent='⏳';
+    document.getElementById('statsGrid').innerHTML=`<div class="stat-card" style="grid-column:1/-1;border:none;background:transparent;backdrop-filter:none;box-shadow:none;pointer-events:none;padding:60px">
+      <div style="text-align:center;color:var(--dim)"><div style="width:48px;height:48px;border:3px solid rgba(139,92,246,.15);border-top-color:var(--accent);border-radius:50%;animation:spinner 1s linear infinite;margin:0 auto 18px"></div><div style="font-size:14px;font-weight:600">⏳ البوت لسه بيتصل بـ Discord...</div><div style="font-size:12px;margin-top:6px;color:var(--dim)">هيتم الاتصال تلقائياً خلال ثوان</div></div>
+    </div>`;
     document.getElementById('recentTickets').innerHTML='<div class="empty">—</div>';
     document.getElementById('recentReviews').innerHTML='<div class="empty">—</div>';
-    setTimeout(()=>loadAll(),5000);
+    setTimeout(()=>loadAll(),2000);
     return;
   }
-  else{document.getElementById('guildName').textContent=guild.name||'—';document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;}
+  document.getElementById('guildName').textContent=guild.name||'—';document.getElementById('memberCount').textContent=`👥 ${guild.memberCount}`;
   document.getElementById('statsGrid').innerHTML=`
     <div class="stat-card"><div class="stat-icon">🎫</div><div class="num">${stats.orders}</div><div class="label">الطلبات</div></div>
     <div class="stat-card"><div class="stat-icon">✅</div><div class="num">${stats.completed}</div><div class="label">مكتملة</div></div>
