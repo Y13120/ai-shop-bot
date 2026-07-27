@@ -1743,11 +1743,23 @@ function saveShortcuts(data) {
   save('shortcuts.json', data);
 }
 
-function canUseShortcut(interaction, scData) {
-  if (scData.allowedRoles?.length > 0 && !interaction.member.roles.cache.some(r => scData.allowedRoles.includes(r.id))) return false;
-  if (scData.deniedRoles?.length > 0 && interaction.member.roles.cache.some(r => scData.deniedRoles.includes(r.id))) return false;
-  if (scData.allowedChannels?.length > 0 && !scData.allowedChannels.includes(interaction.channel.id)) return false;
-  if (scData.deniedChannels?.length > 0 && scData.deniedChannels.includes(interaction.channel.id)) return false;
+function canUseShortcut(interaction, scData, sc) {
+  const gAllowedRoles = scData.allowedRoles || [];
+  const gDeniedRoles = scData.deniedRoles || [];
+  const gAllowedChannels = scData.allowedChannels || [];
+  const gDeniedChannels = scData.deniedChannels || [];
+  const sAllowedRoles = sc?.allowedRoles || [];
+  const sDeniedRoles = sc?.deniedRoles || [];
+  const sAllowedChannels = sc?.allowedChannels || [];
+  const sDeniedChannels = sc?.deniedChannels || [];
+  const allowRoles = sAllowedRoles.length > 0 ? sAllowedRoles : gAllowedRoles;
+  const denyRoles = sDeniedRoles.length > 0 ? sDeniedRoles : gDeniedRoles;
+  const allowChannels = sAllowedChannels.length > 0 ? sAllowedChannels : gAllowedChannels;
+  const denyChannels = sDeniedChannels.length > 0 ? sDeniedChannels : gDeniedChannels;
+  if (allowRoles.length > 0 && !interaction.member.roles.cache.some(r => allowRoles.includes(r.id))) return false;
+  if (denyRoles.length > 0 && interaction.member.roles.cache.some(r => denyRoles.includes(r.id))) return false;
+  if (allowChannels.length > 0 && !allowChannels.includes(interaction.channel.id)) return false;
+  if (denyChannels.length > 0 && denyChannels.includes(interaction.channel.id)) return false;
   return true;
 }
 
@@ -1758,7 +1770,7 @@ async function cmdShortcut(interaction) {
   const scData = loadShortcuts();
   const sc = scData.shortcuts.find(s => s.name === name || s.id === name);
   if (!sc) return interaction.reply({ content: '❌ الاختصار مش موجود', ephemeral: true });
-  if (!canUseShortcut(interaction, scData)) return interaction.reply({ content: '❌ مسمحلكش تستخدم الاختصار ده', ephemeral: true });
+  if (!canUseShortcut(interaction, scData, sc)) return interaction.reply({ content: '❌ مسمحلكش تستخدم الاختصار ده', ephemeral: true });
   await interaction.reply({ content: '⏳ جاري تنفيذ الاختصار...', ephemeral: true });
   if (sc.type === 'message') {
     const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
@@ -1824,7 +1836,7 @@ async function cmdShortcut(interaction) {
 
 async function cmdShortcuts(interaction) {
   const scData = loadShortcuts();
-  const available = scData.shortcuts.filter(sc => canUseShortcut(interaction, scData));
+  const available = scData.shortcuts.filter(sc => canUseShortcut(interaction, scData, sc));
   if (!available.length) return interaction.reply({ content: '📋 لا توجد اختصارات متاحة لك', ephemeral: true });
   const embed = new EmbedBuilder().setTitle('⚡ الاختصارات المتاحة').setDescription(available.map(sc => `**${sc.emoji || '⚡'} ${sc.name}** — ${sc.description || sc.type}`).join('\n\n')).setColor(0x8b5cf6).setTimestamp();
   await interaction.reply({ embeds: [embed], ephemeral: true });
@@ -3450,7 +3462,7 @@ const apiServer = http.createServer(async (req, res) => {
       const d = await parseBody(req);
       const scData = loadShortcuts();
       const id = Date.now().toString(36);
-      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount != null ? d.amount : 50, createdAt: Date.now() };
+      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount != null ? d.amount : 50, allowedRoles: d.allowedRoles || [], deniedRoles: d.deniedRoles || [], allowedChannels: d.allowedChannels || [], deniedChannels: d.deniedChannels || [], createdAt: Date.now() };
       scData.shortcuts.push(sc);
       saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true, shortcut: sc });
@@ -3468,7 +3480,7 @@ const apiServer = http.createServer(async (req, res) => {
       const scData = loadShortcuts();
       const sc = scData.shortcuts.find(s => s.id === id || s.name === id);
       if (!sc) return jsonRes(res, 404, { error: 'Not found' });
-      Object.assign(sc, { name: d.name ?? sc.name, emoji: d.emoji ?? sc.emoji, type: d.type ?? sc.type, description: d.description ?? sc.description, content: d.content ?? sc.content, title: d.title ?? sc.title, color: d.color ?? sc.color, targetChannel: d.targetChannel ?? sc.targetChannel, pingRole: d.pingRole ?? sc.pingRole, action: d.action ?? sc.action, amount: d.amount ?? sc.amount });
+      Object.assign(sc, { name: d.name ?? sc.name, emoji: d.emoji ?? sc.emoji, type: d.type ?? sc.type, description: d.description ?? sc.description, content: d.content ?? sc.content, title: d.title ?? sc.title, color: d.color ?? sc.color, targetChannel: d.targetChannel ?? sc.targetChannel, pingRole: d.pingRole ?? sc.pingRole, action: d.action ?? sc.action, amount: d.amount ?? sc.amount, allowedRoles: d.allowedRoles ?? sc.allowedRoles, deniedRoles: d.deniedRoles ?? sc.deniedRoles, allowedChannels: d.allowedChannels ?? sc.allowedChannels, deniedChannels: d.deniedChannels ?? sc.deniedChannels });
       saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true });
     }

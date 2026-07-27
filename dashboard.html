@@ -145,6 +145,9 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
 .ticket-reply p{font-size:13px;color:var(--dim);margin-bottom:10px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes rippleAnim{to{width:300px;height:300px;opacity:0}}
+select[multiple]{height:80px;min-height:60px}
+select[multiple] option{padding:6px 10px;margin:2px 0;border-radius:6px;cursor:pointer;font-size:12px}
+select[multiple] option:checked{background:rgba(124,58,237,.2);color:var(--accent)}
 .main::-webkit-scrollbar{width:6px}
 .main::-webkit-scrollbar-track{background:transparent}
 .main::-webkit-scrollbar-thumb{background:rgba(139,92,246,.15);border-radius:3px}
@@ -333,7 +336,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
         <div class="settings-grid">
         <div class="card">
           <h3>🔐 الأدوار المسموحة</h3>
-          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">الأدوار اللي تقدر تستخدم الاختصارات (اتركها فاضية للسماح للكل)</p>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">صلاحيات عامة — كل الاختصارات تستخدمها (عامة) (اتركها فاضية للسماح للكل — أو اختار صلاحيات خاصة لكل اختصار من تعديل الاختصار)</p>
           <div id="shortcutsAllowedRoles"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <select id="addAllowedRole" style="flex:1;margin:0"><option value="">اختر رول...</option></select>
@@ -342,7 +345,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
         </div>
         <div class="card">
           <h3>🚫 الأدوار الممنوعة</h3>
-          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">الأدوار اللي مش هتقدر تستخدم الاختصارات</p>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">الأدوار اللي مش هتقدر تستخدم أي اختصار (عامة — ممكن تتخطى لكل اختصار)</p>
           <div id="shortcutsDeniedRoles"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <select id="addDeniedRole" style="flex:1;margin:0"><option value="">اختر رول...</option></select>
@@ -351,7 +354,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
         </div>
         <div class="card">
           <h3>✅ القنوات المسموحة</h3>
-          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي ينفع تتنفذ فيها الاختصارات</p>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي ينفع تتنفذ فيها الاختصارات (عامة — ممكن تتخطى لكل اختصار)</p>
           <div id="shortcutsAllowedChannels"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <select id="addAllowedChannel" style="flex:1;margin:0"><option value="">اختر قناة...</option></select>
@@ -360,7 +363,7 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
         </div>
         <div class="card">
           <h3>⛔ القنوات الممنوعة</h3>
-          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي مش هتتنفذ فيها الاختصارات</p>
+          <p style="color:var(--dim);font-size:12px;margin-bottom:12px">القنوات اللي مش هتتنفذ فيها الاختصارات (عامة — ممكن تتخطى لكل اختصار)</p>
           <div id="shortcutsDeniedChannels"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <select id="addDeniedChannel" style="flex:1;margin:0"><option value="">اختر قناة...</option></select>
@@ -393,7 +396,29 @@ label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px;font-weigh
             </div>
             <label>السبب / المحتوى (اختياري)</label><input id="scActionContent" placeholder="سبب الإجراء..." />
           </div>
-          <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="document.getElementById('addShortcutForm').style.display='none'">إلغاء</button></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+          <div style="margin-bottom:8px"><strong style="font-size:13px">🔐 صلاحيات هذا الاختصار</strong><p style="color:var(--dim);font-size:11px;margin-top:4px">اتركها فاضية عشان ترث الصلاحيات العامة — ملؤها هيعطل الصلاحيات العامة لهذا الاختصار</p></div>
+          <div class="form-row">
+            <div>
+              <label>الأدوار المسموحة</label>
+              <select id="scAllowedRoles" multiple style="height:80px"></select>
+            </div>
+            <div>
+              <label>الأدوار الممنوعة</label>
+              <select id="scDeniedRoles" multiple style="height:80px"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>القنوات المسموحة</label>
+              <select id="scAllowedChannels" multiple style="height:80px"></select>
+            </div>
+            <div>
+              <label>القنوات الممنوعة</label>
+              <select id="scDeniedChannels" multiple style="height:80px"></select>
+            </div>
+          </div>
+          <div class="actions"><button class="btn btn-purple" onclick="addShortcut()">✅ إضافة</button><button class="btn btn-red" onclick="cancelEditShortcut()">إلغاء</button></div>
         </div>
       </div>
       <div class="page" id="page-commands">
@@ -1028,7 +1053,19 @@ async function loadShortcuts(){
 }
 function renderShortcutsList(){
   const types={message:'📝 رسالة',embed:'💎 Embed',announce:'📣 إعلان',action:'🔧 إجراء'};
-  document.getElementById('shortcutsList').innerHTML=_scData.shortcuts.length?`<table><tr><th>الاسم</th><th>النوع</th><th>الوصف</th><th>إجراءات</th></tr>${_scData.shortcuts.map(s=>`<tr><td>${s.emoji||'⚡'} <strong>${s.name}</strong></td><td>${types[s.type]||s.type}</td><td style="color:var(--dim)">${(s.description||'—').substring(0,40)}</td><td><button class="btn btn-purple btn-sm" onclick="editShortcut('${s.id}')">✏️</button> <button class="btn btn-red btn-sm" onclick="deleteShortcut('${s.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد اختصارات — أضف اختصار جديد</div>';
+  const rc=window._rolesCache||[];
+  const chs=Array.isArray(allChannels)?allChannels:[];
+  const roleName=id=>{const r=rc.find(x=>x.id===id);return r?r.name:id;};
+  const chName=id=>{const c=chs.find(x=>x.id===id);return c?c.name:id;};
+  const permBadges=(s)=>{
+    const p=[];
+    (s.allowedRoles||[]).forEach(r=>p.push(`<span class="badge badge-green" style="font-size:10px;padding:2px 6px">🔐 ${roleName(r)}</span>`));
+    (s.deniedRoles||[]).forEach(r=>p.push(`<span class="badge badge-red" style="font-size:10px;padding:2px 6px">🚫 ${roleName(r)}</span>`));
+    (s.allowedChannels||[]).forEach(c=>p.push(`<span class="badge badge-green" style="font-size:10px;padding:2px 6px">✅ ${chName(c)}</span>`));
+    (s.deniedChannels||[]).forEach(c=>p.push(`<span class="badge badge-red" style="font-size:10px;padding:2px 6px">⛔ ${chName(c)}</span>`));
+    return p.length?p.join(' '):'<span style="color:var(--dim);font-size:11px">عام</span>';
+  };
+  document.getElementById('shortcutsList').innerHTML=_scData.shortcuts.length?`<table><tr><th>الاسم</th><th>النوع</th><th>الوصف</th><th>الصلاحيات</th><th>إجراءات</th></tr>${_scData.shortcuts.map(s=>`<tr><td>${s.emoji||'⚡'} <strong>${s.name}</strong></td><td>${types[s.type]||s.type}</td><td style="color:var(--dim)">${(s.description||'—').substring(0,30)}</td><td style="max-width:200px">${permBadges(s)}</td><td><button class="btn btn-purple btn-sm" onclick="editShortcut('${s.id}')">✏️</button> <button class="btn btn-red btn-sm" onclick="deleteShortcut('${s.id}')">🗑️</button></td></tr>`).join('')}</table>`:'<div class="empty">لا توجد اختصارات — أضف اختصار جديد</div>';
 }
 function renderShortcutRoles(){
   const rolesEl=(arr,type)=>{
@@ -1049,10 +1086,12 @@ function renderShortcutChannels(){
   document.getElementById('shortcutsDeniedChannels').innerHTML=chEl(_scData.deniedChannels,'denied');
 }
 function populateShortcutSelects(){
-  const roles=Array.isArray(allMembers)?[]:(window._rolesCache||[]);
+  const rc=window._rolesCache||[];
   const chs=Array.isArray(allChannels)?allChannels.filter(c=>c.type===0):[];
-  ['addAllowedRole','addDeniedRole'].forEach(id=>{const sel=document.getElementById(id);if(sel)sel.innerHTML='<option value="">اختر رول...</option>'+(window._rolesCache||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');});
+  ['addAllowedRole','addDeniedRole'].forEach(id=>{const sel=document.getElementById(id);if(sel)sel.innerHTML='<option value="">اختر رول...</option>'+rc.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');});
   ['addAllowedChannel','addDeniedChannel','scTargetChannel'].forEach(id=>{const sel=document.getElementById(id);if(sel){const cur=sel.querySelector('option');sel.innerHTML=chs.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');if(cur)sel.prepend(cur);}});
+  ['scAllowedRoles','scDeniedRoles'].forEach(id=>{const sel=document.getElementById(id);if(sel)sel.innerHTML=rc.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');});
+  ['scAllowedChannels','scDeniedChannels'].forEach(id=>{const sel=document.getElementById(id);if(sel)sel.innerHTML=chs.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');});
 }
 async function addShortcutRole(type){
   const sel=document.getElementById(type==='allowed'?'addAllowedRole':'addDeniedRole');
@@ -1094,12 +1133,23 @@ async function addShortcut(){
   if(d.type==='embed'){d.title=document.getElementById('scTitle').value;d.color=parseInt(document.getElementById('scColor').value.replace('#',''),16);}
   if(d.type==='announce'){d.pingRole=document.getElementById('scPingRole').value;d.title=document.getElementById('scTitle')?.value||'';}
   if(d.type==='action'){d.action=document.getElementById('scAction').value;d.amount=parseInt(document.getElementById('scAmount').value)||50;d.content=document.getElementById('scActionContent').value||'';}
-  toast('⏳ جاري الإضافة...');
-  const r=await api('api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  const getMulti=id=>{const sel=document.getElementById(id);return sel?Array.from(sel.selectedOptions).map(o=>o.value):[];};
+  d.allowedRoles=getMulti('scAllowedRoles');
+  d.deniedRoles=getMulti('scDeniedRoles');
+  d.allowedChannels=getMulti('scAllowedChannels');
+  d.deniedChannels=getMulti('scDeniedChannels');
+  const editId=document.getElementById('addShortcutForm').dataset.editId;
+  let r;
+  if(editId){
+    r=await api('api/shortcuts/'+encodeURIComponent(editId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  }else{
+    r=await api('api/shortcuts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  }
   if(r.error){toast('❌ '+r.error);return;}
   document.getElementById('addShortcutForm').style.display='none';
-  toast('✅ تمت إضافة الاختصار');
-  // Reset form
+  delete document.getElementById('addShortcutForm').dataset.editId;
+  document.getElementById('addShortcutForm').querySelector('h3').textContent='⚡ إضافة اختصار جديد';
+  toast(editId?'✅ تم تحديث الاختصار':'✅ تمت إضافة الاختصار');
   document.getElementById('scName').value='';
   document.getElementById('scEmoji').value='⚡';
   document.getElementById('scContent').value='';
@@ -1110,14 +1160,39 @@ async function deleteShortcut(id){
   await api('api/shortcuts/'+encodeURIComponent(id),{method:'DELETE'});
   toast('✅ تم الحذف');loadShortcuts();
 }
+function setMultiSelect(id,arr){
+  const sel=document.getElementById(id);if(!sel)return;
+  Array.from(sel.options).forEach(o=>{o.selected=Array.isArray(arr)&&arr.includes(o.value);});
+}
 function editShortcut(id){
   const sc=_scData.shortcuts.find(s=>s.id===id);if(!sc)return;
   document.getElementById('addShortcutForm').style.display='block';
+  document.getElementById('addShortcutForm').dataset.editId=id;
+  document.getElementById('addShortcutForm').querySelector('h3').textContent='✏️ تعديل اختصار: '+sc.name;
   document.getElementById('scName').value=sc.name||'';
   document.getElementById('scEmoji').value=sc.emoji||'⚡';
   document.getElementById('scType').value=sc.type||'message';
   document.getElementById('scContent').value=sc.content||'';
+  if(sc.type==='embed'){if(document.getElementById('scTitle'))document.getElementById('scTitle').value=sc.title||'';if(document.getElementById('scColor'))document.getElementById('scColor').value=sc.color?'#'+sc.color.toString(16).padStart(6,'0'):'#8b5cf6';}
+  if(sc.type==='action'){if(document.getElementById('scAction'))document.getElementById('scAction').value=sc.action||'clear';if(document.getElementById('scAmount'))document.getElementById('scAmount').value=sc.amount||50;if(document.getElementById('scActionContent'))document.getElementById('scActionContent').value=sc.content||'';}
+  if(sc.type==='announce'){if(document.getElementById('scPingRole'))document.getElementById('scPingRole').value=sc.pingRole||'';if(document.getElementById('scTitle'))document.getElementById('scTitle').value=sc.title||'';}
+  if(sc.targetChannel){const sel=document.getElementById('scTargetChannel');if(sel)Array.from(sel.options).forEach(o=>{o.selected=o.value===sc.targetChannel;});}
   updateShortcutForm();
+  setMultiSelect('scAllowedRoles',sc.allowedRoles);
+  setMultiSelect('scDeniedRoles',sc.deniedRoles);
+  setMultiSelect('scAllowedChannels',sc.allowedChannels);
+  setMultiSelect('scDeniedChannels',sc.deniedChannels);
+  document.getElementById('addShortcutForm').scrollIntoView({behavior:'smooth'});
+}
+function cancelEditShortcut(){
+  const f=document.getElementById('addShortcutForm');
+  f.style.display='none';
+  delete f.dataset.editId;
+  f.querySelector('h3').textContent='⚡ إضافة اختصار جديد';
+  document.getElementById('scName').value='';
+  document.getElementById('scEmoji').value='⚡';
+  document.getElementById('scContent').value='';
+  ['scAllowedRoles','scDeniedRoles','scAllowedChannels','scDeniedChannels'].forEach(id=>{const sel=document.getElementById(id);if(sel)Array.from(sel.options).forEach(o=>o.selected=false);});
 }
 
 let revenueChartInstance=null,statusChartInstance=null,topServicesChartInstance=null,monthlyChartInstance=null;
