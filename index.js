@@ -3450,7 +3450,7 @@ const apiServer = http.createServer(async (req, res) => {
       const d = await parseBody(req);
       const scData = loadShortcuts();
       const id = Date.now().toString(36);
-      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount || 50, createdAt: Date.now() };
+      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount != null ? d.amount : 50, createdAt: Date.now() };
       scData.shortcuts.push(sc);
       saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true, shortcut: sc });
