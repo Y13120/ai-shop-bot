@@ -117,7 +117,7 @@ nav button.active{background:linear-gradient(135deg,rgba(124,58,237,.38),rgba(34
 @keyframes topShimmer{to{background-position:200% 0}}
 .card:hover{transform:translateY(-8px);border-color:rgba(34,211,238,.6);box-shadow:0 30px 80px -26px rgba(124,58,237,.7),0 0 55px -10px rgba(34,211,238,.45),0 18px 44px -22px rgba(0,0,0,.95)}
 .card-thumb{height:172px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.card-thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(130% 140% at 50% -20%,rgba(255,255,255,.2),transparent 55%)}
+.card-thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(120% 130% at 50% -15%,rgba(168,85,247,.18),transparent 60%)}
 .card-thumb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#7c3aed,#22d3ee,transparent);box-shadow:0 0 16px rgba(124,58,237,.8)}
 .thumb-emoji{font-size:4.5rem;filter:drop-shadow(0 0 28px rgba(168,85,247,.95)) drop-shadow(0 0 64px rgba(34,211,238,.5)) drop-shadow(0 12px 20px rgba(0,0,0,.65));transition:transform .5s cubic-bezier(.22,.78,.45,1)}
 .card:hover .thumb-emoji{transform:scale(1.15) translateY(-5px) rotate(-3deg)}
@@ -716,12 +716,11 @@ function renderServices(){
       <div class="grid">${sorted.map(s=>{
         const sName=lang==='en'?(s.nameEn||s.name):s.name;
         const sDesc=lang==='en'?(s.descriptionEn||s.description):s.description;
-        const hue=(s.id*47)%360;
         const dls=850+(s.id*137)%4200;
         const cardData={id:s.id,name:s.name,nameEn:s.nameEn,description:s.description,descriptionEn:s.descriptionEn,price:s.price,emoji:s.emoji,category:s.category};
         return`
         <div class="card">
-          <div class="card-thumb" style="background:linear-gradient(150deg,hsl(${hue} 72% 24%),hsl(${(hue+70)%360} 80% 14%))">
+          <div class="card-thumb" style="background:linear-gradient(150deg,rgba(124,58,237,.26),rgba(10,9,24,.94))">
             <span class="thumb-emoji">${s.emoji||'🛒'}</span>
           </div>
           <div class="card-body">
