@@ -3039,7 +3039,7 @@ client.on('interactionCreate', async (interaction) => {
 //  EVENTS
 // ══════════════════════════════════════════════════════════════
 let botReady = false;
-client.on('clientReady', async () => {
+client.on('ready', async () => {
   botReady = true;
   console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
   client.user.setActivity('Codex Zone — خدمات احترافية', { type: ActivityType.Watching });
@@ -3201,7 +3201,10 @@ const apiServer = http.createServer(async (req, res) => {
     }
 
     const guild = (CFG.guildId && client.guilds.cache.get(CFG.guildId)) || client.guilds.cache.first();
-    if (!guild && p !== '/api/health' && p !== '/api/bot') return jsonRes(res, 500, { error: 'No guild — bot not connected yet' });
+    if (!guild && p !== '/api/health' && p !== '/api/bot') {
+      const connecting = !client.isReady();
+      return jsonRes(res, connecting ? 503 : 500, { error: connecting ? 'Bot is connecting to Discord...' : 'No guild — bot not connected yet', status: connecting ? 'connecting' : 'no-guild', guilds: client.guilds.cache.size });
+    }
 
     // ── GET ──
     if (req.method === 'GET' && p === '/api/bot') return jsonRes(res, 200, { id: client.user?.id, username: client.user?.username, avatar: client.user?.displayAvatarURL({ dynamic: true, size: 256 }) });
@@ -3991,7 +3994,7 @@ async function start() {
     }
   }
 
-  client.once('clientReady', async () => {
+  client.once('ready', async () => {
     console.log(`✅ Bot: ${client.user.tag} | ${client.guilds.cache.size} servers`);
 
     // Make logs channel private (staff + owner only)
