@@ -217,8 +217,9 @@ function generateBanner(channelName, emoji, color1, color2, accent) {
 }
 
 const BANNER_FILES_DIR = path.join(__dirname, 'data', 'banners');
+const BANNER_CONFIG_FILE = path.join(__dirname, 'data', 'banner-config.json');
 
-const CHANNEL_BANNER_MAP = {
+const DEFAULT_BANNER_MAP = {
   'من نحن': 'الترحيب.png',
   'الخدمات': 'الخدمات.png',
   'كيف تطلب': 'كيف تطلب.png',
@@ -247,11 +248,28 @@ const CHANNEL_BANNER_MAP = {
   'جاهزة': 'منتجات رقمية جاهزة.png',
 };
 
+function loadBannerConfig() {
+  try {
+    if (fs.existsSync(BANNER_CONFIG_FILE)) return JSON.parse(fs.readFileSync(BANNER_CONFIG_FILE, 'utf-8'));
+  } catch {}
+  return { ...DEFAULT_BANNER_MAP };
+}
+
+function saveBannerConfig(map) {
+  fs.writeFileSync(BANNER_CONFIG_FILE, JSON.stringify(map, null, 2), 'utf-8');
+}
+
 function getBannerFile(channelName) {
-  for (const [key, file] of Object.entries(CHANNEL_BANNER_MAP)) {
+  const map = loadBannerConfig();
+  // Try exact match first, then partial match
+  if (map[channelName]) {
+    const fp = path.join(BANNER_FILES_DIR, map[channelName]);
+    if (fs.existsSync(fp)) return fp;
+  }
+  for (const [key, file] of Object.entries(map)) {
     if (channelName.includes(key)) {
-      const filePath = path.join(BANNER_FILES_DIR, file);
-      if (fs.existsSync(filePath)) return filePath;
+      const fp = path.join(BANNER_FILES_DIR, file);
+      if (fs.existsSync(fp)) return fp;
     }
   }
   return null;
@@ -632,6 +650,8 @@ const COMMANDS = [
   new SlashCommandBuilder().setName('top-customers').setDescription('أفضل الزبائن'),
   new SlashCommandBuilder().setName('help').setDescription('شوف كل الأوامر'),
   new SlashCommandBuilder().setName('banners').setDescription('ولّد بانرات للقنوات وابعتهم'),
+  new SlashCommandBuilder().setName('banner-set').setDescription('ابعث بانر لقناة معينة')
+    .addChannelOption(o => o.setName('channel').setDescription('القناة').setRequired(true)),
   new SlashCommandBuilder().setName('enable-community').setDescription('فعّل وضع Community في السيرفر')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
   new SlashCommandBuilder().setName('hide-all').setDescription('اخفاء جميع القنوات والكاتيجوري من الجميع')
@@ -1771,22 +1791,33 @@ async function cmdShortcut(interaction) {
   const sc = scData.shortcuts.find(s => s.name === name || s.id === name);
   if (!sc) return interaction.reply({ content: '❌ الاختصار مش موجود', ephemeral: true });
   if (!canUseShortcut(interaction, scData, sc)) return interaction.reply({ content: '❌ مسمحلكش تستخدم الاختصار ده', ephemeral: true });
+  const autoDel = sc.autoDelete === true;
+  const autoDelMs = (parseInt(sc.autoDeleteDelay) || 5) * 1000;
   await interaction.reply({ content: '⏳ جاري تنفيذ الاختصار...', ephemeral: true });
   if (sc.type === 'message') {
-    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
-    if (ch) await ch.send({ content: sc.content || '—' });
+    const channels = (Array.isArray(sc.targetChannels) && sc.targetChannels.length) ? sc.targetChannels : (sc.targetChannel ? [sc.targetChannel] : [interaction.channel.id]);
+    for (const chId of channels) {
+      const ch = interaction.guild.channels.cache.get(chId);
+      if (ch) await ch.send({ content: sc.content || '—' });
+    }
   } else if (sc.type === 'embed') {
-    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
-    if (ch) {
-      const embed = new EmbedBuilder().setTitle(sc.title || '').setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
-      await ch.send({ embeds: [embed] });
+    const channels = (Array.isArray(sc.targetChannels) && sc.targetChannels.length) ? sc.targetChannels : (sc.targetChannel ? [sc.targetChannel] : [interaction.channel.id]);
+    for (const chId of channels) {
+      const ch = interaction.guild.channels.cache.get(chId);
+      if (ch) {
+        const embed = new EmbedBuilder().setTitle(sc.title || '').setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
+        await ch.send({ embeds: [embed] });
+      }
     }
   } else if (sc.type === 'announce') {
-    const ch = interaction.guild.channels.cache.get(sc.targetChannel || interaction.channel.id);
-    if (ch) {
-      const embed = new EmbedBuilder().setTitle(`${sc.emoji || '📣'} ${sc.title || ''}`).setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
-      const pingRole = sc.pingRole ? `<@&${sc.pingRole}>` : '';
-      await ch.send({ content: pingRole || undefined, embeds: [embed] });
+    const channels = (Array.isArray(sc.targetChannels) && sc.targetChannels.length) ? sc.targetChannels : (sc.targetChannel ? [sc.targetChannel] : [interaction.channel.id]);
+    for (const chId of channels) {
+      const ch = interaction.guild.channels.cache.get(chId);
+      if (ch) {
+        const embed = new EmbedBuilder().setTitle(`${sc.emoji || '📣'} ${sc.title || ''}`).setDescription(sc.content || '').setColor(sc.color || 0x8b5cf6).setTimestamp();
+        const pingRole = sc.pingRole ? `<@&${sc.pingRole}>` : '';
+        await ch.send({ content: pingRole || undefined, embeds: [embed] });
+      }
     }
   } else if (sc.type === 'action') {
     if (sc.action === 'clear') {
@@ -1801,37 +1832,45 @@ async function cmdShortcut(interaction) {
         remaining -= deleted.size;
       }
       await interaction.editReply({ content: `🧹 تم مسح **${totalDeleted}** رسالة` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
       return;
     }
     const member = targetMember;
-    if (!member) { await interaction.editReply({ content: '❌ حدد عضو مع `/shortcut name:${sc.name} @user`' }); return; }
+    if (!member) { await interaction.editReply({ content: '❌ حدد عضو مع `/shortcut name:${sc.name} @user`' }); if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs); return; }
     const ms = (sc.amount || 60) * 60000;
     const reason = sc.content || 'اختصار سريع';
     if (sc.action === 'ban') {
       await member.ban({ reason });
       await interaction.editReply({ content: `🔨 تم حظر **${member.user.username}**` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     } else if (sc.action === 'kick') {
       await member.kick(reason);
       await interaction.editReply({ content: `👢 تم طرد **${member.user.username}**` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     } else if (sc.action === 'mute') {
       await member.timeout(ms, reason);
       await interaction.editReply({ content: `🔇 تم كتم **${member.user.username}** لمدة ${sc.amount || 60} دقيقة` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     } else if (sc.action === 'unmute') {
       await member.timeout(null, reason);
       await interaction.editReply({ content: `🔊 تم فك الكتم عن **${member.user.username}**` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     } else if (sc.action === 'warn') {
       const warnings = getWarnings();
       const warnId = nextId(warnings);
       warnings.push({ id: warnId, userId: member.id, username: member.user.username, reason, moderator: interaction.user.id, createdAt: Date.now() });
       save('warnings.json', warnings);
       await interaction.editReply({ content: `⚠️ تم تحذير **${member.user.username}** — السبب: ${reason}` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     } else if (sc.action === 'slowmode') {
       await interaction.channel.setRateLimitPerUser(Math.floor(ms / 60000), reason);
       await interaction.editReply({ content: `🐌 تم تعيين السلو مود على **${Math.floor(ms / 60000)}** دقيقة` });
+      if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
     }
     return;
   }
   await interaction.editReply({ content: `✅ تم تنفيذ الاختصار **${sc.name}**` }).catch(() => {});
+  if (autoDel) setTimeout(() => interaction.deleteReply().catch(()=>{}), autoDelMs);
 }
 
 async function cmdShortcuts(interaction) {
@@ -2137,6 +2176,24 @@ async function cmdBanners(interaction) {
   await interaction.editReply(`✅ تم تغيير **${sent}** بانر${skipped ? ` — تم تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}`);
 }
 
+async function cmdBannerSet(interaction) {
+  const ch = interaction.options.getChannel('channel');
+  if (!ch || !ch.isTextBased()) return interaction.reply({ content: '❌ القناة مش موجودة أو مش text', ephemeral: true });
+  await interaction.deferReply();
+  const bannerPath = getBannerFile(ch.name);
+  if (!bannerPath) return interaction.editReply({ content: '❌ مفيش بانر مخصص للقناة دي — حدد بانر من لوحة التحكم', ephemeral: true });
+  try {
+    const { AttachmentBuilder } = require('discord.js');
+    const buf = fs.readFileSync(bannerPath);
+    const fileName = path.basename(bannerPath);
+    const attachment = new AttachmentBuilder(buf, { name: fileName });
+    await ch.setBanner({ attachment });
+    await interaction.editReply(`🖼️ تم إرسال البانر لـ **${ch.name}**`);
+  } catch (e) {
+    await interaction.editReply(`❌ فشل: ${e.message}`);
+  }
+}
+
 async function cmdEnableCommunity(interaction) {
   if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
     return interaction.reply({ content: '❌ محتاج صلاحيات Admin', ephemeral: true });
@@ -2296,7 +2353,7 @@ client.on('interactionCreate', async (interaction) => {
       const map = {
         setup: cmdSetup, services: cmdServices,
         review: cmdReview, leaderboard: cmdLeaderboard,
-        help: cmdHelp, banners: cmdBanners, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
+        help: cmdHelp, banners: cmdBanners, 'banner-set': cmdBannerSet, 'add-service': cmdAddService, 'edit-service': cmdEditService, 'remove-service': cmdRemoveService,
         'auto-role': cmdAutoRole, 'set-logs': cmdSetLogs, automod: cmdAutomod, announce: cmdAnnounce,
         'add-category': cmdAddCategory, 'remove-category': cmdRemoveCategory, 'list-categories': cmdListCategories,
         order: cmdOrder, support: cmdSupport, close: cmdClose,
@@ -3462,7 +3519,7 @@ const apiServer = http.createServer(async (req, res) => {
       const d = await parseBody(req);
       const scData = loadShortcuts();
       const id = Date.now().toString(36);
-      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannel: d.targetChannel || '', pingRole: d.pingRole || '', action: d.action || '', amount: d.amount != null ? d.amount : 50, allowedRoles: d.allowedRoles || [], deniedRoles: d.deniedRoles || [], allowedChannels: d.allowedChannels || [], deniedChannels: d.deniedChannels || [], createdAt: Date.now() };
+      const sc = { id, name: d.name, emoji: d.emoji || '⚡', type: d.type || 'message', description: d.description || '', content: d.content || '', title: d.title || '', color: d.color || 0x8b5cf6, targetChannels: Array.isArray(d.targetChannels) ? d.targetChannels : (d.targetChannel ? [d.targetChannel] : []), pingRole: d.pingRole || '', action: d.action || '', amount: d.amount != null ? d.amount : 50, allowedRoles: d.allowedRoles || [], deniedRoles: d.deniedRoles || [], allowedChannels: d.allowedChannels || [], deniedChannels: d.deniedChannels || [], autoDelete: d.autoDelete === true, autoDeleteDelay: parseInt(d.autoDeleteDelay) || 5, createdAt: Date.now() };
       scData.shortcuts.push(sc);
       saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true, shortcut: sc });
@@ -3480,7 +3537,7 @@ const apiServer = http.createServer(async (req, res) => {
       const scData = loadShortcuts();
       const sc = scData.shortcuts.find(s => s.id === id || s.name === id);
       if (!sc) return jsonRes(res, 404, { error: 'Not found' });
-      Object.assign(sc, { name: d.name ?? sc.name, emoji: d.emoji ?? sc.emoji, type: d.type ?? sc.type, description: d.description ?? sc.description, content: d.content ?? sc.content, title: d.title ?? sc.title, color: d.color ?? sc.color, targetChannel: d.targetChannel ?? sc.targetChannel, pingRole: d.pingRole ?? sc.pingRole, action: d.action ?? sc.action, amount: d.amount ?? sc.amount, allowedRoles: d.allowedRoles ?? sc.allowedRoles, deniedRoles: d.deniedRoles ?? sc.deniedRoles, allowedChannels: d.allowedChannels ?? sc.allowedChannels, deniedChannels: d.deniedChannels ?? sc.deniedChannels });
+      Object.assign(sc, { name: d.name ?? sc.name, emoji: d.emoji ?? sc.emoji, type: d.type ?? sc.type, description: d.description ?? sc.description, content: d.content ?? sc.content, title: d.title ?? sc.title, color: d.color ?? sc.color, targetChannels: d.targetChannels !== undefined ? d.targetChannels : (d.targetChannel !== undefined ? [d.targetChannel] : sc.targetChannels), pingRole: d.pingRole ?? sc.pingRole, action: d.action ?? sc.action, amount: d.amount ?? sc.amount, allowedRoles: d.allowedRoles ?? sc.allowedRoles, deniedRoles: d.deniedRoles ?? sc.deniedRoles, allowedChannels: d.allowedChannels ?? sc.allowedChannels, deniedChannels: d.deniedChannels ?? sc.deniedChannels, autoDelete: d.autoDelete !== undefined ? d.autoDelete === true : sc.autoDelete, autoDeleteDelay: parseInt(d.autoDeleteDelay) || sc.autoDeleteDelay || 5 });
       saveShortcuts(scData);
       return jsonRes(res, 200, { ok: true });
     }
@@ -3809,6 +3866,80 @@ const apiServer = http.createServer(async (req, res) => {
       })();
     }
 
+    // ── BANNER CONFIG API ──
+    if (req.method === 'GET' && p === '/api/banner-config') {
+      const map = loadBannerConfig();
+      let files = [];
+      try { files = fs.readdirSync(BANNER_FILES_DIR).filter(f => f.match(/\.(png|jpg|jpeg|gif|webp)$/i)); } catch {}
+      return jsonRes(res, 200, { map, files });
+    }
+    if (req.method === 'PUT' && p === '/api/banner-config') {
+      const d = await parseBody(req);
+      if (d.map) saveBannerConfig(d.map);
+      if (d.addChannel && d.addFile) {
+        const map = loadBannerConfig();
+        map[d.addChannel] = d.addFile;
+        saveBannerConfig(map);
+      }
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/upload-banner') {
+      let body = '';
+      req.on('data', c => body += c);
+      await new Promise(r => req.on('end', r));
+      const ct = req.headers['content-type'] || '';
+      if (ct.includes('application/json')) {
+        const d = JSON.parse(body);
+        if (!d.name || !d.data) return jsonRes(res, 400, { error: 'Missing name or data' });
+        const ext = d.name.match(/\.\w+$/)?.[0] || '.png';
+        const fileName = d.name;
+        const buffer = Buffer.from(d.data.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        fs.writeFileSync(path.join(BANNER_FILES_DIR, fileName), buffer);
+        return jsonRes(res, 200, { ok: true, fileName });
+      }
+      // multipart fallback via raw
+      return jsonRes(res, 400, { error: 'Use JSON with base64 data' });
+    }
+    if (req.method === 'DELETE' && p.match(/^\/api\/banner-files\/.+$/)) {
+      const fn = decodeURIComponent(p.split('/').pop());
+      const fp = path.join(BANNER_FILES_DIR, fn);
+      if (fs.existsSync(fp)) fs.unlinkSync(fp);
+      return jsonRes(res, 200, { ok: true });
+    }
+    if (req.method === 'POST' && p === '/api/send-banners') {
+      if (!guild) return jsonRes(res, 500, { error: 'Guild not ready' });
+      let sent = 0, skipped = 0, failed = 0;
+      const { AttachmentBuilder } = require('discord.js');
+      for (const [, ch] of guild.channels.cache) {
+        if (!ch.isTextBased()) continue;
+        const bannerPath = getBannerFile(ch.name);
+        if (!bannerPath) { skipped++; continue; }
+        try {
+          const buf = fs.readFileSync(bannerPath);
+          const fileName = path.basename(bannerPath);
+          const attachment = new AttachmentBuilder(buf, { name: fileName });
+          await ch.setBanner({ attachment });
+          sent++;
+        } catch { failed++; }
+        await new Promise(r => setTimeout(r, 600));
+      }
+      return jsonRes(res, 200, { content: `✅ تم تغيير **${sent}** بانر${skipped ? ` — تخطي ${skipped}` : ''}${failed ? ` — فشل ${failed}` : ''}` });
+    }
+    if (req.method === 'POST' && p === '/api/send-banner-channel') {
+      const d = await parseBody(req);
+      if (!guild) return jsonRes(res, 500, { error: 'Guild not ready' });
+      const ch = guild.channels.cache.get(d.channelId);
+      if (!ch) return jsonRes(res, 404, { error: 'Channel not found' });
+      const bannerPath = getBannerFile(ch.name);
+      if (!bannerPath) return jsonRes(res, 404, { error: 'No banner for this channel' });
+      const { AttachmentBuilder } = require('discord.js');
+      const buf = fs.readFileSync(bannerPath);
+      const fileName = path.basename(bannerPath);
+      const attachment = new AttachmentBuilder(buf, { name: fileName });
+      await ch.setBanner({ attachment });
+      return jsonRes(res, 200, { content: `🖼️ تم إرسال البانر لـ **${ch.name}**` });
+    }
+
     jsonRes(res, 404, { error: 'Not found' });
   } catch (e) { console.error('API Error:', e.message); jsonRes(res, 500, { error: e.message }); }
 });
@@ -3832,14 +3963,14 @@ async function start() {
     const scData = loadShortcuts();
     if (!scData.shortcuts || scData.shortcuts.length === 0) {
       const defaults = [
-        { id: 'd-clear-chat', name: 'مسح-الشات', emoji: '🗑️', type: 'action', action: 'clear', amount: 200, content: '', description: 'مسح 200 رسالة من الشات', createdAt: Date.now() },
-        { id: 'd-clear', name: 'مسح', emoji: '🧹', type: 'action', action: 'clear', amount: 50, content: '', description: 'مسح 50 رسالة من القناة', createdAt: Date.now() },
-        { id: 'd-ban', name: 'حظر', emoji: '🔨', type: 'action', action: 'ban', amount: 0, content: 'حظر عبر اختصار', description: 'حظر عضو من السيرفر', createdAt: Date.now() },
-        { id: 'd-kick', name: 'طرد', emoji: '👢', type: 'action', action: 'kick', amount: 0, content: 'طرد عبر اختصار', description: 'طرد عضو من السيرفر', createdAt: Date.now() },
-        { id: 'd-mute', name: 'كتم', emoji: '🔇', type: 'action', action: 'mute', amount: 60, content: 'كتم عبر اختصار', description: 'كتم عضو لمدة 60 دقيقة', createdAt: Date.now() },
-        { id: 'd-unmute', name: 'فك-كتم', emoji: '🔊', type: 'action', action: 'unmute', amount: 0, content: 'فك كتم عبر اختصار', description: 'فك الكتم عن عضو', createdAt: Date.now() },
-        { id: 'd-warn', name: 'تحذير', emoji: '⚠️', type: 'action', action: 'warn', amount: 0, content: 'تحذير عبر اختصار', description: 'تحذير عضو', createdAt: Date.now() },
-        { id: 'd-slowmode', name: 'سلومود', emoji: '🐌', type: 'action', action: 'slowmode', amount: 5, content: 'سلومود عبر اختصار', description: 'تفعيل سلو مود 5 دقائق', createdAt: Date.now() },
+        { id: 'd-clear-chat', name: 'مسح-الشات', emoji: '🗑️', type: 'action', action: 'clear', amount: 200, content: '', description: 'مسح 200 رسالة من الشات', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-clear', name: 'مسح', emoji: '🧹', type: 'action', action: 'clear', amount: 50, content: '', description: 'مسح 50 رسالة من القناة', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-ban', name: 'حظر', emoji: '🔨', type: 'action', action: 'ban', amount: 0, content: 'حظر عبر اختصار', description: 'حظر عضو من السيرفر', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-kick', name: 'طرد', emoji: '👢', type: 'action', action: 'kick', amount: 0, content: 'طرد عبر اختصار', description: 'طرد عضو من السيرفر', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-mute', name: 'كتم', emoji: '🔇', type: 'action', action: 'mute', amount: 60, content: 'كتم عبر اختصار', description: 'كتم عضو لمدة 60 دقيقة', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-unmute', name: 'فك-كتم', emoji: '🔊', type: 'action', action: 'unmute', amount: 0, content: 'فك كتم عبر اختصار', description: 'فك الكتم عن عضو', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-warn', name: 'تحذير', emoji: '⚠️', type: 'action', action: 'warn', amount: 0, content: 'تحذير عبر اختصار', description: 'تحذير عضو', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
+        { id: 'd-slowmode', name: 'سلومود', emoji: '🐌', type: 'action', action: 'slowmode', amount: 5, content: 'سلومود عبر اختصار', description: 'تفعيل سلو مود 5 دقائق', autoDelete: true, autoDeleteDelay: 5, createdAt: Date.now() },
       ];
       scData.shortcuts = defaults;
       saveShortcuts(scData);
